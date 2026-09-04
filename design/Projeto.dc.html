@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:oklch(0.984 0.002 260); --sunken:oklch(0.962 0.004 260); --panel:oklch(1 0 0);
+  --raised:oklch(0.995 0.001 260);
+  --border:oklch(0.906 0.005 260); --border-strong:oklch(0.845 0.007 260);
+  --text:oklch(0.265 0.012 265); --text2:oklch(0.505 0.012 265); --text3:oklch(0.645 0.012 265);
+  --accent:oklch(0.545 0.155 264); --accent-hover:oklch(0.495 0.16 264); --accent-fg:oklch(0.99 0 0);
+  --accent-soft:oklch(0.945 0.032 264); --accent-line:oklch(0.80 0.07 264);
+  --ok:oklch(0.575 0.135 152); --ok-soft:oklch(0.945 0.045 152);
+  --warn:oklch(0.665 0.135 72); --warn-soft:oklch(0.955 0.055 78);
+  --danger:oklch(0.555 0.185 26); --danger-soft:oklch(0.955 0.04 26);
+  --info:oklch(0.565 0.10 232); --info-soft:oklch(0.95 0.03 232);
+  --neutral-soft:oklch(0.94 0.004 260);
+  --ph-dev:oklch(0.545 0.16 292); --ph-dev-soft:oklch(0.95 0.035 292);
+  --ph-hi:oklch(0.55 0.11 212); --ph-hi-soft:oklch(0.945 0.035 212);
+  --ph-he:oklch(0.60 0.115 62); --ph-he-soft:oklch(0.955 0.05 68);
+  --ph-prod:oklch(0.52 0.115 152); --ph-prod-soft:oklch(0.945 0.045 152);
+  --shadow:0 1px 2px oklch(0.26 0.02 265 / 0.06), 0 4px 12px oklch(0.26 0.02 265 / 0.06);
+  --shadow-lg:0 8px 40px oklch(0.26 0.02 265 / 0.16);
+  --hatch:oklch(0.555 0.185 26 / 0.28);
+}
+[data-theme="dark"]{
+  --bg:oklch(0.196 0.008 265); --sunken:oklch(0.164 0.008 265); --panel:oklch(0.228 0.009 265);
+  --raised:oklch(0.255 0.010 265);
+  --border:oklch(0.305 0.011 265); --border-strong:oklch(0.385 0.014 265);
+  --text:oklch(0.945 0.004 265); --text2:oklch(0.715 0.010 265); --text3:oklch(0.565 0.012 265);
+  --accent:oklch(0.665 0.145 264); --accent-hover:oklch(0.725 0.145 264); --accent-fg:oklch(0.17 0.02 265);
+  --accent-soft:oklch(0.315 0.055 264); --accent-line:oklch(0.45 0.09 264);
+  --ok:oklch(0.715 0.135 152); --ok-soft:oklch(0.30 0.055 152);
+  --warn:oklch(0.775 0.125 78); --warn-soft:oklch(0.315 0.055 72);
+  --danger:oklch(0.665 0.175 26); --danger-soft:oklch(0.315 0.075 26);
+  --info:oklch(0.705 0.095 232); --info-soft:oklch(0.30 0.045 232);
+  --neutral-soft:oklch(0.285 0.008 265);
+  --ph-dev:oklch(0.695 0.145 292); --ph-dev-soft:oklch(0.315 0.055 292);
+  --ph-hi:oklch(0.715 0.105 212); --ph-hi-soft:oklch(0.305 0.045 212);
+  --ph-he:oklch(0.775 0.115 68); --ph-he-soft:oklch(0.315 0.05 68);
+  --ph-prod:oklch(0.70 0.115 152); --ph-prod-soft:oklch(0.295 0.05 152);
+  --shadow:0 1px 2px oklch(0 0 0 / 0.4), 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-lg:0 8px 40px oklch(0 0 0 / 0.55);
+  --hatch:oklch(0.665 0.175 26 / 0.35);
+}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+*{box-sizing:border-box;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:var(--accent-hover);text-decoration:underline;}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="width:1440px;height:900px;display:grid;grid-template-columns:216px 1fr;background:var(--bg);color:var(--text);font-size:13px;line-height:1.45;overflow:hidden;">
+
+  <!-- SIDEBAR -->
+  <aside style="display:flex;flex-direction:column;background:var(--sunken);border-right:1px solid var(--border);overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:8px;padding:14px 14px 12px;">
+      <div style="width:20px;height:20px;border-radius:5px;background:var(--text);"></div>
+      <div style="display:grid;">
+        <span style="font-size:13px;font-weight:600;letter-spacing:-0.01em;">Plano</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">local · offline</span>
+      </div>
+      <button onClick="{{ toggleTheme }}" style="margin-left:auto;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text2);font:500 10px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="color:var(--text);border-color:var(--border-strong);">{{ themeGlyph }}</button>
+    </div>
+    <nav style="display:grid;gap:1px;padding:4px 8px;">
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Hoje</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">9</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;background:var(--neutral-soft);box-shadow:inset 2px 0 0 var(--accent);cursor:pointer;"><span style="font-size:13px;font-weight:600;">Projetos</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);">12</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Timeline</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Capacidade</span><span style="margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--danger);"></span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">TodoList</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">23</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Notas</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Painéis</span></div>
+    </nav>
+    <div style="margin-top:14px;padding:0 14px 6px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Projetos ativos</div>
+    <div style="display:grid;gap:1px;padding:0 8px;overflow:auto;">
+      <div style="display:flex;align-items:center;gap:7px;height:26px;padding:0 8px;border-radius:6px;background:var(--neutral-soft);cursor:pointer;">
+        <span style="width:3px;height:12px;border-radius:2px;background:var(--ph-dev);"></span>
+        <span style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Migração do gateway</span>
+        <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--danger);">+11d</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;height:26px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);">
+        <span style="width:3px;height:12px;border-radius:2px;background:var(--ph-he);"></span>
+        <span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Portal do parceiro</span>
+        <span style="margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--danger);"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;height:26px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);">
+        <span style="width:3px;height:12px;border-radius:2px;background:var(--ph-hi);"></span>
+        <span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">App de campo v2</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;height:26px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);">
+        <span style="width:3px;height:12px;border-radius:2px;background:var(--ph-prod);"></span>
+        <span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Observabilidade</span>
+      </div>
+    </div>
+    <div style="margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);display:grid;gap:3px;">
+      <div style="display:flex;align-items:center;height:26px;color:var(--text2);cursor:pointer;font-size:12px;" style-hover="color:var(--text);">Configurações</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">~/Documentos/plano</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">gravado 14:22</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main style="display:flex;flex-direction:column;overflow:hidden;">
+
+    <header style="padding:12px 20px 0;background:var(--panel);border-bottom:1px solid var(--border);display:grid;gap:12px;">
+      <div style="display:flex;align-items:flex-start;gap:14px;">
+        <div style="display:grid;gap:3px;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">
+            <span style="cursor:pointer;">Projetos</span><span style="font-family:'IBM Plex Mono',monospace;">/</span><span style="color:var(--text2);">Migração do gateway</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <h1 style="margin:0;font-size:20px;font-weight:600;letter-spacing:-0.01em;">Migração do gateway</h1>
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:4px;background:var(--ok-soft);color:var(--ok);font-size:11px;font-weight:600;text-transform:uppercase;"><span style="width:6px;height:6px;border-radius:50%;background:var(--ok);"></span>Ativo</span>
+            <span style="padding:2px 7px;border-radius:4px;background:var(--danger-soft);color:var(--danger);font-size:11px;font-weight:600;">P1</span>
+            <div style="display:flex;gap:4px;">
+              <span style="padding:1px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--text2);">pagamentos</span>
+              <span style="padding:1px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--text2);">infra</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <button style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--sunken);">Registrar decisão<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">⌘E</span></button>
+          <button style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--danger);border-radius:6px;background:transparent;color:var(--danger);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--danger-soft);">Bloquear<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:0.7;">⌘B</span></button>
+          <button onClick="{{ openTask }}" style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid transparent;border-radius:6px;background:var(--accent);color:var(--accent-fg);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--accent-hover);">Nova tarefa<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:0.7;">T</span></button>
+          <button style="width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text2);font:600 13px 'IBM Plex Mono',monospace;line-height:1;cursor:pointer;" style-hover="background:var(--sunken);color:var(--text);">⋯</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+        <div style="background:var(--panel);padding:8px 10px;display:grid;gap:2px;">
+          <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Esforço <span style="font-family:'IBM Plex Mono',monospace;">∑</span></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;">320h</span>
+        </div>
+        <div style="background:var(--panel);padding:8px 10px;display:grid;gap:2px;">
+          <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Pessoas <span style="font-family:'IBM Plex Mono',monospace;">∑</span></span>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="width:18px;height:18px;border-radius:4px;background:var(--neutral-soft);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;color:var(--text2);">AN</span>
+            <span style="width:18px;height:18px;border-radius:4px;background:var(--neutral-soft);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;color:var(--text2);">RB</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--text2);">2</span>
+          </div>
+        </div>
+        <div style="background:var(--panel);padding:8px 10px;display:grid;gap:2px;">
+          <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Início <span style="font-family:'IBM Plex Mono',monospace;">∑</span></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;">12/03/2026</span>
+        </div>
+        <div style="background:var(--panel);padding:8px 10px;display:grid;gap:2px;">
+          <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Fim previsto <span style="font-family:'IBM Plex Mono',monospace;">∑</span></span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;">29/09/2026</span>
+        </div>
+        <div style="background:var(--panel);padding:8px 10px;display:grid;gap:2px;">
+          <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">vs baseline v2</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--danger);">+11d</span>
+        </div>
+        <div style="background:var(--panel);padding:8px 10px;display:grid;gap:4px;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;">
+            <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Progresso</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;">33%</span>
+          </div>
+          <div style="height:6px;border-radius:3px;background:var(--sunken);overflow:hidden;display:flex;">
+            <div style="width:33%;background:var(--text2);"></div>
+          </div>
+          <span style="font-size:10px;color:var(--text3);">ponderado por horas</span>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:2px;">
+        <button onClick="{{ setTarefas }}" style="padding:7px 11px;border:0;background:transparent;color:{{ fgTarefas }};font:600 12px 'IBM Plex Sans',sans-serif;cursor:pointer;box-shadow:{{ ulTarefas }};">Tarefas <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--text3);">4</span></button>
+        <button onClick="{{ setAloc }}" style="padding:7px 11px;border:0;background:transparent;color:{{ fgAloc }};font:600 12px 'IBM Plex Sans',sans-serif;cursor:pointer;box-shadow:{{ ulAloc }};">Alocações <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--text3);">4</span></button>
+        <button onClick="{{ setNotas }}" style="padding:7px 11px;border:0;background:transparent;color:{{ fgNotas }};font:600 12px 'IBM Plex Sans',sans-serif;cursor:pointer;box-shadow:{{ ulNotas }};">Notas <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;color:var(--text3);">6</span></button>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;padding-bottom:6px;">
+          <span style="font-size:11px;color:var(--text3);">Baseline</span>
+          <select style="height:24px;padding:0 6px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 11px 'IBM Plex Mono',monospace;outline:none;">
+            <option>v2 · 12/08/2026 · mudança de escopo</option>
+            <option>v1 · 12/03/2026 · plano inicial</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <div style="flex:1;display:grid;grid-template-columns:1fr 376px;overflow:hidden;">
+
+      <!-- CENTRO -->
+      <div style="overflow:auto;padding:14px 20px 28px;display:grid;gap:14px;align-content:start;grid-auto-rows:max-content;">
+
+        <div style="display:{{ dispTarefas }};gap:14px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <input placeholder="Filtrar tarefas" style="flex:1;max-width:260px;height:26px;padding:0 9px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Sans',sans-serif;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);">
+            <span style="display:flex;gap:4px;">
+              <span style="padding:2px 8px;border:1px solid var(--border-strong);border-radius:5px;background:var(--panel);font-size:11px;font-weight:500;cursor:pointer;">Todas</span>
+              <span style="padding:2px 8px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--panel);color:var(--text);">Abertas</span>
+              <span style="padding:2px 8px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--panel);color:var(--text);">Atrasadas</span>
+              <span style="padding:2px 8px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--panel);color:var(--text);">Sem responsável</span>
+            </span>
+            <span style="margin-left:auto;font-size:11px;color:var(--text3);">agrupado por fase</span>
+          </div>
+
+          <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);overflow:hidden;">
+            <div style="display:grid;grid-template-columns:1fr 100px 118px 56px 88px 88px 52px;gap:8px;padding:7px 12px;background:var(--sunken);border-bottom:1px solid var(--border);font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);">
+              <span>Tarefa</span><span>Status</span><span>Pessoas</span><span style="text-align:right;">Esf.</span><span style="text-align:right;">Início</span><span style="text-align:right;">Fim</span><span style="text-align:right;">Desvio</span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--border);background:var(--ph-dev-soft);">
+              <span style="width:3px;height:12px;border-radius:2px;background:var(--ph-dev);"></span>
+              <span style="font-size:11px;font-weight:600;color:var(--text);">Desenvolvimento</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);">2 tarefas · 160h</span>
+              <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);">12/03 → 15/05</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 100px 118px 56px 88px 88px 52px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+              <span style="font-size:13px;">Provisionar ambiente de homologação</span>
+              <span><span style="display:inline-flex;padding:1px 6px;border-radius:4px;background:var(--ok-soft);color:var(--ok);font-size:10px;font-weight:600;">Concluída</span></span>
+              <span style="display:inline-flex;align-items:center;gap:4px;padding:1px 5px 1px 2px;border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--text2);justify-self:start;"><span style="width:16px;height:16px;border-radius:3px;background:var(--neutral-soft);display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;">RB</span>100%</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;">40h</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">12/03/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">27/03/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text3);text-align:right;">—</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 100px 118px 56px 88px 88px 52px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+              <span style="font-size:13px;">Rewrite do roteador de pagamentos</span>
+              <span><span style="display:inline-flex;padding:1px 6px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-size:10px;font-weight:600;">Em andamento</span></span>
+              <span style="display:flex;gap:4px;">
+                <span style="display:inline-flex;align-items:center;gap:4px;padding:1px 5px 1px 2px;border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--text2);"><span style="width:16px;height:16px;border-radius:3px;background:var(--neutral-soft);display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;">AN</span>50%</span>
+                <span style="display:inline-flex;align-items:center;gap:4px;padding:1px 5px 1px 2px;border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--text2);"><span style="width:16px;height:16px;border-radius:3px;background:var(--neutral-soft);display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;">RB</span>50%</span>
+              </span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;">120h</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">30/03/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">15/05/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--danger);text-align:right;">+11d</span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--border);background:var(--ph-hi-soft);">
+              <span style="width:3px;height:12px;border-radius:2px;background:var(--ph-hi);"></span>
+              <span style="font-size:11px;font-weight:600;color:var(--text);">Homologação interna</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);">1 tarefa · 80h</span>
+              <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);">18/05 → 26/06</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 100px 118px 56px 88px 88px 52px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+              <span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap;">Testes de carga<span style="padding:0 5px;border:1px solid var(--border);border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);white-space:nowrap;">dep. rewrite</span></span>
+              <span><span style="display:inline-flex;padding:1px 6px;border-radius:4px;background:var(--neutral-soft);color:var(--text2);font-size:10px;font-weight:600;">A fazer</span></span>
+              <span style="display:inline-flex;align-items:center;gap:4px;padding:1px 5px 1px 2px;border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--text2);justify-self:start;"><span style="width:16px;height:16px;border-radius:3px;background:var(--neutral-soft);display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:600;">RB</span>50%</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;">80h</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">18/05/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">26/06/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text3);text-align:right;">—</span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--border);background:var(--ph-prod-soft);">
+              <span style="width:3px;height:12px;border-radius:2px;background:var(--ph-prod);"></span>
+              <span style="font-size:11px;font-weight:600;color:var(--text);">Produção</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);">1 tarefa · 80h</span>
+              <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);">01/09 → 29/09</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 100px 118px 56px 88px 88px 52px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+              <span style="font-size:13px;">Cutover em produção</span>
+              <span><span style="display:inline-flex;padding:1px 6px;border-radius:4px;background:var(--neutral-soft);color:var(--text2);font-size:10px;font-weight:600;">A fazer</span></span>
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:1px 6px;border:1px dashed var(--warn);border-radius:4px;background:var(--warn-soft);font-size:10px;color:var(--warn);justify-self:start;">sem responsável</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;">80h</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">01/09/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">29/09/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text3);text-align:right;">—</span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 12px 8px;">
+              <button onClick="{{ openTask }}" style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border:1px dashed var(--border-strong);border-radius:5px;background:transparent;color:var(--text3);font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="color:var(--text);border-color:var(--text3);">+ Nova tarefa<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;">T</span></button>
+              <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text2);">∑ 320h · 4 tarefas · 12/03/2026 → 29/09/2026</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:{{ dispAloc }};gap:14px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--warn);border-radius:8px;background:var(--warn-soft);">
+            <span style="width:16px;height:16px;flex:none;margin-top:1px;border-radius:3px;background:var(--warn);color:var(--accent-fg);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">△</span>
+            <div><div style="font-size:13px;font-weight:600;color:var(--warn);">Rafael Brito soma 150% entre 01/06 e 26/06</div><div style="font-size:12px;color:var(--text2);">50% em Testes de carga aqui e 100% em Observabilidade. Capacidade 40h/semana.</div></div>
+            <button style="margin-left:auto;height:24px;padding:0 8px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;">Simular</button>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);overflow:hidden;">
+            <div style="display:grid;grid-template-columns:1fr 150px 100px 100px 96px 90px;gap:10px;padding:7px 12px;background:var(--sunken);border-bottom:1px solid var(--border);font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);">
+              <span>Pessoa</span><span>Tarefa</span><span style="text-align:right;">Alocação</span><span style="text-align:right;">Capacidade</span><span style="text-align:right;">Início</span><span style="text-align:right;">Fim</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 150px 100px 100px 96px 90px;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+              <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:20px;height:20px;border-radius:4px;background:var(--neutral-soft);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--text2);">AN</span><span style="font-size:13px;">Ana Nogueira</span></span>
+              <span style="font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Rewrite do roteador</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;">50%</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">20h/sem</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">30/03/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">15/05/2026</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 150px 100px 100px 96px 90px;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+              <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:20px;height:20px;border-radius:4px;background:var(--neutral-soft);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--text2);">RB</span><span style="font-size:13px;">Rafael Brito</span></span>
+              <span style="font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Rewrite do roteador</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;">50%</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">40h/sem</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">30/03/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">15/05/2026</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 150px 100px 100px 96px 90px;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+              <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:20px;height:20px;border-radius:4px;background:var(--warn-soft);border:1px solid var(--warn);display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--warn);">RB</span><span style="font-size:13px;">Rafael Brito</span></span>
+              <span style="font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Testes de carga</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;color:var(--warn);">50%</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">40h/sem</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">18/05/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text2);text-align:right;">26/06/2026</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 150px 100px 100px 96px 90px;gap:10px;align-items:center;padding:8px 12px;" style-hover="background:var(--sunken);">
+              <span style="display:inline-flex;align-items:center;gap:7px;"><span style="width:20px;height:20px;border-radius:4px;background:var(--neutral-soft);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--text3);">RB</span><span style="font-size:13px;color:var(--text3);">Rafael Brito</span></span>
+              <span style="font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Provisionar ambiente</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;color:var(--text3);">100%</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text3);text-align:right;">40h/sem</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text3);text-align:right;">12/03/2026</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;color:var(--text3);text-align:right;">27/03/2026</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:{{ dispNotas }};border:1px dashed var(--border-strong);border-radius:8px;background:var(--panel);padding:40px;place-items:center;text-align:center;gap:8px;grid-auto-flow:row;">
+          <div style="width:34px;height:34px;border-radius:8px;border:1px dashed var(--border-strong);background:var(--sunken);"></div>
+          <div style="font-size:15px;font-weight:600;">6 notas vinculadas</div>
+          <div style="font-size:12px;color:var(--text2);max-width:360px;text-wrap:pretty;">Abrem no editor markdown em <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">Notas</span> — a árvore filtra por este projeto.</div>
+        </div>
+
+      </div>
+
+      <!-- HISTÓRICO -->
+      <div style="border-left:1px solid var(--border);background:var(--sunken);display:flex;flex-direction:column;overflow:hidden;">
+        <div style="padding:12px 14px 10px;border-bottom:1px solid var(--border);display:grid;gap:9px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <h2 style="margin:0;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);">Histórico do projeto</h2>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">14</span>
+            <button style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--bg);">Registrar evento<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">⌘E</span></button>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">
+            <span style="padding:2px 8px;border:1px solid var(--border-strong);border-radius:5px;background:var(--panel);font-size:11px;font-weight:500;cursor:pointer;">Tudo</span>
+            <span style="padding:2px 8px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--panel);color:var(--text);">Decisões</span>
+            <span style="padding:2px 8px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--panel);color:var(--text);">Escopo</span>
+            <span style="padding:2px 8px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--panel);color:var(--text);">Bloqueios</span>
+            <span style="padding:2px 8px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--panel);color:var(--text);">Realocações</span>
+            <span style="padding:2px 8px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--panel);color:var(--text);">Riscos</span>
+          </div>
+        </div>
+
+        <div style="flex:1;overflow:auto;padding:12px 14px 24px;">
+          <div style="display:grid;gap:10px;">
+
+            <div style="border:1px solid var(--border);border-left:2px solid var(--info);border-radius:8px;background:var(--panel);padding:10px 11px;display:grid;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="padding:1px 6px;border-radius:4px;background:var(--info-soft);color:var(--info);font-size:10px;font-weight:600;text-transform:uppercase;">Nota</span>
+                <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;font-variant-numeric:tabular-nums;color:var(--text3);">03/09/2026 09:12</span>
+              </div>
+              <div style="font-size:12px;color:var(--text2);text-wrap:pretty;">Fornecedor confirmou janela de cutover para o fim de setembro. Precisa alinhar com a operação antes de fechar a data.</div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-left:2px solid var(--accent);border-radius:8px;background:var(--panel);padding:10px 11px;display:grid;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="padding:1px 6px;border-radius:4px;background:var(--accent-soft);color:var(--accent);font-size:10px;font-weight:600;text-transform:uppercase;">Realocação</span>
+                <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;font-variant-numeric:tabular-nums;color:var(--text3);">28/08/2026</span>
+              </div>
+              <div style="font-size:13px;font-weight:600;">Rafael Brito 100% → 50%</div>
+              <div style="font-size:12px;color:var(--text2);text-wrap:pretty;">Metade da capacidade foi para Observabilidade por 3 semanas. Rewrite do roteador desloca o fim em 11 dias.</div>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                <span style="display:inline-flex;align-items:center;gap:5px;padding:1px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--text2);"><span style="width:3px;height:10px;border-radius:2px;background:var(--ph-dev);"></span>Rewrite do roteador</span>
+                <span style="display:inline-flex;align-items:center;gap:5px;padding:1px 6px;border:1px solid var(--border);border-radius:4px;font-size:11px;color:var(--text2);"><span style="width:3px;height:10px;border-radius:2px;background:var(--ph-hi);"></span>Testes de carga</span>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-left:2px solid var(--warn);border-radius:8px;background:var(--panel);padding:10px 11px;display:grid;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="padding:1px 6px;border-radius:4px;background:var(--warn-soft);color:var(--warn);font-size:10px;font-weight:600;text-transform:uppercase;">Risco</span>
+                <span style="padding:1px 6px;border-radius:4px;border:1px solid var(--warn);color:var(--warn);font-size:10px;font-weight:600;">aberto</span>
+                <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;font-variant-numeric:tabular-nums;color:var(--text3);">21/08/2026</span>
+              </div>
+              <div style="font-size:13px;font-weight:600;">Homologação externa depende de terceiro</div>
+              <div style="font-size:12px;color:var(--text2);text-wrap:pretty;">Se o parceiro não responder até 20/09, o cutover escorrega para outubro.</div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-left:2px solid var(--ph-dev);border-radius:8px;background:var(--panel);padding:10px 11px;display:grid;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="padding:1px 6px;border-radius:4px;background:var(--ph-dev-soft);color:var(--ph-dev);font-size:10px;font-weight:600;text-transform:uppercase;">Mudança de escopo</span>
+                <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;font-variant-numeric:tabular-nums;color:var(--text3);">12/08/2026</span>
+              </div>
+              <div style="font-size:13px;font-weight:600;">Conciliação entra no escopo</div>
+              <div style="font-size:12px;color:var(--text2);text-wrap:pretty;"><span style="font-weight:600;color:var(--text);">Contexto:</span> financeiro precisa de conciliação automática no mesmo release. <span style="font-weight:600;color:var(--text);">Impacto:</span> +80h e nova tarefa em Produção.</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--sunken);font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;">
+                <span style="color:var(--text3);">esforço</span><span>240h → 320h</span>
+                <span style="margin-left:auto;color:var(--text3);">fim</span><span style="color:var(--danger);">18/09 → 29/09</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">Congelou <span style="padding:0 5px;border:1px solid var(--border);border-radius:4px;font-family:'IBM Plex Mono',monospace;color:var(--text2);">baseline v2</span></div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-left:2px solid var(--ok);border-radius:8px;background:var(--panel);padding:10px 11px;display:grid;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="padding:1px 6px;border-radius:4px;background:var(--ok-soft);color:var(--ok);font-size:10px;font-weight:600;text-transform:uppercase;">Desbloqueio</span>
+                <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;font-variant-numeric:tabular-nums;color:var(--text3);">30/07/2026</span>
+              </div>
+              <div style="font-size:12px;color:var(--text2);text-wrap:pretty;">Ambiente liberado pela infra. Alocações recriadas para Ana e Rafael.</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;background:var(--sunken);">
+                <div style="flex:1;height:10px;border-radius:3px;background:var(--danger-soft);background-image:repeating-linear-gradient(45deg,transparent 0 3px,var(--hatch) 3px 6px);"></div>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text2);">8 dias bloqueado</span>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-left:2px solid var(--danger);border-radius:8px;background:var(--panel);padding:10px 11px;display:grid;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="padding:1px 6px;border-radius:4px;background:var(--danger-soft);color:var(--danger);font-size:10px;font-weight:600;text-transform:uppercase;">Bloqueio</span>
+                <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;font-variant-numeric:tabular-nums;color:var(--text3);">22/07/2026</span>
+              </div>
+              <div style="font-size:13px;font-weight:600;">Sem ambiente de homologação</div>
+              <div style="font-size:12px;color:var(--text2);text-wrap:pretty;">Infra sem capacidade até 30/07. 2 alocações encerradas no bloqueio.</div>
+            </div>
+
+            <div style="border:1px solid var(--border);border-left:2px solid var(--text3);border-radius:8px;background:var(--panel);padding:10px 11px;display:grid;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;">
+                <span style="padding:1px 6px;border-radius:4px;background:var(--neutral-soft);color:var(--text2);font-size:10px;font-weight:600;text-transform:uppercase;">Decisão</span>
+                <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;font-variant-numeric:tabular-nums;color:var(--text3);">05/08/2026</span>
+              </div>
+              <div style="font-size:13px;font-weight:600;">Manter o provedor atual no piloto</div>
+              <div style="font-size:12px;color:var(--text2);text-wrap:pretty;">Revertida a decisão de 14/07 de trocar de provedor — custo de migração dobrava o prazo.</div>
+              <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);">Reverte <span style="padding:0 5px;border:1px solid var(--border);border-radius:4px;font-family:'IBM Plex Mono',monospace;color:var(--text2);">decisão 14/07</span></div>
+            </div>
+
+            <button style="height:28px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text2);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--panel);color:var(--text);">Carregar 7 eventos anteriores</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div onClick="{{ closeModal }}" style="display:{{ dispNovaTarefa }};position:fixed;inset:0;z-index:40;align-items:flex-start;justify-content:center;padding:56px 24px;background:rgba(12,14,16,0.44);">
+    <div onClick="{{ stop }}" style="width:640px;max-height:100%;display:flex;flex-direction:column;border:1px solid var(--border-strong);border-radius:10px;background:var(--panel);box-shadow:0 24px 64px rgba(0,0,0,0.30);overflow:hidden;">
+
+      <div style="display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--border);background:var(--sunken);">
+        <span style="font-size:13px;font-weight:600;color:var(--text);">Nova tarefa</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">Plataforma de pagamentos · v2</span>
+        <button onClick="{{ closeModal }}" style="margin-left:auto;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text2);font:500 12px 'IBM Plex Mono',monospace;line-height:1;cursor:pointer;" style-hover="color:var(--text);">✕</button>
+      </div>
+
+      <div style="overflow:auto;padding:16px;display:grid;gap:14px;align-content:start;">
+
+        <label style="display:grid;gap:5px;">
+          <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Título</span>
+          <input placeholder="Ex. Testes de carga do gateway" style="height:32px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 13px 'IBM Plex Sans',sans-serif;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);">
+        </label>
+
+        <div style="display:grid;gap:6px;">
+          <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Fase</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <sc-for list="{{ fases }}" as="f" hint-placeholder-count="3">
+              <button onClick="{{ f.pick }}" style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid {{ f.border }};border-radius:6px;background:{{ f.bg }};color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;">
+                <span style="width:3px;height:12px;border-radius:2px;background:{{ f.color }};"></span>{{ f.nome }}
+              </button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <label style="display:grid;gap:5px;">
+            <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Início</span>
+            <input value="07/09/2026" style="height:32px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);">
+          </label>
+          <label style="display:grid;gap:5px;">
+            <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Fim</span>
+            <input value="09/10/2026" style="height:32px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);">
+          </label>
+          <label style="display:grid;gap:5px;">
+            <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Estimativa</span>
+            <div style="position:relative;display:grid;">
+              <input value="80" style="height:32px;padding:0 28px 0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);">
+              <span style="position:absolute;right:10px;top:0;height:32px;display:flex;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">h</span>
+            </div>
+          </label>
+        </div>
+
+        <div style="display:grid;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Atribuição</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">∑ {{ totalAloc }}% da tarefa</span>
+          </div>
+          <div style="border:1px solid var(--border);border-radius:8px;background:var(--bg);overflow:hidden;">
+            <sc-for list="{{ assignees }}" as="a" hint-placeholder-count="2">
+              <div style="display:grid;grid-template-columns:1fr 92px 22px;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border);">
+                <div style="display:flex;align-items:center;gap:7px;min-width:0;">
+                  <span style="width:20px;height:20px;flex:none;border-radius:50%;background:var(--sunken);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font:600 9px 'IBM Plex Sans',sans-serif;color:var(--text2);">{{ a.iniciais }}</span>
+                  <span style="font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ a.nome }}</span>
+                  <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">{{ a.papel }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:1px;justify-self:end;border:1px solid var(--border-strong);border-radius:5px;overflow:hidden;">
+                  <button onClick="{{ a.dec }}" style="width:22px;height:24px;border:0;background:var(--panel);color:var(--text2);font:600 12px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="background:var(--sunken);color:var(--text);">−</button>
+                  <span style="width:44px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text);">{{ a.pct }}%</span>
+                  <button onClick="{{ a.inc }}" style="width:22px;height:24px;border:0;background:var(--panel);color:var(--text2);font:600 12px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="background:var(--sunken);color:var(--text);">+</button>
+                </div>
+                <button onClick="{{ a.remove }}" style="width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:4px;background:transparent;color:var(--text3);font:500 11px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="background:var(--danger-soft);color:var(--danger);">✕</button>
+              </div>
+            </sc-for>
+            <div style="display:flex;align-items:center;gap:6px;padding:7px 10px;">
+              <button onClick="{{ addAssignee }}" style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border:1px dashed var(--border-strong);border-radius:5px;background:transparent;color:var(--text3);font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="color:var(--text);border-color:var(--text3);">+ Adicionar pessoa</button>
+              <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">{{ pessoasLabel }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid {{ impactoBorder }};border-radius:8px;background:{{ impactoBg }};">
+          <span style="width:16px;height:16px;flex:none;margin-top:1px;border-radius:3px;background:{{ impactoBorder }};color:var(--accent-fg);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">{{ impactoGlyph }}</span>
+          <div style="display:grid;gap:4px;">
+            <span style="font-size:12px;font-weight:600;color:var(--text);">{{ impactoTitulo }}</span>
+            <span style="font-size:11px;color:var(--text2);text-wrap:pretty;">{{ impactoTexto }}</span>
+          </div>
+        </div>
+
+        <div style="display:grid;gap:6px;padding-top:2px;border-top:1px solid var(--border);">
+          <div style="display:grid;grid-template-columns:120px 1fr;gap:8px;padding-top:10px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">esforço ∑</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text2);">320h → {{ novoEsforco }}h</span>
+          </div>
+          <div style="display:grid;grid-template-columns:120px 1fr;gap:8px;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">janela</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text2);">12/03/2026 → 29/09/2026 <span style="color:var(--text3);">(sem mudança · fim da tarefa 09/10 vira novo fim)</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:var(--sunken);">
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);cursor:pointer;">
+          <input type="checkbox" style="width:13px;height:13px;accent-color:var(--accent);cursor:pointer;">Criar outra em seguida
+        </label>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <button onClick="{{ closeModal }}" style="height:30px;padding:0 12px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--bg);">Cancelar<span style="margin-left:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">esc</span></button>
+          <button onClick="{{ closeModal }}" style="height:30px;padding:0 12px;border:1px solid transparent;border-radius:6px;background:var(--accent);color:var(--accent-fg);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--accent-hover);">Criar tarefa<span style="margin-left:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:0.7;">⌘↵</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;}}">
+class Component extends DCLogic {
+  state = {
+    theme: null,
+    tab: "tarefas",
+    modal: null,
+    fase: "hi",
+    assignees: [
+      { nome: "Rafael Lima", iniciais: "RL", papel: "infra", pct: 50 },
+      { nome: "Marina Costa", iniciais: "MC", papel: "qa", pct: 50 },
+    ],
+  };
+  componentDidMount() {
+    this._key = (e) => {
+      if (e.key === "Escape") this.setState({ modal: null });
+      if ((e.key === "t" || e.key === "T") && !this.state.modal && !/input|textarea/i.test(e.target.tagName)) {
+        e.preventDefault();
+        this.setState({ modal: "tarefa" });
+      }
+    };
+    window.addEventListener("keydown", this._key);
+  }
+  componentWillUnmount() { window.removeEventListener("keydown", this._key); }
+  setPct(i, d) {
+    this.setState((s) => ({
+      assignees: s.assignees.map((a, k) => (k === i ? { ...a, pct: Math.max(0, Math.min(100, a.pct + d)) } : a)),
+    }));
+  }
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? "light";
+    const t = this.state.tab;
+    const ul = "inset 0 -2px 0 var(--accent)";
+    const fasesDef = [
+      { id: "dev", nome: "Desenvolvimento", color: "var(--ph-dev)" },
+      { id: "hi", nome: "Homologação interna", color: "var(--ph-hi)" },
+      { id: "prod", nome: "Produção", color: "var(--ph-prod)" },
+    ];
+    const as = this.state.assignees;
+    const total = as.reduce((n, a) => n + a.pct, 0);
+    const rafael = as.find((a) => a.nome === "Rafael Lima");
+    const sobrecarga = rafael && rafael.pct + 100 > 100;
+    return {
+      theme,
+      themeGlyph: theme === "dark" ? "☀" : "☾",
+      toggleTheme: () => this.setState({ theme: theme === "dark" ? "light" : "dark" }),
+      setTarefas: () => this.setState({ tab: "tarefas" }),
+      setAloc: () => this.setState({ tab: "alocacoes" }),
+      setNotas: () => this.setState({ tab: "notas" }),
+      fgTarefas: t === "tarefas" ? "var(--text)" : "var(--text2)",
+      fgAloc: t === "alocacoes" ? "var(--text)" : "var(--text2)",
+      fgNotas: t === "notas" ? "var(--text)" : "var(--text2)",
+      ulTarefas: t === "tarefas" ? ul : "none",
+      ulAloc: t === "alocacoes" ? ul : "none",
+      ulNotas: t === "notas" ? ul : "none",
+      dispTarefas: t === "tarefas" ? "grid" : "none",
+      dispAloc: t === "alocacoes" ? "grid" : "none",
+      dispNotas: t === "notas" ? "grid" : "none",
+
+      openTask: () => this.setState({ modal: "tarefa" }),
+      closeModal: () => this.setState({ modal: null }),
+      stop: (e) => e.stopPropagation(),
+      dispNovaTarefa: this.state.modal === "tarefa" ? "flex" : "none",
+      fases: fasesDef.map((f) => ({
+        ...f,
+        bg: this.state.fase === f.id ? "var(--accent-soft)" : "var(--panel)",
+        border: this.state.fase === f.id ? "var(--accent)" : "var(--border-strong)",
+        pick: () => this.setState({ fase: f.id }),
+      })),
+      assignees: as.map((a, i) => ({
+        ...a,
+        inc: () => this.setPct(i, 10),
+        dec: () => this.setPct(i, -10),
+        remove: () => this.setState((s) => ({ assignees: s.assignees.filter((_, k) => k !== i) })),
+      })),
+      totalAloc: total,
+      pessoasLabel: as.length + (as.length === 1 ? " pessoa" : " pessoas"),
+      novoEsforco: 320 + 80,
+      impactoBorder: sobrecarga ? "var(--warn)" : "var(--accent)",
+      impactoBg: sobrecarga ? "var(--warn-soft)" : "var(--accent-soft)",
+      impactoGlyph: sobrecarga ? "△" : "✓",
+      impactoTitulo: sobrecarga
+        ? "Rafael Lima passa de 100% em S37–S40"
+        : "Nenhuma pessoa passa de 100% no período",
+      impactoTexto: sobrecarga
+        ? "Já alocado 100% em Observabilidade nas mesmas semanas. Com " + rafael.pct + "% aqui, chega a " + (100 + rafael.pct) + "%. Reduza a alocação, mova a janela ou aceite e registre a decisão."
+        : "A janela 07/09 → 09/10 cabe na capacidade atual das pessoas atribuídas.",
+    };
+  }
+}
+</script>
+</body>
+</html>

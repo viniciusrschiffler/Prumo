@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:oklch(0.984 0.002 260); --sunken:oklch(0.962 0.004 260); --panel:oklch(1 0 0);
+  --raised:oklch(0.995 0.001 260);
+  --border:oklch(0.906 0.005 260); --border-strong:oklch(0.845 0.007 260);
+  --text:oklch(0.265 0.012 265); --text2:oklch(0.505 0.012 265); --text3:oklch(0.645 0.012 265);
+  --accent:oklch(0.545 0.155 264); --accent-hover:oklch(0.495 0.16 264); --accent-fg:oklch(0.99 0 0);
+  --accent-soft:oklch(0.945 0.032 264); --accent-line:oklch(0.80 0.07 264);
+  --ok:oklch(0.575 0.135 152); --ok-soft:oklch(0.945 0.045 152);
+  --warn:oklch(0.665 0.135 72); --warn-soft:oklch(0.955 0.055 78);
+  --danger:oklch(0.555 0.185 26); --danger-soft:oklch(0.955 0.04 26);
+  --info:oklch(0.565 0.10 232); --info-soft:oklch(0.95 0.03 232);
+  --neutral-soft:oklch(0.94 0.004 260);
+  --ph-dev:oklch(0.545 0.16 292); --ph-dev-soft:oklch(0.95 0.035 292);
+  --ph-hi:oklch(0.55 0.11 212); --ph-hi-soft:oklch(0.945 0.035 212);
+  --ph-he:oklch(0.60 0.115 62); --ph-he-soft:oklch(0.955 0.05 68);
+  --ph-prod:oklch(0.52 0.115 152); --ph-prod-soft:oklch(0.945 0.045 152);
+  --shadow:0 1px 2px oklch(0.26 0.02 265 / 0.06), 0 4px 12px oklch(0.26 0.02 265 / 0.06);
+  --shadow-lg:0 8px 40px oklch(0.26 0.02 265 / 0.16);
+}
+[data-theme="dark"]{
+  --bg:oklch(0.196 0.008 265); --sunken:oklch(0.164 0.008 265); --panel:oklch(0.228 0.009 265);
+  --raised:oklch(0.255 0.010 265);
+  --border:oklch(0.305 0.011 265); --border-strong:oklch(0.385 0.014 265);
+  --text:oklch(0.945 0.004 265); --text2:oklch(0.715 0.010 265); --text3:oklch(0.565 0.012 265);
+  --accent:oklch(0.665 0.145 264); --accent-hover:oklch(0.725 0.145 264); --accent-fg:oklch(0.17 0.02 265);
+  --accent-soft:oklch(0.315 0.055 264); --accent-line:oklch(0.45 0.09 264);
+  --ok:oklch(0.715 0.135 152); --ok-soft:oklch(0.30 0.055 152);
+  --warn:oklch(0.775 0.125 78); --warn-soft:oklch(0.315 0.055 72);
+  --danger:oklch(0.665 0.175 26); --danger-soft:oklch(0.315 0.075 26);
+  --info:oklch(0.705 0.095 232); --info-soft:oklch(0.30 0.045 232);
+  --neutral-soft:oklch(0.285 0.008 265);
+  --ph-dev:oklch(0.695 0.145 292); --ph-dev-soft:oklch(0.315 0.055 292);
+  --ph-hi:oklch(0.715 0.105 212); --ph-hi-soft:oklch(0.305 0.045 212);
+  --ph-he:oklch(0.775 0.115 68); --ph-he-soft:oklch(0.315 0.05 68);
+  --ph-prod:oklch(0.70 0.115 152); --ph-prod-soft:oklch(0.295 0.05 152);
+  --shadow:0 1px 2px oklch(0 0 0 / 0.4), 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-lg:0 8px 40px oklch(0 0 0 / 0.55);
+}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+*{box-sizing:border-box;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:var(--accent-hover);text-decoration:underline;}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="width:1440px;height:900px;display:grid;grid-template-columns:216px 1fr;background:var(--bg);color:var(--text);font-size:13px;line-height:1.45;overflow:hidden;">
+
+  <aside style="display:flex;flex-direction:column;background:var(--sunken);border-right:1px solid var(--border);overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:8px;padding:14px 14px 12px;">
+      <div style="width:20px;height:20px;border-radius:5px;background:var(--text);"></div>
+      <div style="display:grid;">
+        <span style="font-size:13px;font-weight:600;letter-spacing:-0.01em;">Plano</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">local · offline</span>
+      </div>
+      <button onClick="{{ toggleTheme }}" style="margin-left:auto;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text2);font:500 10px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="color:var(--text);border-color:var(--border-strong);">{{ themeGlyph }}</button>
+    </div>
+    <nav style="display:grid;gap:1px;padding:4px 8px;">
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Hoje</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">9</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Projetos</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">12</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Timeline</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Capacidade</span><span style="margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--danger);"></span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;background:var(--neutral-soft);box-shadow:inset 2px 0 0 var(--accent);cursor:pointer;"><span style="font-size:13px;font-weight:600;">TodoList</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);">{{ openCount }}</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Notas</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Painéis</span></div>
+    </nav>
+
+    <div style="margin-top:14px;padding:0 14px 6px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Tags</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;padding:0 14px;">
+      <span style="padding:1px 7px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);">1:1</span>
+      <span style="padding:1px 7px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);">contratação</span>
+      <span style="padding:1px 7px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);">arquitetura</span>
+      <span style="padding:1px 7px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);">pessoal</span>
+      <span style="padding:1px 7px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);">reunião</span>
+    </div>
+
+    <div style="margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);display:grid;gap:3px;">
+      <div style="display:flex;align-items:center;height:26px;color:var(--text2);cursor:pointer;font-size:12px;" style-hover="color:var(--text);">Configurações</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">~/Documentos/plano</div>
+    </div>
+  </aside>
+
+  <main style="display:flex;flex-direction:column;overflow:hidden;">
+
+    <header style="display:grid;gap:10px;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="display:grid;">
+          <h1 style="margin:0;font-size:20px;font-weight:600;letter-spacing:-0.01em;">TodoList</h1>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text3);">{{ subhead }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-left:10px;">
+          <span style="font-size:11px;color:var(--text3);">Agrupar por</span>
+          <div style="display:flex;padding:2px;gap:2px;background:var(--sunken);border:1px solid var(--border);border-radius:6px;">
+            <button onClick="{{ setVenc }}" style="border:0;border-radius:4px;padding:4px 10px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgVenc }};color:{{ fgVenc }};">Vencimento</button>
+            <button onClick="{{ setProj }}" style="border:0;border-radius:4px;padding:4px 10px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgProj }};color:{{ fgProj }};">Projeto</button>
+            <button onClick="{{ setPrio }}" style="border:0;border-radius:4px;padding:4px 10px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgPrio }};color:{{ fgPrio }};">Prioridade</button>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <button onClick="{{ toggleDone }}" style="height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:{{ bgDone }};color:{{ fgDone }};font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;">{{ doneLabel }}</button>
+          <button style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--sunken);">Comandos<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">⌘K</span></button>
+          <button onClick="{{ openNew }}" style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid transparent;border-radius:6px;background:var(--accent);color:var(--accent-fg);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--accent-hover);">Novo item<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:0.7;">N</span></button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="flex:1;position:relative;display:flex;align-items:center;">
+          <span style="position:absolute;left:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);">+</span>
+          <input placeholder="Captura rápida — use #tag, @projeto, !p0 e datas como “sex”, “12/09”" style="width:100%;height:32px;padding:0 78px 0 26px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 13px 'IBM Plex Sans',sans-serif;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);">
+          <span style="position:absolute;right:8px;display:flex;gap:3px;">
+            <span style="padding:1px 5px;border:1px solid var(--border);border-radius:3px;background:var(--sunken);font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">⌘</span>
+            <span style="padding:1px 5px;border:1px solid var(--border);border-radius:3px;background:var(--sunken);font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">↵</span>
+          </span>
+        </div>
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap;">marcar <span style="padding:0 5px;border:1px solid var(--border);border-radius:3px;font-family:'IBM Plex Mono',monospace;">espaço</span> · adiar <span style="padding:0 5px;border:1px solid var(--border);border-radius:3px;font-family:'IBM Plex Mono',monospace;">S</span> · vincular projeto <span style="padding:0 5px;border:1px solid var(--border);border-radius:3px;font-family:'IBM Plex Mono',monospace;">@</span></span>
+      </div>
+    </header>
+
+    <div style="flex:1;display:grid;grid-template-columns:1fr 320px;overflow:hidden;">
+
+      <div style="overflow:auto;padding:14px 20px 24px;display:grid;gap:14px;align-content:start;grid-auto-rows:max-content;">
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+          <section style="display:grid;gap:7px;">
+            <div style="display:flex;align-items:center;gap:9px;">
+              <span style="width:3px;height:13px;border-radius:2px;background:{{ g.color }};"></span>
+              <h2 style="margin:0;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:{{ g.titleColor }};">{{ g.titulo }}</h2>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text3);">{{ g.count }}</span>
+              <div style="flex:1;height:1px;background:var(--border);"></div>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">{{ g.meta }}</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);overflow:hidden;">
+              <sc-for list="{{ g.itens }}" as="t" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:24px 1fr auto auto auto 24px;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+                  <span onClick="{{ t.toggle }}" style="width:15px;height:15px;border-radius:4px;border:1px solid {{ t.boxBorder }};background:{{ t.boxBg }};display:inline-flex;align-items:center;justify-content:center;color:var(--accent-fg);font-size:9px;cursor:pointer;">{{ t.check }}</span>
+                  <span style="font-size:13px;color:{{ t.textColor }};text-decoration:{{ t.strike }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.titulo }}</span>
+                  <span style="display:flex;gap:4px;">
+                    <sc-for list="{{ t.tags }}" as="tg" hint-placeholder-count="1">
+                      <span style="padding:0 6px;border:1px solid var(--border);border-radius:4px;font-size:10px;color:var(--text3);white-space:nowrap;">{{ tg.nome }}</span>
+                    </sc-for>
+                  </span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:{{ t.projColor }};white-space:nowrap;"><span style="width:3px;height:11px;border-radius:2px;background:{{ t.faseColor }};display:{{ t.projDotDisplay }};"></span>{{ t.projeto }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:8px;">
+                    <span style="padding:1px 6px;border-radius:4px;background:{{ t.prioBg }};color:{{ t.prioFg }};font-size:10px;font-weight:600;">{{ t.prio }}</span>
+                    <span style="min-width:52px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:{{ t.dueColor }};">{{ t.due }}</span>
+                  </span>
+                  <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;color:var(--text3);font:500 12px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);">⋯</span>
+                </div>
+              </sc-for>
+              <div style="display:{{ addRowDisplay }};align-items:center;padding:5px 12px 7px;">
+                <button onClick="{{ openNew }}" style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border:1px dashed var(--border-strong);border-radius:5px;background:transparent;color:var(--text3);font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="color:var(--text);border-color:var(--text3);">+ Novo item</button>
+              </div>
+            </div>
+          </section>
+        </sc-for>
+
+        <div style="display:{{ emptyDisplay }};border:1px dashed var(--border-strong);border-radius:8px;background:var(--panel);padding:44px;place-items:center;text-align:center;gap:8px;grid-auto-flow:row;">
+          <div style="width:34px;height:34px;border-radius:8px;border:1px dashed var(--border-strong);background:var(--sunken);"></div>
+          <div style="font-size:15px;font-weight:600;">Nenhum todo em aberto</div>
+          <div style="font-size:12px;color:var(--text2);max-width:340px;text-wrap:pretty;">Capture o próximo na barra acima. Tudo que você escrever fica em <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">todos.json</span> na sua pasta local.</div>
+        </div>
+      </div>
+
+      <div style="border-left:1px solid var(--border);background:var(--sunken);overflow:auto;padding:14px;display:grid;gap:14px;align-content:start;grid-auto-rows:max-content;">
+        <section style="display:grid;gap:8px;">
+          <h2 style="margin:0;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);">Esta semana</h2>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:10px;display:grid;gap:2px;">
+              <span style="font-size:11px;color:var(--text2);">Concluídos</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ok);">{{ doneN }}</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:10px;display:grid;gap:2px;">
+              <span style="font-size:11px;color:var(--text2);">Atrasados</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--danger);">{{ lateN }}</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:10px;display:grid;gap:2px;">
+              <span style="font-size:11px;color:var(--text2);">Em aberto</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;">{{ openCount }}</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:10px;display:grid;gap:2px;">
+              <span style="font-size:11px;color:var(--text2);">Sem projeto</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text2);">{{ noProjN }}</span>
+            </div>
+          </div>
+        </section>
+
+        <section style="display:grid;gap:8px;">
+          <h2 style="margin:0;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);">Por projeto</h2>
+          <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);overflow:hidden;">
+            <sc-for list="{{ byProject }}" as="p" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 11px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+                <span style="width:3px;height:12px;border-radius:2px;background:{{ p.color }};"></span>
+                <span style="font-size:12px;color:{{ p.nameColor }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ p.nome }}</span>
+                <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text2);">{{ p.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="display:grid;gap:8px;">
+          <h2 style="margin:0;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);">Recorrentes</h2>
+          <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);overflow:hidden;">
+            <div style="display:grid;gap:3px;padding:9px 11px;border-bottom:1px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:7px;"><span style="font-size:12px;font-weight:600;">1:1 com o time</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">seg</span></div>
+              <div style="font-size:11px;color:var(--text3);">Gera 3 todos toda segunda-feira.</div>
+            </div>
+            <div style="display:grid;gap:3px;padding:9px 11px;">
+              <div style="display:flex;align-items:center;gap:7px;"><span style="font-size:12px;font-weight:600;">Revisar riscos abertos</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">sex</span></div>
+              <div style="font-size:11px;color:var(--text3);">Último gerado em 28/08.</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- NOVO ITEM -->
+  <div style="display:{{ newDisplay }};position:fixed;inset:0;background:oklch(0.2 0.02 265 / 0.4);align-items:center;justify-content:center;z-index:40;">
+    <div style="width:560px;border:1px solid var(--border-strong);border-radius:12px;background:var(--panel);box-shadow:var(--shadow-lg);overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:7px;height:7px;border-radius:50%;background:var(--accent);"></span><span style="font-size:14px;font-weight:600;">Novo item</span></div>
+        <button onClick="{{ closeNew }}" style="width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text2);font:500 11px 'IBM Plex Mono',monospace;cursor:pointer;">esc</button>
+      </div>
+
+      <div style="padding:14px;display:grid;gap:11px;">
+        <label style="display:grid;gap:4px;">
+          <span style="font-size:11px;color:var(--text2);">Nome</span>
+          <input value="{{ fNome }}" onChange="{{ setNome }}" placeholder="O que precisa ser feito" style="height:30px;padding:0 9px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 13px 'IBM Plex Sans',sans-serif;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);">
+        </label>
+
+        <label style="display:grid;gap:4px;">
+          <span style="font-size:11px;color:var(--text2);">Descrição</span>
+          <textarea rows="3" value="{{ fDesc }}" onChange="{{ setDesc }}" placeholder="Contexto, links, próximos passos — aceita markdown" style="padding:7px 9px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Sans',sans-serif;resize:none;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);"></textarea>
+        </label>
+
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:10px;">
+          <label style="display:grid;gap:4px;">
+            <span style="font-size:11px;color:var(--text2);">Projeto vinculado</span>
+            <select value="{{ fProj }}" onChange="{{ setProjeto }}" style="height:30px;padding:0 6px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Sans',sans-serif;outline:none;">
+              <option value="">Sem projeto</option>
+              <option value="Migração do gateway">Migração do gateway</option>
+              <option value="Portal do parceiro">Portal do parceiro</option>
+              <option value="Observabilidade">Observabilidade</option>
+              <option value="App de campo v2">App de campo v2</option>
+            </select>
+          </label>
+          <label style="display:grid;gap:4px;">
+            <span style="font-size:11px;color:var(--text2);">Data limite</span>
+            <input type="date" value="{{ fDue }}" onChange="{{ setDue }}" style="height:30px;padding:0 8px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);">
+          </label>
+        </div>
+
+        <div style="display:grid;gap:5px;">
+          <span style="font-size:11px;color:var(--text2);">Prioridade</span>
+          <div style="display:flex;gap:6px;">
+            <sc-for list="{{ prioOptions }}" as="p" hint-placeholder-count="4">
+              <button onClick="{{ p.pick }}" style="flex:1;height:28px;border:1px solid {{ p.border }};border-radius:6px;background:{{ p.bg }};color:{{ p.fg }};font:600 11px 'IBM Plex Sans',sans-serif;cursor:pointer;">{{ p.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--sunken);">
+          <span style="width:16px;height:16px;flex:none;border-radius:50%;border:1px solid var(--border-strong);color:var(--text2);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">i</span>
+          <span style="font-size:12px;color:var(--text2);">Vai para <span style="font-weight:600;color:var(--text);">{{ previewGroup }}</span> no agrupamento atual{{ previewExtra }}</span>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-top:1px solid var(--border);background:var(--sunken);">
+        <span style="font-size:11px;color:var(--text3);">A seção é definida pela data limite — sem data cai em “Sem data”.</span>
+        <div style="display:flex;gap:8px;">
+          <button onClick="{{ closeNew }}" style="height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;">Cancelar</button>
+          <button onClick="{{ saveNew }}" style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid transparent;border-radius:6px;background:var(--accent);color:var(--accent-fg);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--accent-hover);">Criar item<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:0.75;">⌘↵</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;}}">
+class Component extends DCLogic {
+  state = {
+    theme: null, group: "vencimento", showDone: false, done: {}, novo: false,
+    form: { nome: "", desc: "", proj: "", due: "", prio: "P2" },
+    extras: [],
+  };
+  nextId = 100;
+
+  classify(due) {
+    if (!due) return { key: "semdata", label: "sem data" };
+    const hoje = new Date(2026, 8, 3);
+    const d = new Date(due + "T00:00:00");
+    const dias = Math.round((d - hoje) / 86400000);
+    const lbl = String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0");
+    if (dias < 0) return { key: "atraso", label: "+" + Math.abs(dias) + "d" };
+    if (dias === 0) return { key: "hoje", label: "hoje" };
+    if (dias === 1) return { key: "semana", label: "amanhã" };
+    if (dias <= 3) return { key: "semana", label: lbl };
+    return { key: "depois", label: lbl };
+  }
+  groupName(key) {
+    return { atraso: "Atrasados", hoje: "Hoje", semana: "Esta semana", depois: "Depois", semdata: "Sem data" }[key];
+  }
+  faseDe(proj) {
+    return { "Migração do gateway": "dev", "Portal do parceiro": "he", "Observabilidade": "prod", "App de campo v2": "hi" }[proj] || null;
+  }
+
+  todos = [
+    { id: 1, titulo: "Fechar escopo do módulo de conciliação com o time financeiro", due: "hoje", dueKey: "hoje", prio: "P0", proj: "Migração do gateway", fase: "dev", tags: ["arquitetura"] },
+    { id: 2, titulo: "Responder proposta de replanejamento do parceiro", due: "+2d", dueKey: "atraso", prio: "P1", proj: "Portal do parceiro", fase: "he", tags: [] },
+    { id: 3, titulo: "1:1 com Rafael — carga acima de 100%", due: "hoje", dueKey: "hoje", prio: "P2", proj: null, fase: null, tags: ["1:1"] },
+    { id: 4, titulo: "Revisar baseline antes do comitê", due: "14:02", dueKey: "feito", prio: "P2", proj: "App de campo v2", fase: "hi", tags: [], feito: true },
+    { id: 5, titulo: "Aprovar vaga de dev pleno com o RH", due: "+5d", dueKey: "atraso", prio: "P1", proj: null, fase: null, tags: ["contratação"] },
+    { id: 6, titulo: "Escrever ADR do roteador de pagamentos", due: "amanhã", dueKey: "semana", prio: "P1", proj: "Migração do gateway", fase: "dev", tags: ["arquitetura"] },
+    { id: 7, titulo: "Alinhar janela de cutover com a operação", due: "sex 05/09", dueKey: "semana", prio: "P0", proj: "Observabilidade", fase: "prod", tags: ["reunião"] },
+    { id: 8, titulo: "Definir substituto de Rafael em Observabilidade", due: "sex 05/09", dueKey: "semana", prio: "P1", proj: "Observabilidade", fase: "prod", tags: [] },
+    { id: 9, titulo: "Consolidar notas da retro de agosto", due: "09/09", dueKey: "depois", prio: "P2", proj: null, fase: null, tags: ["pessoal"] },
+    { id: 10, titulo: "Revisar plano de contratação do Q4", due: "15/09", dueKey: "depois", prio: "P2", proj: null, fase: null, tags: ["contratação"] },
+    { id: 11, titulo: "Preparar demo interna do app de campo", due: "sem data", dueKey: "semdata", prio: "P3", proj: "App de campo v2", fase: "hi", tags: [] },
+    { id: 12, titulo: "Ler proposta de observabilidade do fornecedor", due: "sem data", dueKey: "semdata", prio: "P3", proj: null, fase: null, tags: ["pessoal"] },
+  ];
+
+  fase = { dev: "var(--ph-dev)", hi: "var(--ph-hi)", he: "var(--ph-he)", prod: "var(--ph-prod)" };
+
+  prioStyle(p) {
+    if (p === "P0") return ["var(--danger-soft)", "var(--danger)"];
+    if (p === "P1") return ["var(--warn-soft)", "var(--warn)"];
+    return ["var(--neutral-soft)", "var(--text2)"];
+  }
+
+  item(t) {
+    const done = t.feito || !!this.state.done[t.id];
+    const ps = this.prioStyle(t.prio);
+    return {
+      titulo: t.titulo,
+      check: done ? "✓" : "",
+      boxBg: done ? "var(--accent)" : "var(--bg)",
+      boxBorder: done ? "var(--accent)" : "var(--border-strong)",
+      textColor: done ? "var(--text3)" : "var(--text)",
+      strike: done ? "line-through" : "none",
+      toggle: () => this.setState(s => ({ done: { ...s.done, [t.id]: !(t.feito || s.done[t.id]) } })),
+      tags: t.tags.map(n => ({ nome: n })),
+      projeto: t.proj || "sem projeto",
+      projColor: t.proj ? "var(--text2)" : "var(--text3)",
+      faseColor: this.fase[t.fase] || "var(--border-strong)",
+      projDotDisplay: t.proj ? "inline-block" : "none",
+      prio: t.prio, prioBg: done ? "var(--neutral-soft)" : ps[0], prioFg: done ? "var(--text3)" : ps[1],
+      due: t.due,
+      dueColor: done ? "var(--text3)" : t.dueKey === "atraso" ? "var(--danger)" : t.dueKey === "hoje" ? "var(--text)" : "var(--text2)",
+    };
+  }
+
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? "light";
+    const g = this.state.group;
+    const showDone = this.state.showDone;
+    const on = "var(--panel)", off = "transparent";
+    const done = (t) => t.feito || !!this.state.done[t.id];
+    const all = this.todos.concat(this.state.extras);
+    const pool = all.filter(t => showDone || !done(t));
+    const f = this.state.form;
+    const cls = this.classify(f.due);
+
+    let defs;
+    if (g === "vencimento") {
+      defs = [
+        { key: "atraso", titulo: "Atrasados", color: "var(--danger)", titleColor: "var(--danger)", meta: "resolver ou adiar" },
+        { key: "hoje", titulo: "Hoje", color: "var(--accent)", titleColor: "var(--text)", meta: "qui, 03/09" },
+        { key: "semana", titulo: "Esta semana", color: "var(--border-strong)", titleColor: "var(--text2)", meta: "até 06/09" },
+        { key: "depois", titulo: "Depois", color: "var(--border-strong)", titleColor: "var(--text2)", meta: "" },
+        { key: "semdata", titulo: "Sem data", color: "var(--border-strong)", titleColor: "var(--text2)", meta: "backlog pessoal" },
+        { key: "feito", titulo: "Concluídos hoje", color: "var(--ok)", titleColor: "var(--ok)", meta: "" },
+      ];
+      defs = defs.map(d => ({ ...d, itens: pool.filter(t => (done(t) ? "feito" : t.dueKey) === d.key) }));
+    } else if (g === "projeto") {
+      const names = ["Migração do gateway", "Portal do parceiro", "Observabilidade", "App de campo v2", null];
+      defs = names.map(n => ({
+        key: n || "sem",
+        titulo: n || "Sem projeto",
+        color: n ? this.fase[this.faseDe(n)] || "var(--border-strong)" : "var(--border-strong)",
+        titleColor: "var(--text2)", meta: "",
+        itens: pool.filter(t => t.proj === n),
+      }));
+    } else {
+      defs = ["P0", "P1", "P2", "P3"].map(p => ({
+        key: p, titulo: p === "P0" ? "P0 · urgente" : p === "P1" ? "P1 · alta" : p === "P2" ? "P2 · normal" : "P3 · baixa",
+        color: p === "P0" ? "var(--danger)" : p === "P1" ? "var(--warn)" : "var(--border-strong)",
+        titleColor: "var(--text2)", meta: "",
+        itens: pool.filter(t => t.prio === p),
+      }));
+    }
+
+    const groups = defs.filter(d => d.itens.length).map(d => ({
+      titulo: d.titulo, color: d.color, titleColor: d.titleColor, meta: d.meta,
+      count: d.itens.length, itens: d.itens.map(t => this.item(t)),
+    }));
+
+    const openTodos = all.filter(t => !done(t));
+    const openN = openTodos.length;
+    const lateN = openTodos.filter(t => t.dueKey === "atraso").length;
+    const linkedN = openTodos.filter(t => t.proj).length;
+    const noProjN = openN - linkedN;
+    const doneN = all.filter(t => done(t)).length;
+    const projNames = ["Migração do gateway", "Portal do parceiro", "Observabilidade", "App de campo v2"];
+    const byProject = projNames.map(n => ({
+      nome: n,
+      color: this.fase[this.faseDe(n)] || "var(--border-strong)",
+      count: openTodos.filter(t => t.proj === n).length,
+      nameColor: "var(--text)",
+    })).concat([{ nome: "Sem projeto", color: "var(--border-strong)", count: noProjN, nameColor: "var(--text2)" }]);
+
+    const prioOptions = ["P0", "P1", "P2", "P3"].map(p => {
+      const sel = f.prio === p;
+      const ps = this.prioStyle(p);
+      return {
+        label: p === "P0" ? "P0 urgente" : p === "P1" ? "P1 alta" : p === "P2" ? "P2 normal" : "P3 baixa",
+        pick: () => this.setState(s => ({ form: { ...s.form, prio: p } })),
+        bg: sel ? ps[0] : "transparent",
+        fg: sel ? ps[1] : "var(--text2)",
+        border: sel ? ps[1] : "var(--border)",
+      };
+    });
+
+    const previewGroup = g === "vencimento" ? this.groupName(cls.key)
+      : g === "projeto" ? (f.proj || "Sem projeto")
+      : (f.prio + (f.prio === "P0" ? " · urgente" : f.prio === "P1" ? " · alta" : f.prio === "P2" ? " · normal" : " · baixa"));
+
+    return {
+      theme,
+      themeGlyph: theme === "dark" ? "☀" : "☾",
+      toggleTheme: () => this.setState({ theme: theme === "dark" ? "light" : "dark" }),
+      setVenc: () => this.setState({ group: "vencimento" }),
+      setProj: () => this.setState({ group: "projeto" }),
+      setPrio: () => this.setState({ group: "prioridade" }),
+      bgVenc: g === "vencimento" ? on : off, fgVenc: g === "vencimento" ? "var(--text)" : "var(--text2)",
+      bgProj: g === "projeto" ? on : off, fgProj: g === "projeto" ? "var(--text)" : "var(--text2)",
+      bgPrio: g === "prioridade" ? on : off, fgPrio: g === "prioridade" ? "var(--text)" : "var(--text2)",
+      groups,
+      openCount: openN,
+      subhead: openN + " em aberto · " + lateN + " atrasados · " + linkedN + " vinculados a projeto",
+      lateN, linkedN, noProjN, doneN, byProject,
+      doneLabel: showDone ? "Ocultar concluídos" : "Mostrar concluídos",
+      bgDone: showDone ? "var(--accent-soft)" : "var(--panel)",
+      fgDone: showDone ? "var(--accent)" : "var(--text)",
+      toggleDone: () => this.setState({ showDone: !showDone }),
+      emptyDisplay: groups.length ? "none" : "grid",
+      addRowDisplay: "none",
+      newDisplay: this.state.novo ? "flex" : "none",
+      openNew: () => this.setState({ novo: true }),
+      closeNew: () => this.setState({ novo: false }),
+      fNome: f.nome, fDesc: f.desc, fProj: f.proj, fDue: f.due,
+      setNome: (e) => this.setState(s => ({ form: { ...s.form, nome: e.target.value } })),
+      setDesc: (e) => this.setState(s => ({ form: { ...s.form, desc: e.target.value } })),
+      setProjeto: (e) => this.setState(s => ({ form: { ...s.form, proj: e.target.value } })),
+      setDue: (e) => this.setState(s => ({ form: { ...s.form, due: e.target.value } })),
+      prioOptions, previewGroup,
+      previewExtra: f.proj ? " · vinculado a " + f.proj : "",
+      saveNew: () => {
+        const c = this.classify(f.due);
+        const item = {
+          id: this.nextId++, titulo: f.nome || "Item sem título", desc: f.desc,
+          due: c.label, dueKey: c.key, prio: f.prio,
+          proj: f.proj || null, fase: this.faseDe(f.proj), tags: [],
+        };
+        this.setState(s => ({
+          extras: s.extras.concat([item]), novo: false,
+          form: { nome: "", desc: "", proj: "", due: "", prio: "P2" },
+        }));
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

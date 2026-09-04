@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:oklch(0.984 0.002 260); --sunken:oklch(0.962 0.004 260); --panel:oklch(1 0 0);
+  --raised:oklch(0.995 0.001 260);
+  --border:oklch(0.906 0.005 260); --border-strong:oklch(0.845 0.007 260);
+  --text:oklch(0.265 0.012 265); --text2:oklch(0.505 0.012 265); --text3:oklch(0.645 0.012 265);
+  --accent:oklch(0.545 0.155 264); --accent-hover:oklch(0.495 0.16 264); --accent-fg:oklch(0.99 0 0);
+  --accent-soft:oklch(0.945 0.032 264); --accent-line:oklch(0.80 0.07 264);
+  --ok:oklch(0.575 0.135 152); --ok-soft:oklch(0.945 0.045 152);
+  --warn:oklch(0.665 0.135 72); --warn-soft:oklch(0.955 0.055 78);
+  --danger:oklch(0.555 0.185 26); --danger-soft:oklch(0.955 0.04 26);
+  --info:oklch(0.565 0.10 232); --info-soft:oklch(0.95 0.03 232);
+  --neutral-soft:oklch(0.94 0.004 260);
+  --ph-dev:oklch(0.545 0.16 292); --ph-dev-soft:oklch(0.95 0.035 292);
+  --ph-hi:oklch(0.55 0.11 212); --ph-hi-soft:oklch(0.945 0.035 212);
+  --ph-he:oklch(0.60 0.115 62); --ph-he-soft:oklch(0.955 0.05 68);
+  --ph-prod:oklch(0.52 0.115 152); --ph-prod-soft:oklch(0.945 0.045 152);
+  --shadow:0 1px 2px oklch(0.26 0.02 265 / 0.06), 0 4px 12px oklch(0.26 0.02 265 / 0.06);
+  --shadow-lg:0 8px 40px oklch(0.26 0.02 265 / 0.16);
+}
+[data-theme="dark"]{
+  --bg:oklch(0.196 0.008 265); --sunken:oklch(0.164 0.008 265); --panel:oklch(0.228 0.009 265);
+  --raised:oklch(0.255 0.010 265);
+  --border:oklch(0.305 0.011 265); --border-strong:oklch(0.385 0.014 265);
+  --text:oklch(0.945 0.004 265); --text2:oklch(0.715 0.010 265); --text3:oklch(0.565 0.012 265);
+  --accent:oklch(0.665 0.145 264); --accent-hover:oklch(0.725 0.145 264); --accent-fg:oklch(0.17 0.02 265);
+  --accent-soft:oklch(0.315 0.055 264); --accent-line:oklch(0.45 0.09 264);
+  --ok:oklch(0.715 0.135 152); --ok-soft:oklch(0.30 0.055 152);
+  --warn:oklch(0.775 0.125 78); --warn-soft:oklch(0.315 0.055 72);
+  --danger:oklch(0.665 0.175 26); --danger-soft:oklch(0.315 0.075 26);
+  --info:oklch(0.705 0.095 232); --info-soft:oklch(0.30 0.045 232);
+  --neutral-soft:oklch(0.285 0.008 265);
+  --ph-dev:oklch(0.695 0.145 292); --ph-dev-soft:oklch(0.315 0.055 292);
+  --ph-hi:oklch(0.715 0.105 212); --ph-hi-soft:oklch(0.305 0.045 212);
+  --ph-he:oklch(0.775 0.115 68); --ph-he-soft:oklch(0.315 0.05 68);
+  --ph-prod:oklch(0.70 0.115 152); --ph-prod-soft:oklch(0.295 0.05 152);
+  --shadow:0 1px 2px oklch(0 0 0 / 0.4), 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-lg:0 8px 40px oklch(0 0 0 / 0.55);
+}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+*{box-sizing:border-box;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:var(--accent-hover);text-decoration:underline;}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="width:1440px;height:900px;display:grid;grid-template-columns:216px 1fr;background:var(--bg);color:var(--text);font-size:13px;line-height:1.45;overflow:hidden;">
+
+  <aside style="display:flex;flex-direction:column;background:var(--sunken);border-right:1px solid var(--border);overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:8px;padding:14px 14px 12px;">
+      <div style="width:20px;height:20px;border-radius:5px;background:var(--text);"></div>
+      <div style="display:grid;">
+        <span style="font-size:13px;font-weight:600;letter-spacing:-0.01em;">Plano</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">local · offline</span>
+      </div>
+      <button onClick="{{ toggleTheme }}" style="margin-left:auto;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text2);font:500 10px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="color:var(--text);border-color:var(--border-strong);">{{ themeGlyph }}</button>
+    </div>
+    <nav style="display:grid;gap:1px;padding:4px 8px;">
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Hoje</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">9</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Projetos</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">12</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Timeline</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Capacidade</span><span style="margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--danger);"></span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">TodoList</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">11</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Notas</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">9</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Painéis</span></div>
+    </nav>
+
+    <div style="margin-top:14px;padding:0 14px 6px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Seções</div>
+    <div style="display:grid;gap:1px;padding:0 8px;">
+      <sc-for list="{{ secoes }}" as="s" hint-placeholder-count="4">
+        <div onClick="{{ s.pick }}" style="display:flex;align-items:center;gap:7px;height:26px;padding:0 8px;border-radius:6px;background:{{ s.bg }};color:{{ s.fg }};font-weight:{{ s.weight }};cursor:pointer;" style-hover="background:var(--neutral-soft);">
+          <span style="font-size:12px;">{{ s.label }}</span>
+          <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">{{ s.meta }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);display:grid;gap:3px;">
+      <div style="display:flex;align-items:center;height:26px;color:var(--text);font-weight:600;font-size:12px;box-shadow:inset 2px 0 0 var(--accent);padding-left:6px;">Configurações</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">~/Documentos/plano</div>
+    </div>
+  </aside>
+
+  <main style="display:flex;flex-direction:column;overflow:hidden;">
+
+    <header style="display:flex;align-items:center;gap:14px;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--border);">
+      <div style="display:grid;">
+        <h1 style="margin:0;font-size:20px;font-weight:600;letter-spacing:-0.01em;">Configurações</h1>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text3);">{{ subhead }}</span>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <span style="display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ok);"><span style="width:6px;height:6px;border-radius:50%;background:var(--ok);"></span>gravado 14:22</span>
+      </div>
+    </header>
+
+    <div style="flex:1;overflow:auto;padding:16px 20px 32px;display:grid;gap:16px;align-content:start;grid-auto-rows:max-content;max-width:1040px;">
+
+      <!-- PASTA DE DADOS -->
+      <section style="border:1px solid var(--border);border-radius:8px;background:var(--panel);overflow:hidden;">
+        <div style="display:flex;align-items:baseline;gap:9px;padding:12px 14px;border-bottom:1px solid var(--border);">
+          <h2 style="margin:0;font-size:13px;font-weight:600;">Pasta de dados</h2>
+          <span style="font-size:11px;color:var(--text3);">tudo fica em arquivos locais — nada sai daqui</span>
+        </div>
+        <div style="padding:14px;display:grid;gap:11px;">
+          <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;">
+            <label style="display:grid;gap:4px;">
+              <span style="font-size:11px;color:var(--text2);">Caminho</span>
+              <input value="~/Documentos/plano" style="height:30px;padding:0 9px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Mono',monospace;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);">
+            </label>
+            <button style="height:30px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--sunken);">Escolher pasta</button>
+            <button style="height:30px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--sunken);">Revelar no Finder</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;">
+            <div style="background:var(--sunken);padding:8px 10px;display:grid;gap:2px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);">projetos.json</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">42 kB · 14:22</span></div>
+            <div style="background:var(--sunken);padding:8px 10px;display:grid;gap:2px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);">pessoas.json</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">3 kB · 09:04</span></div>
+            <div style="background:var(--sunken);padding:8px 10px;display:grid;gap:2px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);">todos.json</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">11 kB · 14:20</span></div>
+            <div style="background:var(--sunken);padding:8px 10px;display:grid;gap:2px;"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);">notas/</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">9 arquivos .md</span></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--warn);border-radius:8px;background:var(--warn-soft);">
+            <span style="width:16px;height:16px;flex:none;margin-top:1px;border-radius:3px;background:var(--warn);color:var(--accent-fg);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">△</span>
+            <div><div style="font-size:13px;font-weight:600;color:var(--warn);">Backup automático desligado</div><div style="font-size:12px;color:var(--text2);">Sem cópia local os dados dependem só desta pasta.</div></div>
+            <button style="margin-left:auto;height:24px;padding:0 8px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;">Ativar backup diário</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PESSOAS -->
+      <section style="border:1px solid var(--border);border-radius:8px;background:var(--panel);overflow:hidden;">
+        <div style="display:flex;align-items:baseline;gap:9px;padding:12px 14px;border-bottom:1px solid var(--border);">
+          <h2 style="margin:0;font-size:13px;font-weight:600;">Pessoas</h2>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">{{ pessoasMeta }}</span>
+          <button onClick="{{ addPessoa }}" style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border:1px solid transparent;border-radius:6px;background:var(--accent);color:var(--accent-fg);font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--accent-hover);">Nova pessoa</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 130px 140px 110px 90px;gap:10px;padding:7px 14px;background:var(--sunken);border-bottom:1px solid var(--border);font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);">
+          <span>Nome</span><span style="text-align:right;">Capacidade</span><span>Alocações ativas</span><span>Estado</span><span style="text-align:right;">Ações</span>
+        </div>
+        <sc-for list="{{ pessoas }}" as="p" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:1fr 130px 140px 110px 90px;gap:10px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+            <span style="display:inline-flex;align-items:center;gap:8px;">
+              <span style="width:22px;height:22px;border-radius:4px;background:{{ p.avBg }};border:1px solid {{ p.avBorder }};display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:{{ p.avFg }};">{{ p.ini }}</span>
+              <span style="font-size:13px;color:{{ p.nomeColor }};">{{ p.nome }}</span>
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:5px;justify-content:flex-end;">
+              <input value="{{ p.cap }}" onChange="{{ p.setCap }}" style="width:52px;height:26px;padding:0 7px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;text-align:right;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">h/sem</span>
+            </span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:{{ p.alocColor }};">{{ p.aloc }}</span>
+            <button onClick="{{ p.toggle }}" style="justify-self:start;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border:1px solid {{ p.stBorder }};border-radius:6px;background:{{ p.stBg }};color:{{ p.stFg }};font:600 10px 'IBM Plex Sans',sans-serif;text-transform:uppercase;letter-spacing:0.02em;cursor:pointer;">{{ p.estado }}</button>
+            <span style="display:flex;gap:4px;justify-content:flex-end;">
+              <button style="width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text2);font:500 11px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="color:var(--text);border-color:var(--border-strong);">✎</button>
+              <button style="width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:{{ p.delColor }};font:500 11px 'IBM Plex Mono',monospace;cursor:{{ p.delCursor }};" style-hover="border-color:var(--danger);">✕</button>
+            </span>
+          </div>
+        </sc-for>
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;">
+          <span style="font-size:11px;color:var(--text3);">Pessoa inativa não aparece em novas alocações, mas o histórico é preservado.</span>
+          <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text2);">{{ capTotal }}</span>
+        </div>
+      </section>
+
+      <!-- FASES -->
+      <section style="border:1px solid var(--border);border-radius:8px;background:var(--panel);overflow:hidden;">
+        <div style="display:flex;align-items:baseline;gap:9px;padding:12px 14px;border-bottom:1px solid var(--border);">
+          <h2 style="margin:0;font-size:13px;font-weight:600;">Fases</h2>
+          <span style="font-size:11px;color:var(--text3);">a ordem define a sequência nas telas · a cor é usada em todo o app</span>
+          <button style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 9px;border:1px solid transparent;border-radius:6px;background:var(--accent);color:var(--accent-fg);font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--accent-hover);">Nova fase</button>
+        </div>
+        <div style="display:grid;grid-template-columns:34px 1fr 200px 120px 90px;gap:10px;padding:7px 14px;background:var(--sunken);border-bottom:1px solid var(--border);font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);">
+          <span>Ordem</span><span>Nome</span><span>Cor</span><span style="text-align:right;">Tarefas</span><span style="text-align:right;">Ações</span>
+        </div>
+        <sc-for list="{{ fases }}" as="f" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:34px 1fr 200px 120px 90px;gap:10px;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+            <span style="display:inline-flex;align-items:center;gap:6px;">
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);cursor:grab;">⠿</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text2);">{{ f.ordem }}</span>
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:8px;">
+              <span style="width:3px;height:14px;border-radius:2px;background:{{ f.cor }};"></span>
+              <span style="font-size:13px;">{{ f.nome }}</span>
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:1px 6px;border-radius:4px;background:{{ f.corSoft }};color:{{ f.cor }};font-size:10px;font-weight:600;">exemplo</span>
+            </span>
+            <span style="display:flex;gap:5px;">
+              <sc-for list="{{ f.swatches }}" as="s" hint-placeholder-count="4">
+                <button onClick="{{ s.pick }}" style="width:20px;height:20px;border-radius:5px;background:{{ s.cor }};border:2px solid {{ s.ring }};cursor:pointer;padding:0;"></button>
+              </sc-for>
+            </span>
+            <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text2);">{{ f.tarefas }}</span>
+            <span style="display:flex;gap:4px;justify-content:flex-end;">
+              <button style="width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text2);font:500 11px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="color:var(--text);border-color:var(--border-strong);">✎</button>
+              <button style="width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:{{ f.delColor }};font:500 11px 'IBM Plex Mono',monospace;cursor:{{ f.delCursor }};" style-hover="border-color:var(--danger);">✕</button>
+            </span>
+          </div>
+        </sc-for>
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;">
+          <span style="font-size:11px;color:var(--text3);">Fase com tarefas não pode ser excluída — mova as tarefas antes.</span>
+          <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text2);">{{ fasesMeta }}</span>
+        </div>
+      </section>
+
+      <!-- PREFERÊNCIAS -->
+      <section style="border:1px solid var(--border);border-radius:8px;background:var(--panel);overflow:hidden;">
+        <div style="display:flex;align-items:baseline;gap:9px;padding:12px 14px;border-bottom:1px solid var(--border);">
+          <h2 style="margin:0;font-size:13px;font-weight:600;">Preferências</h2>
+        </div>
+        <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div style="display:grid;gap:10px;">
+            <div style="display:grid;gap:5px;">
+              <span style="font-size:11px;color:var(--text2);">Tema</span>
+              <div style="display:flex;padding:2px;gap:2px;background:var(--sunken);border:1px solid var(--border);border-radius:6px;width:max-content;">
+                <button onClick="{{ setLight }}" style="border:0;border-radius:4px;padding:5px 12px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgLight }};color:{{ fgLight }};">Claro</button>
+                <button onClick="{{ setDark }}" style="border:0;border-radius:4px;padding:5px 12px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgDark }};color:{{ fgDark }};">Escuro</button>
+                <button onClick="{{ setSystem }}" style="border:0;border-radius:4px;padding:5px 12px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgSys }};color:{{ fgSys }};">Sistema</button>
+              </div>
+            </div>
+            <label style="display:grid;gap:4px;">
+              <span style="font-size:11px;color:var(--text2);">Início da semana</span>
+              <select style="height:28px;width:180px;padding:0 6px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Sans',sans-serif;outline:none;"><option>Segunda-feira</option><option>Domingo</option></select>
+            </label>
+            <label style="display:grid;gap:4px;">
+              <span style="font-size:11px;color:var(--text2);">Alertar projeto sem atualização após</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;">
+                <input value="14" style="width:56px;height:28px;padding:0 8px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Mono',monospace;text-align:right;outline:none;">
+                <span style="font-size:12px;color:var(--text3);">dias</span>
+              </span>
+            </label>
+          </div>
+          <div style="display:grid;gap:9px;align-content:start;">
+            <sc-for list="{{ flags }}" as="fl" hint-placeholder-count="4">
+              <label onClick="{{ fl.toggle }}" style="display:flex;align-items:flex-start;gap:9px;cursor:pointer;">
+                <span style="width:15px;height:15px;flex:none;margin-top:1px;border-radius:4px;border:1px solid {{ fl.border }};background:{{ fl.bg }};display:inline-flex;align-items:center;justify-content:center;color:var(--accent-fg);font-size:9px;">{{ fl.check }}</span>
+                <span style="display:grid;gap:1px;">
+                  <span style="font-size:12px;font-weight:500;">{{ fl.label }}</span>
+                  <span style="font-size:11px;color:var(--text3);text-wrap:pretty;">{{ fl.desc }}</span>
+                </span>
+              </label>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <!-- DADOS -->
+      <section style="border:1px solid var(--danger);border-radius:8px;background:var(--panel);overflow:hidden;">
+        <div style="display:flex;align-items:baseline;gap:9px;padding:12px 14px;border-bottom:1px solid var(--border);">
+          <h2 style="margin:0;font-size:13px;font-weight:600;color:var(--danger);">Integridade dos dados</h2>
+          <span style="font-size:11px;color:var(--text3);">verificado 14:22 · sem erros</span>
+        </div>
+        <div style="padding:14px;display:flex;align-items:center;gap:10px;">
+          <button style="height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--sunken);">Verificar arquivos</button>
+          <button style="height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--sunken);">Exportar tudo</button>
+          <button style="height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--sunken);">Importar de pasta</button>
+          <button style="margin-left:auto;height:28px;padding:0 10px;border:1px solid var(--danger);border-radius:6px;background:transparent;color:var(--danger);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--danger-soft);">Apagar todos os dados locais</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;}}">
+class Component extends DCLogic {
+  state = {
+    theme: null, temaPref: "light", secao: "Pessoas",
+    inativos: { "Júlia Farah": true },
+    cores: { dev: "dev", hi: "hi", he: "he", prod: "prod" },
+    flags: { atalhos: true, confirmar: true, autosave: true, markdown: false },
+  };
+
+  palette = {
+    dev: ["var(--ph-dev)", "var(--ph-dev-soft)"],
+    hi: ["var(--ph-hi)", "var(--ph-hi-soft)"],
+    he: ["var(--ph-he)", "var(--ph-he-soft)"],
+    prod: ["var(--ph-prod)", "var(--ph-prod-soft)"],
+  };
+
+  people = [
+    { nome: "Ana Nogueira", ini: "AN", cap: 40, aloc: 1 },
+    { nome: "Rafael Brito", ini: "RB", cap: 40, aloc: 3, over: true },
+    { nome: "Marcos Teles", ini: "MT", cap: 30, aloc: 2 },
+    { nome: "Júlia Farah", ini: "JF", cap: 20, aloc: 0 },
+  ];
+
+  fasesBase = [
+    { key: "dev", nome: "Desenvolvimento", tarefas: 6 },
+    { key: "hi", nome: "Homologação interna", tarefas: 3 },
+    { key: "he", nome: "Homologação externa", tarefas: 2 },
+    { key: "prod", nome: "Produção", tarefas: 4 },
+  ];
+
+  flagDefs = [
+    { key: "atalhos", label: "Mostrar atalhos nos tooltips", desc: "Exibe a tecla ao lado do nome da ação." },
+    { key: "confirmar", label: "Confirmar antes de bloquear projeto", desc: "Pede motivo e data de retomada — encerra as alocações." },
+    { key: "autosave", label: "Gravar em disco a cada alteração", desc: "Desligado, grava a cada 5 minutos e ao fechar." },
+    { key: "markdown", label: "Abrir notas já em preview", desc: "Por padrão a nota abre no modo dividido." },
+  ];
+
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? "light";
+    const pref = this.state.temaPref;
+    const on = "var(--panel)", off = "transparent";
+    const inativos = this.state.inativos;
+
+    const ativos = this.people.filter(p => !inativos[p.nome]);
+    const pessoas = this.people.map(p => {
+      const ativo = !inativos[p.nome];
+      const over = ativo && p.over;
+      return {
+        nome: p.nome, ini: p.ini, cap: String(p.cap),
+        nomeColor: ativo ? "var(--text)" : "var(--text3)",
+        avBg: over ? "var(--danger-soft)" : "var(--neutral-soft)",
+        avBorder: over ? "var(--danger)" : "var(--border)",
+        avFg: over ? "var(--danger)" : ativo ? "var(--text2)" : "var(--text3)",
+        aloc: p.aloc === 0 ? "nenhuma" : p.aloc + (p.aloc === 1 ? " alocação" : " alocações"),
+        alocColor: over ? "var(--danger)" : p.aloc === 0 ? "var(--text3)" : "var(--text2)",
+        estado: ativo ? "Ativo" : "Inativo",
+        stBg: ativo ? "var(--ok-soft)" : "var(--neutral-soft)",
+        stFg: ativo ? "var(--ok)" : "var(--text3)",
+        stBorder: ativo ? "transparent" : "var(--border-strong)",
+        delColor: p.aloc ? "var(--text3)" : "var(--danger)",
+        delCursor: p.aloc ? "not-allowed" : "pointer",
+        setCap: () => {},
+        toggle: () => this.setState(s => ({ inativos: { ...s.inativos, [p.nome]: !s.inativos[p.nome] } })),
+      };
+    });
+
+    const fases = this.fasesBase.map((f, i) => {
+      const chave = this.state.cores[f.key];
+      const [cor, corSoft] = this.palette[chave];
+      return {
+        ordem: String(i + 1).padStart(2, "0"), nome: f.nome, tarefas: f.tarefas,
+        cor, corSoft,
+        swatches: Object.keys(this.palette).map(k => ({
+          cor: this.palette[k][0],
+          ring: k === chave ? "var(--text2)" : "transparent",
+          pick: () => this.setState(s => ({ cores: { ...s.cores, [f.key]: k } })),
+        })),
+        delColor: f.tarefas ? "var(--text3)" : "var(--danger)",
+        delCursor: f.tarefas ? "not-allowed" : "pointer",
+      };
+    });
+
+    const flags = this.flagDefs.map(f => {
+      const v = this.state.flags[f.key];
+      return {
+        label: f.label, desc: f.desc, check: v ? "✓" : "",
+        bg: v ? "var(--accent)" : "var(--bg)",
+        border: v ? "var(--accent)" : "var(--border-strong)",
+        toggle: () => this.setState(s => ({ flags: { ...s.flags, [f.key]: !s.flags[f.key] } })),
+      };
+    });
+
+    const capTotal = ativos.reduce((a, p) => a + p.cap, 0);
+    const secoes = ["Pasta de dados", "Pessoas", "Fases", "Preferências"].map(label => ({
+      label, meta: label === "Pessoas" ? String(this.people.length) : label === "Fases" ? String(this.fasesBase.length) : "",
+      pick: () => this.setState({ secao: label }),
+      bg: this.state.secao === label ? "var(--neutral-soft)" : "transparent",
+      fg: this.state.secao === label ? "var(--text)" : "var(--text2)",
+      weight: this.state.secao === label ? "500" : "400",
+    }));
+
+    return {
+      theme,
+      themeGlyph: theme === "dark" ? "☀" : "☾",
+      toggleTheme: () => this.setState({ theme: theme === "dark" ? "light" : "dark", temaPref: theme === "dark" ? "light" : "dark" }),
+      pessoas, fases, flags, secoes,
+      subhead: ativos.length + " pessoas ativas · " + this.fasesBase.length + " fases · " + capTotal + "h/semana de capacidade",
+      pessoasMeta: ativos.length + " ativas · " + (this.people.length - ativos.length) + " inativas",
+      capTotal: "Capacidade do time: " + capTotal + "h/semana",
+      fasesMeta: this.fasesBase.reduce((a, f) => a + f.tarefas, 0) + " tarefas distribuídas",
+      setLight: () => this.setState({ temaPref: "light", theme: "light" }),
+      setDark: () => this.setState({ temaPref: "dark", theme: "dark" }),
+      setSystem: () => this.setState({ temaPref: "system", theme: "light" }),
+      bgLight: pref === "light" ? on : off, fgLight: pref === "light" ? "var(--text)" : "var(--text2)",
+      bgDark: pref === "dark" ? on : off, fgDark: pref === "dark" ? "var(--text)" : "var(--text2)",
+      bgSys: pref === "system" ? on : off, fgSys: pref === "system" ? "var(--text)" : "var(--text2)",
+    };
+  }
+}
+</script>
+</body>
+</html>

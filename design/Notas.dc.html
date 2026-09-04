@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:oklch(0.984 0.002 260); --sunken:oklch(0.962 0.004 260); --panel:oklch(1 0 0);
+  --raised:oklch(0.995 0.001 260);
+  --border:oklch(0.906 0.005 260); --border-strong:oklch(0.845 0.007 260);
+  --text:oklch(0.265 0.012 265); --text2:oklch(0.505 0.012 265); --text3:oklch(0.645 0.012 265);
+  --accent:oklch(0.545 0.155 264); --accent-hover:oklch(0.495 0.16 264); --accent-fg:oklch(0.99 0 0);
+  --accent-soft:oklch(0.945 0.032 264); --accent-line:oklch(0.80 0.07 264);
+  --ok:oklch(0.575 0.135 152); --ok-soft:oklch(0.945 0.045 152);
+  --warn:oklch(0.665 0.135 72); --warn-soft:oklch(0.955 0.055 78);
+  --danger:oklch(0.555 0.185 26); --danger-soft:oklch(0.955 0.04 26);
+  --info:oklch(0.565 0.10 232); --info-soft:oklch(0.95 0.03 232);
+  --neutral-soft:oklch(0.94 0.004 260);
+  --ph-dev:oklch(0.545 0.16 292); --ph-dev-soft:oklch(0.95 0.035 292);
+  --ph-hi:oklch(0.55 0.11 212); --ph-hi-soft:oklch(0.945 0.035 212);
+  --ph-he:oklch(0.60 0.115 62); --ph-he-soft:oklch(0.955 0.05 68);
+  --ph-prod:oklch(0.52 0.115 152); --ph-prod-soft:oklch(0.945 0.045 152);
+  --shadow:0 1px 2px oklch(0.26 0.02 265 / 0.06), 0 4px 12px oklch(0.26 0.02 265 / 0.06);
+  --shadow-lg:0 8px 40px oklch(0.26 0.02 265 / 0.16);
+}
+[data-theme="dark"]{
+  --bg:oklch(0.196 0.008 265); --sunken:oklch(0.164 0.008 265); --panel:oklch(0.228 0.009 265);
+  --raised:oklch(0.255 0.010 265);
+  --border:oklch(0.305 0.011 265); --border-strong:oklch(0.385 0.014 265);
+  --text:oklch(0.945 0.004 265); --text2:oklch(0.715 0.010 265); --text3:oklch(0.565 0.012 265);
+  --accent:oklch(0.665 0.145 264); --accent-hover:oklch(0.725 0.145 264); --accent-fg:oklch(0.17 0.02 265);
+  --accent-soft:oklch(0.315 0.055 264); --accent-line:oklch(0.45 0.09 264);
+  --ok:oklch(0.715 0.135 152); --ok-soft:oklch(0.30 0.055 152);
+  --warn:oklch(0.775 0.125 78); --warn-soft:oklch(0.315 0.055 72);
+  --danger:oklch(0.665 0.175 26); --danger-soft:oklch(0.315 0.075 26);
+  --info:oklch(0.705 0.095 232); --info-soft:oklch(0.30 0.045 232);
+  --neutral-soft:oklch(0.285 0.008 265);
+  --ph-dev:oklch(0.695 0.145 292); --ph-dev-soft:oklch(0.315 0.055 292);
+  --ph-hi:oklch(0.715 0.105 212); --ph-hi-soft:oklch(0.305 0.045 212);
+  --ph-he:oklch(0.775 0.115 68); --ph-he-soft:oklch(0.315 0.05 68);
+  --ph-prod:oklch(0.70 0.115 152); --ph-prod-soft:oklch(0.295 0.05 152);
+  --shadow:0 1px 2px oklch(0 0 0 / 0.4), 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-lg:0 8px 40px oklch(0 0 0 / 0.55);
+}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+*{box-sizing:border-box;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:var(--accent-hover);text-decoration:underline;}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="width:1440px;height:900px;display:grid;grid-template-columns:216px 1fr;background:var(--bg);color:var(--text);font-size:13px;line-height:1.45;overflow:hidden;">
+
+  <aside style="display:flex;flex-direction:column;background:var(--sunken);border-right:1px solid var(--border);overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:8px;padding:14px 14px 12px;">
+      <div style="width:20px;height:20px;border-radius:5px;background:var(--text);"></div>
+      <div style="display:grid;">
+        <span style="font-size:13px;font-weight:600;letter-spacing:-0.01em;">Plano</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">local · offline</span>
+      </div>
+      <button onClick="{{ toggleTheme }}" style="margin-left:auto;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text2);font:500 10px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="color:var(--text);border-color:var(--border-strong);">{{ themeGlyph }}</button>
+    </div>
+    <nav style="display:grid;gap:1px;padding:4px 8px;">
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Hoje</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">9</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Projetos</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">12</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Timeline</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Capacidade</span><span style="margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--danger);"></span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">TodoList</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">11</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;background:var(--neutral-soft);box-shadow:inset 2px 0 0 var(--accent);cursor:pointer;"><span style="font-size:13px;font-weight:600;">Notas</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2);">9</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Painéis</span></div>
+    </nav>
+
+    <div style="margin-top:14px;padding:0 14px 6px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Filtrar por projeto</div>
+    <div style="display:grid;gap:1px;padding:0 8px;">
+      <div style="display:flex;align-items:center;gap:7px;height:26px;padding:0 8px;border-radius:6px;background:var(--neutral-soft);cursor:pointer;"><span style="font-size:12px;font-weight:500;">Todos</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text2);">9</span></div>
+      <div style="display:flex;align-items:center;gap:7px;height:26px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="width:3px;height:12px;border-radius:2px;background:var(--ph-dev);"></span><span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Migração</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">3</span></div>
+      <div style="display:flex;align-items:center;gap:7px;height:26px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="width:3px;height:12px;border-radius:2px;background:var(--ph-he);"></span><span style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Portal do parceiro</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">2</span></div>
+      <div style="display:flex;align-items:center;gap:7px;height:26px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="width:3px;height:12px;border-radius:2px;background:var(--border-strong);"></span><span style="font-size:12px;">Sem projeto</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">4</span></div>
+    </div>
+
+    <div style="margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);display:grid;gap:3px;">
+      <div style="display:flex;align-items:center;height:26px;color:var(--text2);cursor:pointer;font-size:12px;" style-hover="color:var(--text);">Configurações</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">~/Documentos/plano/notas</div>
+    </div>
+  </aside>
+
+  <main style="display:grid;grid-template-columns:252px 1fr;overflow:hidden;">
+
+    <!-- ÁRVORE -->
+    <div style="display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--sunken);overflow:hidden;">
+      <div style="display:grid;gap:8px;padding:12px 12px 10px;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);">Árvore</span>
+          <span style="margin-left:auto;display:flex;gap:4px;">
+            <button style="width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text2);font:600 12px 'IBM Plex Mono',monospace;line-height:1;cursor:pointer;" style-hover="color:var(--text);border-color:var(--border-strong);">+</button>
+            <button style="width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text2);font:600 11px 'IBM Plex Mono',monospace;line-height:1;cursor:pointer;" style-hover="color:var(--text);border-color:var(--border-strong);">⌕</button>
+          </span>
+        </div>
+        <input placeholder="Buscar no conteúdo" style="height:26px;padding:0 9px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg);color:var(--text);font:400 12px 'IBM Plex Sans',sans-serif;outline:none;" style-focus="border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);">
+      </div>
+      <div style="flex:1;overflow:auto;padding:8px;display:grid;gap:1px;align-content:start;">
+        <sc-for list="{{ tree }}" as="n" hint-placeholder-count="12">
+          <div onClick="{{ n.pick }}" style="display:flex;align-items:center;gap:6px;height:26px;padding:0 8px 0 {{ n.pad }};border-radius:6px;background:{{ n.bg }};box-shadow:{{ n.ring }};cursor:pointer;" style-hover="background:var(--neutral-soft);">
+            <span style="width:12px;flex:none;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);">{{ n.glyph }}</span>
+            <span style="width:3px;height:11px;border-radius:2px;background:{{ n.faseColor }};display:{{ n.dotDisplay }};"></span>
+            <span style="font-size:12px;font-weight:{{ n.weight }};color:{{ n.color }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ n.nome }}</span>
+            <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">{{ n.meta }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="padding:8px 12px;border-top:1px solid var(--border);font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">{{ totals }}</div>
+    </div>
+
+    <!-- EDITOR -->
+    <div style="display:flex;flex-direction:column;overflow:hidden;">
+      <header style="display:grid;gap:9px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="display:grid;gap:2px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <h1 style="margin:0;font-size:17px;font-weight:600;letter-spacing:-0.01em;">{{ docTitle }}</h1>
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:1px 6px;border-radius:4px;background:var(--neutral-soft);font-size:10px;color:var(--text2);"><span style="width:3px;height:10px;border-radius:2px;background:{{ docFaseColor }};display:{{ docDotDisplay }};"></span>{{ docProjeto }}</span>
+            </div>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">{{ docPath }} · {{ docMeta }}</span>
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+            <div style="display:flex;padding:2px;gap:2px;background:var(--sunken);border:1px solid var(--border);border-radius:6px;">
+              <button onClick="{{ setEdit }}" style="border:0;border-radius:4px;padding:4px 10px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgEdit }};color:{{ fgEdit }};">Editor</button>
+              <button onClick="{{ setSplit }}" style="border:0;border-radius:4px;padding:4px 10px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgSplit }};color:{{ fgSplit }};">Dividido</button>
+              <button onClick="{{ setPreview }}" style="border:0;border-radius:4px;padding:4px 10px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgPrev }};color:{{ fgPrev }};">Preview</button>
+            </div>
+            <button style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--sunken);">Vincular projeto<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">@</span></button>
+            <button style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid transparent;border-radius:6px;background:var(--accent);color:var(--accent-fg);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--accent-hover);">Nova nota<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:0.7;">⌘N</span></button>
+          </div>
+        </div>
+      </header>
+
+      <div style="flex:1;display:grid;grid-template-columns:{{ paneCols }};overflow:hidden;">
+
+        <div style="display:{{ editorDisplay }};overflow:auto;background:var(--bg);">
+          <div style="padding:22px 26px 40px;max-width:760px;">
+            <pre style="margin:0;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:1.75;color:var(--text);white-space:pre-wrap;">{{ docSource }}</pre>
+          </div>
+        </div>
+
+        <div style="display:{{ previewDisplay }};overflow:auto;background:var(--panel);border-left:{{ previewBorder }};">
+          <div style="display:{{ previewIsFolder }};place-items:center;align-content:center;gap:8px;height:100%;padding:40px;text-align:center;">
+            <div style="width:34px;height:34px;border-radius:8px;border:1px dashed var(--border-strong);background:var(--sunken);"></div>
+            <div style="font-size:15px;font-weight:600;">{{ folderName }}</div>
+            <div style="font-size:12px;color:var(--text2);max-width:320px;text-wrap:pretty;">{{ folderMeta }} nesta pasta. Selecione um arquivo <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">.md</span> na árvore para editar e visualizar.</div>
+          </div>
+
+          <div style="padding:22px 28px 48px;max-width:720px;display:{{ previewIsNote }};gap:14px;">
+            <h2 style="margin:0;font-size:22px;font-weight:600;letter-spacing:-0.01em;">{{ previewTitle }}</h2>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              <span style="padding:1px 7px;border-radius:4px;background:var(--neutral-soft);color:var(--text2);font-size:11px;font-weight:600;">{{ previewTipo }}</span>
+              <span style="padding:1px 7px;border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:11px;">{{ previewDate }}</span>
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:1px 7px;border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:11px;"><span style="width:3px;height:10px;border-radius:2px;background:{{ docFaseColor }};display:{{ previewProjDot }};"></span>{{ previewProjeto }}</span>
+            </div>
+
+            <div style="display:{{ previewIsGeneric }};gap:12px;">
+              <p style="margin:0;font-size:14px;line-height:1.65;color:var(--text2);white-space:pre-wrap;text-wrap:pretty;">{{ previewBody }}</p>
+            </div>
+
+            <div style="display:{{ previewIsDecision }};gap:14px;">
+            <p style="margin:0;font-size:14px;line-height:1.65;color:var(--text2);text-wrap:pretty;">Revertida a decisão de 14/07 de trocar de provedor. O custo de migração dobrava o prazo do piloto e o ganho de latência medido ficou dentro da margem de erro.</p>
+
+            <h3 style="margin:6px 0 0;font-size:15px;font-weight:600;">Contexto</h3>
+            <p style="margin:0;font-size:14px;line-height:1.65;color:var(--text2);text-wrap:pretty;">O provedor novo prometia 30% menos latência no roteamento, mas exigia refazer a camada de conciliação — a mesma que acabou de entrar no escopo.</p>
+
+            <h3 style="margin:6px 0 0;font-size:15px;font-weight:600;">Impacto</h3>
+            <ul style="margin:0;padding-left:20px;display:grid;gap:5px;font-size:14px;line-height:1.6;color:var(--text2);">
+              <li>Rewrite do roteador continua na baseline v2, sem replanejar.</li>
+              <li>Teste de latência volta para o backlog de Observabilidade.</li>
+              <li>Contrato atual renova em 12/2026 — revisar antes.</li>
+            </ul>
+
+            <div style="border:1px solid var(--border);border-left:2px solid var(--accent);border-radius:8px;background:var(--sunken);padding:11px 13px;display:grid;gap:4px;">
+              <span style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);">Nota vinculada</span>
+              <span style="font-size:13px;color:var(--text2);">Este arquivo está ligado ao evento <span style="font-weight:600;color:var(--text);">decisão · 05/08/2026</span> no histórico do projeto.</span>
+            </div>
+
+            <h3 style="margin:6px 0 0;font-size:15px;font-weight:600;">Números comparados</h3>
+            <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;">
+              <div style="display:grid;grid-template-columns:1fr 96px 96px;gap:10px;padding:7px 11px;background:var(--sunken);border-bottom:1px solid var(--border);font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);">
+                <span>Cenário</span><span style="text-align:right;">Esforço</span><span style="text-align:right;">Fim</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 96px 96px;gap:10px;padding:8px 11px;border-bottom:1px solid var(--border);">
+                <span style="font-size:13px;">Manter provedor</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;">320h</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;">29/09</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 96px 96px;gap:10px;padding:8px 11px;">
+                <span style="font-size:13px;color:var(--text2);">Trocar provedor</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;color:var(--danger);">560h</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-variant-numeric:tabular-nums;text-align:right;color:var(--danger);">18/12</span>
+              </div>
+            </div>
+
+            <pre style="margin:0;padding:11px 13px;border:1px solid var(--border);border-radius:8px;background:var(--sunken);font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:var(--text2);overflow:auto;">roteador.provider = "atual"
+roteador.fallback  = "novo"   # só em failover</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer style="display:flex;align-items:center;gap:16px;padding:8px 18px;border-top:1px solid var(--border);background:var(--panel);font-size:11px;color:var(--text2);">
+        <span style="font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;">{{ docStats }}</span>
+        <span style="color:var(--text3);">negrito <span style="padding:0 5px;border:1px solid var(--border);border-radius:3px;font-family:'IBM Plex Mono',monospace;">⌘B</span> · link <span style="padding:0 5px;border:1px solid var(--border);border-radius:3px;font-family:'IBM Plex Mono',monospace;">⌘L</span> · preview <span style="padding:0 5px;border:1px solid var(--border);border-radius:3px;font-family:'IBM Plex Mono',monospace;">⌘P</span></span>
+        <span style="margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;color:var(--ok);"><span style="width:6px;height:6px;border-radius:50%;background:var(--ok);"></span>salvo em disco 14:22</span>
+      </footer>
+    </div>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, mode: "split", sel: 3 };
+
+  nodes = [
+    { nome: "Projetos", tipo: "pasta", nivel: 0, dir: "notas/projetos" },
+    { nome: "Migração do gateway", tipo: "pasta", nivel: 1, fase: "dev", dir: "notas/projetos/migracao-gateway", projeto: "Migração do gateway" },
+    { nome: "escopo-conciliacao.md", body: "Financeiro pediu conciliação automática no mesmo release. Entrou\nno escopo em 12/08 e congelou a baseline v2.\n\n## Impacto\n\n- +80h de esforço e uma nova tarefa em Produção.\n- Fim previsto foi de 18/09 para 29/09.", words: 186, lines: 22, tipo: "arq", nivel: 2, fase: "dev", projeto: "Migração do gateway", dir: "notas/projetos/migracao-gateway", meta: "28/08", kb: "1,4", titulo: "Escopo: conciliação automática" },
+    { nome: "decisao-provedor.md", words: 412, lines: 38, tipo: "arq", nivel: 2, fase: "dev", projeto: "Migração do gateway", dir: "notas/projetos/migracao-gateway", meta: "05/08", kb: "2,1", titulo: "Decisão: manter o provedor atual no piloto" },
+    { nome: "adr-roteador.md", body: "Decisão de arquitetura sobre o roteador de pagamentos: reescrita\nincremental com feature flag por adquirente.\n\n## Alternativas\n\n- Reescrita completa em uma janela — descartada pelo risco.\n- Proxy temporário — descartado por custo de manutenção.", words: 312, lines: 41, tipo: "arq", nivel: 2, fase: "dev", projeto: "Migração do gateway", dir: "notas/projetos/migracao-gateway", meta: "02/08", kb: "3,6", titulo: "ADR 004 — roteador de pagamentos" },
+    { nome: "Portal do parceiro", tipo: "pasta", nivel: 1, fase: "he", dir: "notas/projetos/portal-parceiro", projeto: "Portal do parceiro" },
+    { nome: "bloqueio-juridico.md", body: "Projeto bloqueado desde 26/08 aguardando validação jurídica do\ncontrato do parceiro. 3 alocações encerradas no bloqueio.\n\n## Próximo passo\n\nCobrar retorno do jurídico até 05/09 ou escalar.", words: 142, lines: 18, tipo: "arq", nivel: 2, fase: "he", projeto: "Portal do parceiro", dir: "notas/projetos/portal-parceiro", meta: "26/08", kb: "0,9", titulo: "Bloqueio: validação jurídica do contrato" },
+    { nome: "reuniao-parceiro.md", body: "Parceiro propôs replanejar a homologação externa para outubro.\nPediu resposta até 05/09.\n\n## Pontos\n\n- Ambiente de homologação deles só libera em 20/09.\n- Sugeriram reduzir o piloto para 2 lojas.", words: 158, lines: 20, tipo: "arq", nivel: 2, fase: "he", projeto: "Portal do parceiro", dir: "notas/projetos/portal-parceiro", meta: "19/08", kb: "1,1", titulo: "Reunião com o parceiro — 19/08" },
+    { nome: "Time", tipo: "pasta", nivel: 0, dir: "notas/time" },
+    { nome: "1-1-rafael.md", body: "Rafael está em 150% entre 01/06 e 26/06 e segue acima de 100%\nem S37–S40. Combinamos avaliar substituto em Observabilidade.\n\n## Combinados\n\n- Marcos assume a coleta de métricas a partir de S41.\n- Revisar carga na próxima semana.", words: 198, lines: 24, tipo: "arq", nivel: 1, dir: "notas/time", meta: "03/09", kb: "1,8", titulo: "1:1 Rafael — carga acima de 100%" },
+    { nome: "plano-contratacao.md", body: "Duas vagas aprovadas para o Q4: um dev pleno e um SRE.\nRH pediu descritivo até 10/09.\n\n## Prioridade\n\nSRE primeiro — a fila de Observabilidade depende dele.", words: 164, lines: 21, tipo: "arq", nivel: 1, dir: "notas/time", meta: "01/09", kb: "2,4", titulo: "Plano de contratação Q4" },
+    { nome: "retro-agosto.md", body: "Retro de agosto com o time. Tema dominante: mudanças de escopo\nno meio da sprint.\n\n## Ações\n\n- Registrar toda mudança de escopo como evento no projeto.\n- Congelar baseline antes de cada replanejamento.", words: 176, lines: 23, tipo: "arq", nivel: 1, dir: "notas/time", meta: "29/08", kb: "1,2", titulo: "Retro de agosto" },
+    { nome: "Pessoal", tipo: "pasta", nivel: 0, dir: "notas/pessoal" },
+    { nome: "leituras.md", body: "Referências para ler com calma.\n\n- Proposta de observabilidade do fornecedor.\n- Artigo sobre roteamento multi-adquirente.", words: 62, lines: 9, tipo: "arq", nivel: 1, dir: "notas/pessoal", meta: "30/08", kb: "0,6", titulo: "Leituras e referências" },
+  ];
+
+  fase = { dev: "var(--ph-dev)", hi: "var(--ph-hi)", he: "var(--ph-he)", prod: "var(--ph-prod)" };
+
+  source = `# Decisão: manter o provedor atual no piloto
+
+tipo:: decisão
+data:: 05/08/2026
+projeto:: @migracao-gateway
+
+Revertida a decisão de 14/07 de trocar de provedor. O custo de
+migração dobrava o prazo do piloto e o ganho de latência medido
+ficou dentro da margem de erro.
+
+## Contexto
+
+O provedor novo prometia 30% menos latência no roteamento, mas
+exigia refazer a camada de conciliação — a mesma que acabou de
+entrar no escopo.
+
+## Impacto
+
+- Rewrite do roteador continua na baseline v2, sem replanejar.
+- Teste de latência volta para o backlog de Observabilidade.
+- Contrato atual renova em 12/2026 — revisar antes.
+
+> [!nota] Este arquivo está ligado ao evento
+> decisão · 05/08/2026 no histórico do projeto.
+
+## Números comparados
+
+| Cenário          | Esforço | Fim   |
+|------------------|--------:|------:|
+| Manter provedor  |    320h | 29/09 |
+| Trocar provedor  |    560h | 18/12 |
+
+\`\`\`ini
+roteador.provider = "atual"
+roteador.fallback  = "novo"   # só em failover
+\`\`\``;
+
+  docFor(n) {
+    if (n.nome === "decisao-provedor.md") return this.source;
+    const proj = n.projeto ? "projeto:: @" + n.projeto.toLowerCase().replace(/ /g, "-") + "\n" : "";
+    return "# " + n.titulo + "\n\ndata:: " + n.meta + "/2026\n" + proj + "\n" + (n.body || "");
+  }
+
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? "light";
+    const m = this.state.mode;
+    const sel = this.state.sel;
+    const on = "var(--panel)", off = "transparent";
+
+    const files = this.nodes.filter(n => n.tipo === "arq");
+    const folders = this.nodes.filter(n => n.tipo === "pasta");
+    const countIn = (dir) => files.filter(n => n.dir === dir || n.dir.startsWith(dir + "/")).length;
+
+    const tree = this.nodes.map((n, i) => {
+      const isSel = i === sel;
+      const pasta = n.tipo === "pasta";
+      return {
+        nome: n.nome, meta: pasta ? String(countIn(n.dir)) : n.meta,
+        pad: (8 + n.nivel * 12) + "px",
+        glyph: pasta ? "▾" : "md",
+        weight: pasta ? "600" : "400",
+        color: pasta ? "var(--text)" : isSel ? "var(--text)" : "var(--text2)",
+        bg: isSel ? "var(--accent-soft)" : "transparent",
+        ring: isSel ? "inset 2px 0 0 var(--accent)" : "none",
+        faseColor: this.fase[n.fase] || "var(--border-strong)",
+        dotDisplay: !pasta && n.fase ? "inline-block" : "none",
+        pick: () => this.setState({ sel: i }),
+      };
+    });
+
+    const node = this.nodes[sel];
+    const isFile = node.tipo === "arq";
+    return {
+      theme,
+      themeGlyph: theme === "dark" ? "☀" : "☾",
+      toggleTheme: () => this.setState({ theme: theme === "dark" ? "light" : "dark" }),
+      tree,
+      setEdit: () => this.setState({ mode: "editor" }),
+      setSplit: () => this.setState({ mode: "split" }),
+      setPreview: () => this.setState({ mode: "preview" }),
+      bgEdit: m === "editor" ? on : off, fgEdit: m === "editor" ? "var(--text)" : "var(--text2)",
+      bgSplit: m === "split" ? on : off, fgSplit: m === "split" ? "var(--text)" : "var(--text2)",
+      bgPrev: m === "preview" ? on : off, fgPrev: m === "preview" ? "var(--text)" : "var(--text2)",
+      paneCols: m === "split" ? "1fr 1fr" : "1fr",
+      editorDisplay: m === "preview" ? "none" : "block",
+      previewDisplay: m === "editor" ? "none" : "block",
+      previewBorder: m === "split" ? "1px solid var(--border)" : "0",
+      docTitle: isFile ? node.nome : node.nome + "/",
+      docProjeto: node.projeto || "sem projeto",
+      docFaseColor: this.fase[node.fase] || "var(--border-strong)",
+      docDotDisplay: node.fase ? "inline-block" : "none",
+      docPath: isFile ? node.dir + "/" + node.nome : node.dir + "/",
+      docMeta: isFile ? "editado " + node.meta + "/2026 · " + node.kb + " kB" : countIn(node.dir) + " arquivos",
+      docSource: isFile ? this.docFor(node) : "Selecione um arquivo .md para editar.",
+      docStats: isFile ? node.words + " palavras · " + node.lines + " linhas" : countIn(node.dir) + " arquivos nesta pasta",
+      previewTitle: node.titulo || node.nome,
+      previewIsFolder: isFile ? "none" : "grid",
+      previewIsNote: isFile ? "grid" : "none",
+      folderName: node.nome + "/",
+      folderMeta: countIn(node.dir) + (countIn(node.dir) === 1 ? " arquivo" : " arquivos"),
+      previewIsDecision: node.nome === "decisao-provedor.md" ? "grid" : "none",
+      previewIsGeneric: node.nome === "decisao-provedor.md" ? "none" : "grid",
+      previewDate: (node.meta || "") + "/2026",
+      previewTipo: node.nome === "decisao-provedor.md" ? "decisão" : node.projeto ? "nota de projeto" : "nota pessoal",
+      previewProjeto: node.projeto || "sem projeto",
+      previewProjDot: node.fase ? "inline-block" : "none",
+      previewBody: node.body || "",
+      totals: files.length + " arquivos .md · " + folders.length + " pastas",
+    };
+  }
+}
+</script>
+</body>
+</html>

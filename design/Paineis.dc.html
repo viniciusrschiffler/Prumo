@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:oklch(0.984 0.002 260); --sunken:oklch(0.962 0.004 260); --panel:oklch(1 0 0);
+  --raised:oklch(0.995 0.001 260);
+  --border:oklch(0.906 0.005 260); --border-strong:oklch(0.845 0.007 260);
+  --text:oklch(0.265 0.012 265); --text2:oklch(0.505 0.012 265); --text3:oklch(0.645 0.012 265);
+  --accent:oklch(0.545 0.155 264); --accent-hover:oklch(0.495 0.16 264); --accent-fg:oklch(0.99 0 0);
+  --accent-soft:oklch(0.945 0.032 264); --accent-line:oklch(0.80 0.07 264);
+  --ok:oklch(0.575 0.135 152); --ok-soft:oklch(0.945 0.045 152);
+  --warn:oklch(0.665 0.135 72); --warn-soft:oklch(0.955 0.055 78);
+  --danger:oklch(0.555 0.185 26); --danger-soft:oklch(0.955 0.04 26);
+  --info:oklch(0.565 0.10 232); --info-soft:oklch(0.95 0.03 232);
+  --neutral-soft:oklch(0.94 0.004 260);
+  --ph-dev:oklch(0.545 0.16 292); --ph-dev-soft:oklch(0.95 0.035 292);
+  --ph-hi:oklch(0.55 0.11 212); --ph-hi-soft:oklch(0.945 0.035 212);
+  --ph-he:oklch(0.60 0.115 62); --ph-he-soft:oklch(0.955 0.05 68);
+  --ph-prod:oklch(0.52 0.115 152); --ph-prod-soft:oklch(0.945 0.045 152);
+  --shadow:0 1px 2px oklch(0.26 0.02 265 / 0.06), 0 4px 12px oklch(0.26 0.02 265 / 0.06);
+  --shadow-lg:0 8px 40px oklch(0.26 0.02 265 / 0.16);
+  --hatch:oklch(0.555 0.185 26 / 0.28);
+}
+[data-theme="dark"]{
+  --bg:oklch(0.196 0.008 265); --sunken:oklch(0.164 0.008 265); --panel:oklch(0.228 0.009 265);
+  --raised:oklch(0.255 0.010 265);
+  --border:oklch(0.305 0.011 265); --border-strong:oklch(0.385 0.014 265);
+  --text:oklch(0.945 0.004 265); --text2:oklch(0.715 0.010 265); --text3:oklch(0.565 0.012 265);
+  --accent:oklch(0.665 0.145 264); --accent-hover:oklch(0.725 0.145 264); --accent-fg:oklch(0.17 0.02 265);
+  --accent-soft:oklch(0.315 0.055 264); --accent-line:oklch(0.45 0.09 264);
+  --ok:oklch(0.715 0.135 152); --ok-soft:oklch(0.30 0.055 152);
+  --warn:oklch(0.775 0.125 78); --warn-soft:oklch(0.315 0.055 72);
+  --danger:oklch(0.665 0.175 26); --danger-soft:oklch(0.315 0.075 26);
+  --info:oklch(0.705 0.095 232); --info-soft:oklch(0.30 0.045 232);
+  --neutral-soft:oklch(0.285 0.008 265);
+  --ph-dev:oklch(0.695 0.145 292); --ph-dev-soft:oklch(0.315 0.055 292);
+  --ph-hi:oklch(0.715 0.105 212); --ph-hi-soft:oklch(0.305 0.045 212);
+  --ph-he:oklch(0.775 0.115 68); --ph-he-soft:oklch(0.315 0.05 68);
+  --ph-prod:oklch(0.70 0.115 152); --ph-prod-soft:oklch(0.295 0.05 152);
+  --shadow:0 1px 2px oklch(0 0 0 / 0.4), 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-lg:0 8px 40px oklch(0 0 0 / 0.55);
+  --hatch:oklch(0.665 0.175 26 / 0.4);
+}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:"IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+*{box-sizing:border-box;}
+a{color:var(--accent);text-decoration:none;}
+a:hover{color:var(--accent-hover);text-decoration:underline;}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="width:1440px;height:900px;display:grid;grid-template-columns:216px 1fr;background:var(--bg);color:var(--text);font-size:13px;line-height:1.45;overflow:hidden;">
+
+  <aside style="display:flex;flex-direction:column;background:var(--sunken);border-right:1px solid var(--border);overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:8px;padding:14px 14px 12px;">
+      <div style="width:20px;height:20px;border-radius:5px;background:var(--text);"></div>
+      <div style="display:grid;">
+        <span style="font-size:13px;font-weight:600;letter-spacing:-0.01em;">Plano</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">local · offline</span>
+      </div>
+      <button onClick="{{ toggleTheme }}" style="margin-left:auto;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:5px;background:var(--panel);color:var(--text2);font:500 10px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="color:var(--text);border-color:var(--border-strong);">{{ themeGlyph }}</button>
+    </div>
+    <nav style="display:grid;gap:1px;padding:4px 8px;">
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Hoje</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">9</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Projetos</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">12</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Timeline</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Capacidade</span><span style="margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--danger);"></span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">TodoList</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">11</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Notas</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">9</span></div>
+      <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;background:var(--neutral-soft);box-shadow:inset 2px 0 0 var(--accent);cursor:pointer;"><span style="font-size:13px;font-weight:600;">Painéis</span></div>
+    </nav>
+
+    <div style="margin-top:14px;padding:0 14px 6px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Fases</div>
+    <div style="display:grid;gap:2px;padding:0 14px;">
+      <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);"><span style="width:8px;height:8px;border-radius:2px;background:var(--ph-dev);"></span>Desenvolvimento</div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);"><span style="width:8px;height:8px;border-radius:2px;background:var(--ph-hi);"></span>Homolog. interna</div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);"><span style="width:8px;height:8px;border-radius:2px;background:var(--ph-he);"></span>Homolog. externa</div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);"><span style="width:8px;height:8px;border-radius:2px;background:var(--ph-prod);"></span>Produção</div>
+    </div>
+
+    <div style="margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);display:grid;gap:3px;">
+      <div style="display:flex;align-items:center;height:26px;color:var(--text2);cursor:pointer;font-size:12px;" style-hover="color:var(--text);">Configurações</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">~/Documentos/plano</div>
+    </div>
+  </aside>
+
+  <main style="display:flex;flex-direction:column;overflow:hidden;">
+
+    <header style="display:flex;align-items:center;gap:14px;padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--border);">
+      <div style="display:grid;">
+        <h1 style="margin:0;font-size:20px;font-weight:600;letter-spacing:-0.01em;">Painéis</h1>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text3);">{{ subhead }}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:10px;">
+        <span style="font-size:11px;color:var(--text3);">Período</span>
+        <div style="display:flex;padding:2px;gap:2px;background:var(--sunken);border:1px solid var(--border);border-radius:6px;">
+          <sc-for list="{{ periods }}" as="p" hint-placeholder-count="3">
+            <button onClick="{{ p.pick }}" style="border:0;border-radius:4px;padding:4px 11px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ p.bg }};color:{{ p.fg }};">{{ p.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <button style="height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--sunken);">Exportar CSV</button>
+        <button style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--sunken);">Comandos<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">⌘K</span></button>
+      </div>
+    </header>
+
+    <div style="flex:1;overflow:auto;padding:16px 20px 28px;display:grid;gap:14px;align-content:start;grid-auto-rows:max-content;">
+
+      <!-- KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+        <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+          <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:11px;display:grid;gap:3px;">
+            <span style="font-size:11px;color:var(--text2);">{{ k.label }}</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:{{ k.color }};letter-spacing:-0.01em;">{{ k.valor }}</span>
+            <span style="font-size:11px;color:var(--text3);">{{ k.nota }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:14px;align-items:start;">
+
+        <!-- PESSOAS POR PROJETO -->
+        <section style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:13px;display:grid;gap:11px;">
+          <div style="display:flex;align-items:baseline;gap:9px;">
+            <h2 style="margin:0;font-size:13px;font-weight:600;">Pessoas alocadas por projeto</h2>
+            <span style="font-size:11px;color:var(--text3);">soma de percentuais · barras por fase</span>
+            <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">{{ totalAlloc }}</span>
+          </div>
+          <div style="display:grid;gap:9px;">
+            <sc-for list="{{ porProjeto }}" as="p" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:150px 1fr 76px;gap:10px;align-items:center;">
+                <span style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);overflow:hidden;"><span style="width:3px;height:12px;flex:none;border-radius:2px;background:{{ p.color }};"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ p.nome }}</span></span>
+                <div style="height:16px;border-radius:3px;background:var(--sunken);overflow:hidden;display:flex;">
+                  <div style="width:{{ p.w }};background:{{ p.color }};background-image:{{ p.hatch }};display:flex;align-items:center;padding-left:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--accent-fg);">{{ p.inner }}</div>
+                </div>
+                <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:{{ p.valColor }};">{{ p.val }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- PROJETOS POR FASE -->
+        <section style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:13px;display:grid;gap:11px;">
+          <div style="display:flex;align-items:baseline;gap:9px;">
+            <h2 style="margin:0;font-size:13px;font-weight:600;">Projetos por fase</h2>
+            <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">{{ totalProjetos }}</span>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:12px;height:132px;padding:0 4px;">
+            <sc-for list="{{ porFase }}" as="f" hint-placeholder-count="4">
+              <div style="flex:1;display:grid;gap:5px;justify-items:center;align-content:end;height:100%;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;">{{ f.n }}</span>
+                <div style="width:100%;height:{{ f.h }};border-radius:3px 3px 0 0;background:{{ f.color }};"></div>
+                <span style="font-size:10px;color:var(--text2);text-align:center;line-height:1.2;">{{ f.nome }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start;">
+
+        <!-- TEMPO MÉDIO POR FASE -->
+        <section style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:13px;display:grid;gap:11px;">
+          <div style="display:flex;align-items:baseline;gap:9px;">
+            <h2 style="margin:0;font-size:13px;font-weight:600;">Tempo médio em cada fase</h2>
+            <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">dias</span>
+          </div>
+          <div style="display:grid;gap:8px;">
+            <sc-for list="{{ tempoFase }}" as="t" hint-placeholder-count="4">
+              <div style="display:grid;grid-template-columns:110px 1fr 58px;gap:9px;align-items:center;">
+                <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);overflow:hidden;"><span style="width:3px;height:11px;flex:none;border-radius:2px;background:{{ t.color }};"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.nome }}</span></span>
+                <div style="height:12px;border-radius:3px;background:var(--sunken);overflow:hidden;"><div style="width:{{ t.w }};height:100%;background:{{ t.color }};"></div></div>
+                <span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:{{ t.valColor }};">{{ t.val }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size:11px;color:var(--text3);text-wrap:pretty;">{{ gargalo }}</div>
+        </section>
+
+        <!-- DIAS BLOQUEADO -->
+        <section style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:13px;display:grid;gap:11px;">
+          <div style="display:flex;align-items:baseline;gap:9px;">
+            <h2 style="margin:0;font-size:13px;font-weight:600;">Dias de projeto bloqueado</h2>
+            <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--danger);">{{ totalBloqueio }}</span>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:6px;height:104px;">
+            <sc-for list="{{ bloqueios }}" as="b" hint-placeholder-count="6">
+              <div style="flex:1;display:grid;gap:5px;justify-items:center;align-content:end;height:100%;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;font-variant-numeric:tabular-nums;color:{{ b.labelColor }};">{{ b.n }}</span>
+                <div style="width:100%;height:{{ b.h }};border-radius:3px 3px 0 0;background:{{ b.bg }};border:{{ b.border }};background-image:{{ b.hatch }};"></div>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">{{ b.mes }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:grid;gap:5px;">
+            <sc-for list="{{ bloqLista }}" as="b" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text2);"><span style="width:3px;height:11px;flex:none;border-radius:2px;background:{{ b.color }};"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ b.nome }}</span><span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;color:{{ b.valColor }};">{{ b.val }}</span></div>
+            </sc-for>
+          </div>
+        </section>
+
+        <!-- DISTRIBUIÇÃO DE CARGA -->
+        <section style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:13px;display:grid;gap:11px;">
+          <div style="display:flex;align-items:baseline;gap:9px;">
+            <h2 style="margin:0;font-size:13px;font-weight:600;">Distribuição de carga</h2>
+            <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">média por pessoa</span>
+          </div>
+          <div style="display:grid;gap:9px;">
+            <sc-for list="{{ carga }}" as="c" hint-placeholder-count="3">
+              <div style="display:grid;gap:4px;">
+                <div style="display:flex;align-items:center;gap:7px;">
+                  <span style="width:20px;height:20px;border-radius:4px;background:{{ c.avBg }};border:1px solid {{ c.avBorder }};display:inline-flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:{{ c.avFg }};">{{ c.ini }}</span>
+                  <span style="font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.nome }}</span>
+                  <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:{{ c.valColor }};font-weight:600;">{{ c.val }}</span>
+                </div>
+                <div style="position:relative;height:12px;border-radius:3px;background:var(--sunken);overflow:hidden;">
+                  <div style="width:{{ c.w }};height:100%;background:{{ c.color }};"></div>
+                  <div style="position:absolute;top:0;bottom:0;left:66.7%;width:1px;background:var(--border-strong);"></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size:11px;color:var(--text3);">A linha marca 100% da capacidade semanal.</div>
+        </section>
+      </div>
+
+      <!-- EVENTOS -->
+      <section style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:13px;display:grid;gap:11px;">
+        <div style="display:flex;align-items:baseline;gap:9px;">
+          <h2 style="margin:0;font-size:13px;font-weight:600;">Eventos registrados por tipo</h2>
+          <span style="font-size:11px;color:var(--text3);">o que mudou no período — mudança é evento, não exceção</span>
+          <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);">{{ totalEventos }}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;">
+          <sc-for list="{{ eventos }}" as="e" hint-placeholder-count="7">
+            <div style="display:grid;gap:6px;">
+              <div style="display:flex;align-items:flex-end;height:64px;">
+                <div style="width:100%;height:{{ e.h }};border-radius:3px;background:{{ e.color }};"></div>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:6px;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;">{{ e.n }}</span>
+                <span style="font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ e.nome }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;}}">
+class Component extends DCLogic {
+  state = { theme: null, period: "90d" };
+
+  fase = { dev: "var(--ph-dev)", hi: "var(--ph-hi)", he: "var(--ph-he)", prod: "var(--ph-prod)" };
+
+  dados = {
+    "30d": {
+      label: "30 dias", desde: "04/08/2026",
+      projetos: [
+        { nome: "Migração do gateway", fase: "dev", pct: 150, pessoas: 2 },
+        { nome: "Observabilidade", fase: "prod", pct: 100, pessoas: 1 },
+        { nome: "App de campo v2", fase: "hi", pct: 30, pessoas: 1, pausado: true },
+        { nome: "Portal do parceiro", fase: "he", pct: 0, pessoas: 0, bloqueado: true },
+      ],
+      porFase: [{ nome: "Desenv.", fase: "dev", n: 2 }, { nome: "Homolog. int.", fase: "hi", n: 1 }, { nome: "Homolog. ext.", fase: "he", n: 1 }, { nome: "Produção", fase: "prod", n: 1 }],
+      tempoFase: [{ nome: "Desenvolvimento", fase: "dev", d: 42 }, { nome: "Homolog. interna", fase: "hi", d: 26 }, { nome: "Homolog. externa", fase: "he", d: 143 }, { nome: "Produção", fase: "prod", d: 18 }],
+      bloqueios: [{ mes: "ago", n: 20 }, { mes: "set", n: 3 }],
+      porProjetoBloq: [{ nome: "Portal do parceiro", fase: "he", d: 23 }],
+      carga: [{ nome: "Ana Nogueira", ini: "AN", pct: 80 }, { nome: "Rafael Brito", ini: "RB", pct: 138 }, { nome: "Marcos Teles", ini: "MT", pct: 30 }],
+      eventos: [{ nome: "Decisão", n: 2, cor: "var(--text2)" }, { nome: "Escopo", n: 1, cor: "var(--ph-dev)" }, { nome: "Bloqueio", n: 1, cor: "var(--danger)" }, { nome: "Desbloqueio", n: 0, cor: "var(--ok)" }, { nome: "Realocação", n: 2, cor: "var(--accent)" }, { nome: "Risco", n: 1, cor: "var(--warn)" }, { nome: "Nota", n: 4, cor: "var(--info)" }],
+      kpis: { entregues: 1, atraso: "+11d", esforco: "824h", uso: "83%" },
+    },
+    "90d": {
+      label: "90 dias", desde: "05/06/2026",
+      projetos: [
+        { nome: "Migração do gateway", fase: "dev", pct: 200, pessoas: 2 },
+        { nome: "Observabilidade", fase: "prod", pct: 150, pessoas: 2 },
+        { nome: "App de campo v2", fase: "hi", pct: 30, pessoas: 1, pausado: true },
+        { nome: "Portal do parceiro", fase: "he", pct: 50, pessoas: 1, bloqueado: true },
+      ],
+      porFase: [{ nome: "Desenv.", fase: "dev", n: 4 }, { nome: "Homolog. int.", fase: "hi", n: 3 }, { nome: "Homolog. ext.", fase: "he", n: 2 }, { nome: "Produção", fase: "prod", n: 3 }],
+      tempoFase: [{ nome: "Desenvolvimento", fase: "dev", d: 38 }, { nome: "Homolog. interna", fase: "hi", d: 24 }, { nome: "Homolog. externa", fase: "he", d: 129 }, { nome: "Produção", fase: "prod", d: 16 }],
+      bloqueios: [{ mes: "jun", n: 0 }, { mes: "jul", n: 8 }, { mes: "ago", n: 20 }, { mes: "set", n: 3 }],
+      porProjetoBloq: [{ nome: "Portal do parceiro", fase: "he", d: 23 }, { nome: "Migração do gateway", fase: "dev", d: 8 }],
+      carga: [{ nome: "Ana Nogueira", ini: "AN", pct: 74 }, { nome: "Rafael Brito", ini: "RB", pct: 121 }, { nome: "Marcos Teles", ini: "MT", pct: 30 }],
+      eventos: [{ nome: "Decisão", n: 6, cor: "var(--text2)" }, { nome: "Escopo", n: 3, cor: "var(--ph-dev)" }, { nome: "Bloqueio", n: 3, cor: "var(--danger)" }, { nome: "Desbloqueio", n: 2, cor: "var(--ok)" }, { nome: "Realocação", n: 5, cor: "var(--accent)" }, { nome: "Risco", n: 4, cor: "var(--warn)" }, { nome: "Nota", n: 9, cor: "var(--info)" }],
+      kpis: { entregues: 2, atraso: "+9d", esforco: "1.008h", uso: "76%" },
+    },
+    "ano": {
+      label: "12 meses", desde: "03/09/2025",
+      projetos: [
+        { nome: "Migração do gateway", fase: "dev", pct: 200, pessoas: 2 },
+        { nome: "Observabilidade", fase: "prod", pct: 150, pessoas: 2 },
+        { nome: "Onboarding de lojistas", fase: "prod", pct: 180, pessoas: 2 },
+        { nome: "Portal do parceiro", fase: "he", pct: 90, pessoas: 2, bloqueado: true },
+        { nome: "App de campo v2", fase: "hi", pct: 30, pessoas: 1, pausado: true },
+      ],
+      porFase: [{ nome: "Desenv.", fase: "dev", n: 7 }, { nome: "Homolog. int.", fase: "hi", n: 5 }, { nome: "Homolog. ext.", fase: "he", n: 4 }, { nome: "Produção", fase: "prod", n: 6 }],
+      tempoFase: [{ nome: "Desenvolvimento", fase: "dev", d: 44 }, { nome: "Homolog. interna", fase: "hi", d: 28 }, { nome: "Homolog. externa", fase: "he", d: 118 }, { nome: "Produção", fase: "prod", d: 19 }],
+      bloqueios: [{ mes: "dez", n: 6 }, { mes: "fev", n: 12 }, { mes: "abr", n: 4 }, { mes: "jul", n: 8 }, { mes: "ago", n: 20 }, { mes: "set", n: 3 }],
+      porProjetoBloq: [{ nome: "Portal do parceiro", fase: "he", d: 23 }, { nome: "Autoatendimento de faturas", fase: "dev", d: 12 }, { nome: "Migração do gateway", fase: "dev", d: 8 }, { nome: "Onboarding de lojistas", fase: "prod", d: 6 }, { nome: "App de campo v2", fase: "hi", d: 4 }],
+      carga: [{ nome: "Ana Nogueira", ini: "AN", pct: 88 }, { nome: "Rafael Brito", ini: "RB", pct: 104 }, { nome: "Marcos Teles", ini: "MT", pct: 46 }],
+      eventos: [{ nome: "Decisão", n: 19, cor: "var(--text2)" }, { nome: "Escopo", n: 11, cor: "var(--ph-dev)" }, { nome: "Bloqueio", n: 8, cor: "var(--danger)" }, { nome: "Desbloqueio", n: 7, cor: "var(--ok)" }, { nome: "Realocação", n: 16, cor: "var(--accent)" }, { nome: "Risco", n: 12, cor: "var(--warn)" }, { nome: "Nota", n: 24, cor: "var(--info)" }],
+      kpis: { entregues: 6, atraso: "+14d", esforco: "3.640h", uso: "79%" },
+    },
+  };
+
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? "light";
+    const pk = this.state.period;
+    const d = this.dados[pk];
+    const on = "var(--panel)", off = "transparent";
+
+    const periods = [["30d", "30 dias"], ["90d", "90 dias"], ["ano", "12 meses"]].map(([k, label]) => ({
+      label, pick: () => this.setState({ period: k }),
+      bg: pk === k ? on : off, fg: pk === k ? "var(--text)" : "var(--text2)",
+    }));
+
+    const maxPct = Math.max(...d.projetos.map(p => p.pct), 100);
+    const porProjeto = d.projetos.map(p => ({
+      nome: p.nome, color: this.fase[p.fase],
+      w: (p.pct / maxPct * 100).toFixed(1) + "%",
+      hatch: p.bloqueado ? "repeating-linear-gradient(45deg,transparent 0 3px,var(--hatch) 3px 6px)" : "none",
+      inner: p.pessoas ? p.pessoas + (p.pessoas === 1 ? " pessoa" : " pessoas") : "",
+      val: p.pct === 0 ? "encerradas" : p.pct + "%",
+      valColor: p.bloqueado ? "var(--danger)" : p.pausado ? "var(--warn)" : "var(--text2)",
+    }));
+
+    const maxFase = Math.max(...d.porFase.map(f => f.n));
+    const porFase = d.porFase.map(f => ({
+      nome: f.nome, n: f.n, color: this.fase[f.fase],
+      h: Math.max(6, f.n / maxFase * 96) + "px",
+    }));
+
+    const maxT = Math.max(...d.tempoFase.map(t => t.d));
+    const tempoFase = d.tempoFase.map(t => ({
+      nome: t.nome, color: this.fase[t.fase],
+      w: (t.d / maxT * 100).toFixed(1) + "%",
+      val: t.d + "d",
+      valColor: t.d === maxT ? "var(--danger)" : "var(--text2)",
+    }));
+
+    const maxB = Math.max(...d.bloqueios.map(b => b.n), 1);
+    const bloqueios = d.bloqueios.map(b => ({
+      mes: b.mes, n: b.n || "·",
+      h: Math.max(3, b.n / maxB * 72) + "px",
+      bg: b.n ? "var(--danger-soft)" : "var(--sunken)",
+      border: b.n ? "1px solid var(--danger)" : "1px solid var(--border)",
+      hatch: b.n ? "repeating-linear-gradient(45deg,transparent 0 3px,var(--hatch) 3px 6px)" : "none",
+      labelColor: b.n ? "var(--danger)" : "var(--text3)",
+    }));
+
+    const carga = d.carga.map(c => {
+      const over = c.pct > 100;
+      return {
+        nome: c.nome, ini: c.ini, val: c.pct + "%",
+        w: Math.min(100, c.pct / 150 * 100).toFixed(1) + "%",
+        color: over ? "var(--danger)" : "var(--ok)",
+        valColor: over ? "var(--danger)" : "var(--text2)",
+        avBg: over ? "var(--danger-soft)" : "var(--neutral-soft)",
+        avBorder: over ? "var(--danger)" : "var(--border)",
+        avFg: over ? "var(--danger)" : "var(--text2)",
+      };
+    });
+
+    const maxE = Math.max(...d.eventos.map(e => e.n), 1);
+    const eventos = d.eventos.map(e => ({
+      nome: e.nome, n: e.n, color: e.n ? e.cor : "var(--border)",
+      h: Math.max(3, e.n / maxE * 60) + "px",
+    }));
+
+    const bloqTotal = d.porProjetoBloq.reduce((a, p) => a + p.d, 0);
+    const bloqLista = d.porProjetoBloq.map(p => ({
+      nome: p.nome, color: this.fase[p.fase], val: p.d + "d",
+      valColor: p.d === Math.max(...d.porProjetoBloq.map(x => x.d)) ? "var(--danger)" : "var(--text2)",
+    }));
+
+    const tSorted = [...d.tempoFase].sort((a, b) => b.d - a.d);
+    const ratio = (tSorted[0].d / d.tempoFase[0].d).toFixed(1).replace(".", ",");
+
+    const k = d.kpis;
+    const totalEventosN = d.eventos.reduce((a, e) => a + e.n, 0);
+    const kpis = [
+      { label: "Projetos entregues", valor: k.entregues, nota: "no período", color: "var(--text)" },
+      { label: "Atraso médio", valor: k.atraso, nota: "vs baseline atual", color: "var(--danger)" },
+      { label: "Esforço planejado", valor: k.esforco, nota: "soma das tarefas", color: "var(--text)" },
+      { label: "Uso de capacidade", valor: k.uso, nota: "média do time", color: "var(--text)" },
+      { label: "Dias bloqueado", valor: bloqTotal, nota: "soma dos projetos", color: "var(--danger)" },
+    ];
+
+    return {
+      theme,
+      themeGlyph: theme === "dark" ? "☀" : "☾",
+      toggleTheme: () => this.setState({ theme: theme === "dark" ? "light" : "dark" }),
+      periods, kpis, porProjeto, porFase, tempoFase, bloqueios, carga, eventos,
+      subhead: d.label + " · desde " + d.desde + " · " + d.projetos.length + " projetos com atividade",
+      totalAlloc: d.projetos.reduce((a, p) => a + p.pessoas, 0) + " alocações ativas",
+      totalProjetos: d.porFase.reduce((a, f) => a + f.n, 0) + " projetos",
+      totalBloqueio: bloqTotal + "d no período",
+      bloqLista,
+      gargalo: tSorted[0].nome + " é o gargalo: " + ratio + "× o tempo de desenvolvimento.",
+      totalEventos: totalEventosN + " eventos",
+    };
+  }
+}
+</script>
+</body>
+</html>

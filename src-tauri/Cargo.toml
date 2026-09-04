@@ -1,0 +1,21 @@
+[package]
+name = "prumo"
+version = "0.1.0"
+description = "Aplicativo local de organização de projetos"
+authors = ["Vinicius Schiffler"]
+license = ""
+repository = ""
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "prumo_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6.3" }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "2.11.3" }
