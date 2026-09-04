@@ -1,12 +1,8 @@
 import { invoke } from '@tauri-apps/api/core'
 import { PrumoError } from '@/domain/errors/PrumoError'
+import type { BatchStatement } from './SqlGateway'
 
 const EXECUTE_BATCH_COMMAND = 'execute_batch'
-
-export type BatchStatement = {
-  query: string
-  values?: readonly unknown[]
-}
 
 export async function executeBatch(
   databasePath: string,

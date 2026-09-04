@@ -1,14 +1,9 @@
 import { PrumoError } from '@/domain/errors/PrumoError'
-import type { BatchStatement } from './executeBatch'
 import type { Migration } from './migrations/migrationList'
+import type { SqlGateway } from './SqlGateway'
 import { splitSqlStatements } from './splitSqlStatements'
 
 const USER_VERSION_QUERY = 'PRAGMA user_version'
-
-export type SqlRunner = {
-  select<TRow>(query: string, values?: unknown[]): Promise<TRow[]>
-  executeBatch(statements: readonly BatchStatement[]): Promise<number>
-}
 
 type UserVersionRow = {
   user_version: number
@@ -23,8 +18,8 @@ function assertUsableVersion(version: number): void {
   }
 }
 
-async function readUserVersion(runner: SqlRunner): Promise<number> {
-  const rows = await runner.select<UserVersionRow>(USER_VERSION_QUERY)
+async function readUserVersion(runner: SqlGateway): Promise<number> {
+  const rows = await runner.select<UserVersionRow[]>(USER_VERSION_QUERY)
   const version = rows[0]?.user_version
 
   if (typeof version !== 'number') {
@@ -34,7 +29,7 @@ async function readUserVersion(runner: SqlRunner): Promise<number> {
   return version
 }
 
-async function applyMigration(runner: SqlRunner, migration: Migration): Promise<void> {
+async function applyMigration(runner: SqlGateway, migration: Migration): Promise<void> {
   const statements = splitSqlStatements(migration.sql).map((query) => ({ query }))
 
   try {
@@ -52,7 +47,7 @@ async function applyMigration(runner: SqlRunner, migration: Migration): Promise<
 }
 
 export async function runMigrations(
-  runner: SqlRunner,
+  runner: SqlGateway,
   migrations: readonly Migration[],
 ): Promise<number> {
   for (const migration of migrations) {

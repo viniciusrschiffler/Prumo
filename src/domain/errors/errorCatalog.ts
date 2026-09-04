@@ -6,6 +6,8 @@ export const ERROR_CATALOG = {
     'Esta pasta foi usada por uma versão mais nova do Prumo. Atualize o aplicativo para abri-la.',
   TRANSACTION_FAILED:
     'Não foi possível concluir a operação. Nenhuma alteração foi gravada.',
+  PERSON_HAS_HISTORY:
+    'Esta pessoa tem alocações registradas. Marque como inativa para preservar o histórico.',
   RECORD_NOT_FOUND: 'O registro não foi encontrado.',
   INVALID_RECORD_SHAPE: 'Um registro do banco está em formato inesperado.',
 } as const
