@@ -4,6 +4,8 @@ export const ERROR_CATALOG = {
   MIGRATION_FAILED: 'Não foi possível preparar o banco de dados. As alterações não foram gravadas.',
   MIGRATION_VERSION_AHEAD:
     'Esta pasta foi usada por uma versão mais nova do Prumo. Atualize o aplicativo para abri-la.',
+  TRANSACTION_FAILED:
+    'Não foi possível concluir a operação. Nenhuma alteração foi gravada.',
   RECORD_NOT_FOUND: 'O registro não foi encontrado.',
   INVALID_RECORD_SHAPE: 'Um registro do banco está em formato inesperado.',
 } as const

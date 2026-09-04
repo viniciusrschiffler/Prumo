@@ -1,7 +1,8 @@
 import Database from '@tauri-apps/plugin-sql'
 import { PrumoError } from '@/domain/errors/PrumoError'
+import { executeBatch } from './executeBatch'
 import { MIGRATION_LIST } from './migrations/migrationList'
-import { runMigrations } from './MigrationRunner'
+import { runMigrations, type SqlRunner } from './MigrationRunner'
 
 const DATABASE_FILE_NAME = 'prumo.db'
 const CONNECTION_PRAGMAS = ['PRAGMA journal_mode = WAL', 'PRAGMA foreign_keys = ON']
@@ -36,7 +37,12 @@ async function connectAndMigrate(databaseUrl: string): Promise<number> {
     await database.execute(pragma)
   }
 
-  const schemaVersion = await runMigrations(database, MIGRATION_LIST)
+  const migrationRunner: SqlRunner = {
+    select: (query, values) => database.select(query, values),
+    executeBatch: (statements) => executeBatch(database.path, statements),
+  }
+
+  const schemaVersion = await runMigrations(migrationRunner, MIGRATION_LIST)
   openConnection = database
 
   return schemaVersion

@@ -1,12 +1,13 @@
 import { PrumoError } from '@/domain/errors/PrumoError'
+import type { BatchStatement } from './executeBatch'
 import type { Migration } from './migrations/migrationList'
 import { splitSqlStatements } from './splitSqlStatements'
 
 const USER_VERSION_QUERY = 'PRAGMA user_version'
 
 export type SqlRunner = {
-  execute(query: string, values?: unknown[]): Promise<unknown>
   select<TRow>(query: string, values?: unknown[]): Promise<TRow[]>
+  executeBatch(statements: readonly BatchStatement[]): Promise<number>
 }
 
 type UserVersionRow = {
@@ -33,17 +34,14 @@ async function readUserVersion(runner: SqlRunner): Promise<number> {
   return version
 }
 
-// Sem transação de propósito: o pool do tauri-plugin-sql abre até 10 conexões e cada chamada pega
-// uma delas, então BEGIN e ROLLBACK caem em conexões diferentes e não têm efeito — verificado.
 async function applyMigration(runner: SqlRunner, migration: Migration): Promise<void> {
-  const statements = splitSqlStatements(migration.sql)
+  const statements = splitSqlStatements(migration.sql).map((query) => ({ query }))
 
   try {
-    for (const statement of statements) {
-      await runner.execute(statement)
-    }
-
-    await runner.execute(`${USER_VERSION_QUERY} = ${migration.version}`)
+    await runner.executeBatch([
+      ...statements,
+      { query: `${USER_VERSION_QUERY} = ${migration.version}` },
+    ])
   } catch (cause) {
     throw new PrumoError(
       'MIGRATION_FAILED',
