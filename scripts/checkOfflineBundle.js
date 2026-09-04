@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 const BUNDLE_DIRECTORY = fileURLToPath(new URL('../dist', import.meta.url))
 const SCANNED_EXTENSIONS = new Set(['.js', '.mjs', '.css', '.html', '.json', '.svg'])
 const URL_PATTERN = /\bhttps?:\/\/[^\s"'`)<>]+/g
+const CSS_COMMENT_PATTERN = /\/\*[\s\S]*?\*\//g
 const ALLOWED_URL_PREFIXES = [
   'http://localhost',
   'https://localhost',
@@ -37,8 +38,9 @@ async function collectScannableFiles(directory) {
   return files
 }
 
-function findExternalUrls(content) {
-  const matches = content.match(URL_PATTERN) ?? []
+function findExternalUrls(content, extension) {
+  const scannable = extension === '.css' ? content.replaceAll(CSS_COMMENT_PATTERN, '') : content
+  const matches = scannable.match(URL_PATTERN) ?? []
   const unique = [...new Set(matches)]
 
   return unique.filter((url) => !ALLOWED_URL_PREFIXES.some((prefix) => url.startsWith(prefix)))
@@ -57,7 +59,7 @@ export async function checkOfflineBundle() {
   const offenders = []
 
   for (const file of files) {
-    const urls = findExternalUrls(await readFile(file, 'utf8'))
+    const urls = findExternalUrls(await readFile(file, 'utf8'), extname(file))
 
     if (urls.length > 0) {
       offenders.push({ file: relative(BUNDLE_DIRECTORY, file), urls })
