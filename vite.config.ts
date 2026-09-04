@@ -1,7 +1,7 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 
 const DEV_SERVER_PORT = 1420
 
@@ -19,5 +19,9 @@ export default defineConfig({
     watch: {
       ignored: ['**/src-tauri/**'],
     },
+  },
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.ts'],
   },
 })
