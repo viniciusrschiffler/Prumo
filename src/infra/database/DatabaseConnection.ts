@@ -1,6 +1,6 @@
 import Database from '@tauri-apps/plugin-sql'
 import { PrumoError } from '@/domain/errors/PrumoError'
-import { executeBatch } from './executeBatch'
+import { createTauriSqlGateway } from './createTauriSqlGateway'
 import { MIGRATION_LIST } from './migrations/migrationList'
 import { runMigrations } from './MigrationRunner'
 import type { SqlGateway } from './SqlGateway'
@@ -38,15 +38,16 @@ async function connectAndMigrate(databaseUrl: string): Promise<number> {
     await database.execute(pragma)
   }
 
-  const migrationGateway: SqlGateway = {
-    select: (query, values) => database.select(query, values === undefined ? undefined : [...values]),
-    executeBatch: (statements) => executeBatch(database.path, statements),
-  }
+  const migrationGateway = createTauriSqlGateway(database)
 
   const schemaVersion = await runMigrations(migrationGateway, MIGRATION_LIST)
   openConnection = database
 
   return schemaVersion
+}
+
+export function getSqlGateway(): SqlGateway {
+  return createTauriSqlGateway(getDatabase())
 }
 
 export function getDatabase(): Database {

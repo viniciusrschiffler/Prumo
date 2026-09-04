@@ -1,0 +1,31 @@
+import { createMemoryRouter, Navigate } from 'react-router'
+import { AppShell } from '@/ui/layout/AppShell'
+import { SCREEN_META } from '@/ui/layout/screenMeta'
+import { CapacityScreen } from '@/ui/screens/CapacityScreen'
+import { DashboardsScreen } from '@/ui/screens/DashboardsScreen'
+import { NotesScreen } from '@/ui/screens/NotesScreen'
+import { ProjectScreen } from '@/ui/screens/ProjectScreen'
+import { ProjectsScreen } from '@/ui/screens/ProjectsScreen'
+import { SettingsScreen } from '@/ui/screens/SettingsScreen'
+import { TimelineScreen } from '@/ui/screens/TimelineScreen'
+import { TodayScreen } from '@/ui/screens/TodayScreen'
+import { TodoListScreen } from '@/ui/screens/TodoListScreen'
+
+export const router = createMemoryRouter([
+  {
+    path: '/',
+    element: <AppShell />,
+    children: [
+      { index: true, element: <Navigate to={SCREEN_META.today.path} replace /> },
+      { path: SCREEN_META.today.path, element: <TodayScreen /> },
+      { path: SCREEN_META.projects.path, element: <ProjectsScreen /> },
+      { path: SCREEN_META.project.path, element: <ProjectScreen /> },
+      { path: SCREEN_META.timeline.path, element: <TimelineScreen /> },
+      { path: SCREEN_META.capacity.path, element: <CapacityScreen /> },
+      { path: SCREEN_META.todos.path, element: <TodoListScreen /> },
+      { path: SCREEN_META.notes.path, element: <NotesScreen /> },
+      { path: SCREEN_META.dashboards.path, element: <DashboardsScreen /> },
+      { path: SCREEN_META.settings.path, element: <SettingsScreen /> },
+    ],
+  },
+])

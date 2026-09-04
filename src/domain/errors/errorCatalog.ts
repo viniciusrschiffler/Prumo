@@ -8,6 +8,7 @@ export const ERROR_CATALOG = {
     'Não foi possível concluir a operação. Nenhuma alteração foi gravada.',
   PERSON_HAS_HISTORY:
     'Esta pessoa tem alocações registradas. Marque como inativa para preservar o histórico.',
+  SHORTCUT_CONFLICT: 'Dois comandos disputam o mesmo atalho.',
   RECORD_NOT_FOUND: 'O registro não foi encontrado.',
   INVALID_RECORD_SHAPE: 'Um registro do banco está em formato inesperado.',
 } as const

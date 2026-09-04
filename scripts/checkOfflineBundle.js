@@ -14,8 +14,9 @@ const ALLOWED_URL_PREFIXES = [
   'http://asset.localhost',
   'https://tauri.localhost',
   'http://www.w3.org/',
-  // O React concatena esta URL no texto das mensagens de erro de produção; é string, nunca requisição.
+  // React e React Router concatenam estas URLs no texto de mensagens de erro; são string, nunca requisição.
   'https://reactjs.org/docs/error-decoder.html',
+  'https://reactrouter.com/en/main/routers/picking-a-router',
 ]
 
 async function collectScannableFiles(directory) {
