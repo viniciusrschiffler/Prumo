@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/checkOfflineBundle.js",
     "preview": "vite preview",
     "lint": "oxlint",
     "test": "vitest run",
@@ -14,6 +14,11 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.1",
+    "@tauri-apps/plugin-dialog": "^2.7.3",
+    "@tauri-apps/plugin-fs": "^2.5.2",
+    "@tauri-apps/plugin-global-shortcut": "^2.3.2",
+    "@tauri-apps/plugin-opener": "^2.5.5",
+    "@tauri-apps/plugin-sql": "^2.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
