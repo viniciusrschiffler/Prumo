@@ -10,6 +10,7 @@ import { useSidebarContext } from '@/ui/layout/useSidebarContext'
 import { DataFolderSection } from './settings/DataFolderSection'
 import { PeopleSection } from './settings/PeopleSection'
 import { PhasesSection } from './settings/PhasesSection'
+import { PreferencesSection } from './settings/PreferencesSection'
 import { SETTINGS_SECTIONS, scrollToSection, type SettingsSectionId } from './settings/settingsSections'
 import { ScreenShell } from './ScreenShell'
 
@@ -109,6 +110,7 @@ export function SettingsScreen() {
             <DataFolderSection />
             <PeopleSection />
             <PhasesSection />
+            <PreferencesSection />
           </>
         )}
       </div>

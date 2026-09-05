@@ -38,7 +38,7 @@ export function SectionCard({
         >
           {title}
         </h2>
-        {note !== undefined && <span className="text-label font-normal tracking-normal text-text3">{note}</span>}
+        {note !== undefined && <span className="text-meta text-text3">{note}</span>}
         {action !== undefined && <div className="ml-auto flex items-center gap-2">{action}</div>}
       </div>
       {children}

@@ -208,7 +208,7 @@ export function PhasesSection() {
       </div>
 
       <div className="flex items-center gap-2.5 px-3.5 py-[9px]">
-        <span className="text-label font-normal tracking-normal text-text3">
+        <span className="text-meta text-text3">
           Fase com tarefas não pode ser excluída — mova as tarefas antes.
         </span>
         <span className="ml-auto font-mono text-meta tabular-nums text-text2">

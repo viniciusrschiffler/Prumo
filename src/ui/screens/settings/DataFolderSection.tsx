@@ -64,7 +64,7 @@ export function DataFolderSection() {
       <div className="grid gap-[11px] p-3.5">
         <div className="grid grid-cols-[1fr_auto_auto] items-end gap-2">
           <label className="grid gap-1">
-            <span className="text-label font-normal tracking-normal text-text2">Caminho</span>
+            <span className="text-meta text-text2">Caminho</span>
             <Input
               numeric
               readOnly

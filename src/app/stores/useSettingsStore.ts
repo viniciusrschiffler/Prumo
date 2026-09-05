@@ -13,6 +13,7 @@ import {
   serializeAppSetting,
   type AppSettingField,
   type AppSettings,
+  type ThemePreference,
 } from '@/domain/settings/appSettings'
 import { writeDataFolderPointer } from '@/infra/config/dataFolderPointer'
 import { closeDatabase, getSqlGateway } from '@/infra/database/DatabaseConnection'
@@ -212,6 +213,11 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     const { key, value: text } = serializeAppSetting(field, value)
 
     set((state) => ({ settings: { ...state.settings, [field]: value } }))
+
+    if (field === 'themePreference') {
+      useThemeStore.getState().setPreference(value as ThemePreference)
+    }
+
     await new SqliteSettingRepository(getSqlGateway()).write(key, text)
     await get().refreshFolder()
   },

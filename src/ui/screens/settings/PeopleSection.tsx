@@ -282,7 +282,7 @@ export function PeopleSection() {
       </div>
 
       <div className="flex items-center gap-2.5 px-3.5 py-[9px]">
-        <span className="text-label font-normal tracking-normal text-text3">
+        <span className="text-meta text-text3">
           Pessoa inativa não aparece em novas alocações, mas o histórico é preservado.
         </span>
         <span className="ml-auto font-mono text-meta tabular-nums text-text2">
