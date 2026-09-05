@@ -1,11 +1,7 @@
-import type { CSSProperties } from 'react'
 import { classNames } from './classNames'
+import { phaseColorStyle } from './phaseColorStyle'
 
 export type PhaseBadgeVariant = 'badge' | 'inline'
-
-export function phaseColorStyle(color: string): CSSProperties {
-  return { '--phase-color': color } as CSSProperties
-}
 
 type PhaseBadgeProps = {
   name: string
