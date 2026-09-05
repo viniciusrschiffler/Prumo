@@ -8,6 +8,7 @@ import { Alert } from '@/ui/primitives/Alert'
 import { Button } from '@/ui/primitives/Button'
 import { useSidebarContext } from '@/ui/layout/useSidebarContext'
 import { DataFolderSection } from './settings/DataFolderSection'
+import { DataIntegritySection } from './settings/DataIntegritySection'
 import { PeopleSection } from './settings/PeopleSection'
 import { PhasesSection } from './settings/PhasesSection'
 import { PreferencesSection } from './settings/PreferencesSection'
@@ -111,6 +112,7 @@ export function SettingsScreen() {
             <PeopleSection />
             <PhasesSection />
             <PreferencesSection />
+            <DataIntegritySection />
           </>
         )}
       </div>

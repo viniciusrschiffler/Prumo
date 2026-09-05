@@ -1,11 +1,17 @@
 import { create } from 'zustand'
 import { bootstrapDatabase } from '@/app/bootstrapDatabase'
-import { toPublicMessage } from '@/domain/errors/PrumoError'
+import { PrumoError, toPublicMessage } from '@/domain/errors/PrumoError'
+import {
+  parseIntegrityProblems,
+  serializeIntegrityProblems,
+  type IntegrityReport,
+} from '@/domain/integrity/integrityReport'
 import type { DataFolderEntry } from '@/domain/repositories/DataFolderRepository'
 import type { Allocation } from '@/domain/schemas/allocationSchema'
 import type { Person } from '@/domain/schemas/personSchema'
 import type { Phase } from '@/domain/schemas/phaseSchema'
 import type { EntityId } from '@/domain/schemas/primitives'
+import { SETTING_KEYS } from '@/domain/schemas/settingSchema'
 import type { Task } from '@/domain/schemas/taskSchema'
 import {
   APP_SETTING_DEFAULTS,
@@ -17,6 +23,9 @@ import {
 } from '@/domain/settings/appSettings'
 import { writeDataFolderPointer } from '@/infra/config/dataFolderPointer'
 import { closeDatabase, getSqlGateway } from '@/infra/database/DatabaseConnection'
+import { eraseAllData } from '@/infra/database/eraseAllData'
+import { exportAllTables, type ExportResult } from '@/infra/database/exportAllTables'
+import { runIntegrityCheck } from '@/infra/database/runIntegrityCheck'
 import { SqliteAllocationRepository } from '@/infra/repositories/SqliteAllocationRepository'
 import { SqlitePersonRepository } from '@/infra/repositories/SqlitePersonRepository'
 import { SqlitePhaseRepository } from '@/infra/repositories/SqlitePhaseRepository'
@@ -53,12 +62,29 @@ type SettingsState = FolderSlice & {
   savePhase: (phase: Phase) => Promise<void>
   removePhase: (id: EntityId) => Promise<void>
   reorderPhases: (orderedIds: readonly EntityId[]) => Promise<void>
+  integrityReport: IntegrityReport | null
+  checkIntegrity: () => Promise<IntegrityReport>
+  exportAll: () => Promise<ExportResult>
+  eraseAll: () => Promise<void>
   chooseFolder: () => Promise<boolean>
   revealFolder: () => Promise<void>
   writeSetting: <TField extends AppSettingField>(
     field: TField,
     value: AppSettings[TField],
   ) => Promise<void>
+}
+
+function readIntegrityReport(raw: Readonly<Record<string, string>>): IntegrityReport | null {
+  const checkedAt = raw[SETTING_KEYS.lastIntegrityCheckAt]
+
+  if (checkedAt === undefined) {
+    return null
+  }
+
+  return {
+    checkedAt,
+    problems: parseIntegrityProblems(raw[SETTING_KEYS.lastIntegrityCheckResult] ?? ''),
+  }
 }
 
 async function readDatabaseSlice() {
@@ -72,7 +98,14 @@ async function readDatabaseSlice() {
     new SqliteAllocationRepository(gateway).listAll(),
   ])
 
-  return { ...parseAppSettings(rawSettings), people, phases, tasks, allocations }
+  return {
+    ...parseAppSettings(rawSettings),
+    integrityReport: readIntegrityReport(rawSettings),
+    people,
+    phases,
+    tasks,
+    allocations,
+  }
 }
 
 // A pasta falha por motivo próprio — permissão, caminho removido — e não pode derrubar a
@@ -106,6 +139,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   dataFolderPath: null,
   folderEntries: [],
   folderErrorMessage: null,
+  integrityReport: null,
 
   load: async () => {
     set(() => ({ status: 'loading', errorMessage: null }))
@@ -124,6 +158,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         errorMessage: null,
         settings: database.settings,
         invalidSettingKeys: database.invalidKeys,
+        integrityReport: database.integrityReport,
         people: database.people,
         phases: database.phases,
         tasks: database.tasks,
@@ -146,6 +181,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     set(() => ({
       settings: database.settings,
       invalidSettingKeys: database.invalidKeys,
+      integrityReport: database.integrityReport,
       people: database.people,
       phases: database.phases,
       tasks: database.tasks,
@@ -181,6 +217,44 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   reorderPhases: async (orderedIds) => {
     await new SqlitePhaseRepository(getSqlGateway()).reorder(orderedIds)
     await get().refreshData()
+  },
+
+  checkIntegrity: async () => {
+    const gateway = getSqlGateway()
+    const report = await runIntegrityCheck(gateway, get().dataFolderPath)
+
+    await new SqliteSettingRepository(gateway).writeMany([
+      { key: SETTING_KEYS.lastIntegrityCheckAt, value: report.checkedAt },
+      {
+        key: SETTING_KEYS.lastIntegrityCheckResult,
+        value: serializeIntegrityProblems(report.problems),
+      },
+    ])
+
+    set(() => ({ integrityReport: report }))
+    await get().refreshFolder()
+
+    return report
+  },
+
+  exportAll: async () => {
+    const folderPath = get().dataFolderPath
+
+    if (folderPath === null) {
+      throw new PrumoError('EXPORT_FAILED', 'exportação pedida sem pasta de dados definida')
+    }
+
+    const result = await exportAllTables(getSqlGateway(), folderPath)
+
+    await get().refreshFolder()
+
+    return result
+  },
+
+  eraseAll: async () => {
+    await eraseAllData(getSqlGateway())
+    set(() => ({ integrityReport: null }))
+    await get().load()
   },
 
   chooseFolder: async () => {
