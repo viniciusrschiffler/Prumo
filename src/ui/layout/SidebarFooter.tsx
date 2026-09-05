@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router'
 import { useDatabaseStore, type DatabaseStatus } from '@/app/stores/useDatabaseStore'
+import { DEV_PRIMITIVES_PATH } from '@/app/router'
 import { SCREEN_META } from './screenMeta'
 
 const STATUS_LABEL: Record<DatabaseStatus, string> = {
@@ -39,6 +40,16 @@ export function SidebarFooter({ dataFolderPath }: SidebarFooterProps) {
       >
         {dataFolderPath ?? 'pasta não definida'}
       </div>
+      {import.meta.env.DEV && (
+        <NavLink
+          to={DEV_PRIMITIVES_PATH}
+          className={({ isActive }) =>
+            `text-label font-normal ${isActive ? 'text-accent' : 'text-text3 hover:text-text2'}`
+          }
+        >
+          Primitivos · dev
+        </NavLink>
+      )}
       <div className="flex items-center gap-1.5 font-mono text-micro text-text3">
         <span className={`h-1.5 w-1.5 rounded-full ${STATUS_COLOR[status]}`} />
         {STATUS_LABEL[status]}

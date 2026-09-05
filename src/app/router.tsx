@@ -11,6 +11,8 @@ import { TimelineScreen } from '@/ui/screens/TimelineScreen'
 import { TodayScreen } from '@/ui/screens/TodayScreen'
 import { TodoListScreen } from '@/ui/screens/TodoListScreen'
 
+export const DEV_PRIMITIVES_PATH = '/dev/primitivos'
+
 export const router = createMemoryRouter([
   {
     path: '/',
@@ -26,6 +28,18 @@ export const router = createMemoryRouter([
       { path: SCREEN_META.notes.path, element: <NotesScreen /> },
       { path: SCREEN_META.dashboards.path, element: <DashboardsScreen /> },
       { path: SCREEN_META.settings.path, element: <SettingsScreen /> },
+      ...(import.meta.env.DEV
+        ? [
+            {
+              path: DEV_PRIMITIVES_PATH,
+              lazy: async () => {
+                const { DevPrimitivesScreen } = await import('@/ui/dev/DevPrimitivesScreen')
+
+                return { Component: DevPrimitivesScreen }
+              },
+            },
+          ]
+        : []),
     ],
   },
 ])

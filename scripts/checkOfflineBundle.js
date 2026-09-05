@@ -17,6 +17,11 @@ const ALLOWED_URL_PREFIXES = [
   // React e React Router concatenam estas URLs no texto de mensagens de erro; são string, nunca requisição.
   'https://reactjs.org/docs/error-decoder.html',
   'https://reactrouter.com/en/main/routers/picking-a-router',
+  // O Zod valida IPv6 parseando com new URL('http://[...]'); parse, nunca requisição.
+  'http://[',
+  // Identificadores de dialeto do conversor JSON Schema do Zod; são valores de objeto.
+  'https://json-schema.org/draft/',
+  'http://json-schema.org/draft-',
 ]
 
 async function collectScannableFiles(directory) {
