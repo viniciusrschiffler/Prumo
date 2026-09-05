@@ -62,12 +62,19 @@
   --text-label--font-weight: 600;
   --text-label--letter-spacing: 0.08em;
 
-  /* Mesmo passo de 11px do rótulo de coluna, na variante de dado: peso 400 e sem espacejamento.
+  /* Mesmo passo de 11px do título de grupo, na variante de dado: peso 400 e sem espacejamento.
      É o subtítulo mono do cabeçalho das nove telas. */
   --text-meta: 11px;
   --text-meta--line-height: 1.3;
   --text-meta--font-weight: 400;
   --text-meta--letter-spacing: 0;
+
+  /* Rótulo de coluna de tabela densa. O passo de 11px do catálogo tipográfico é o do
+     título de grupo; as tabelas dos .dc.html usam 10px com espacejamento de 0.06em. */
+  --text-column: 10px;
+  --text-column--line-height: 1.3;
+  --text-column--font-weight: 600;
+  --text-column--letter-spacing: 0.06em;
 
   --text-micro: 10px;
   --text-micro--line-height: 1.3;

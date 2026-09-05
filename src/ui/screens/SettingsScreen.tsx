@@ -8,6 +8,7 @@ import { Alert } from '@/ui/primitives/Alert'
 import { Button } from '@/ui/primitives/Button'
 import { useSidebarContext } from '@/ui/layout/useSidebarContext'
 import { DataFolderSection } from './settings/DataFolderSection'
+import { PeopleSection } from './settings/PeopleSection'
 import { SETTINGS_SECTIONS, scrollToSection, type SettingsSectionId } from './settings/settingsSections'
 import { ScreenShell } from './ScreenShell'
 
@@ -103,7 +104,10 @@ export function SettingsScreen() {
         {status === 'loading' || status === 'idle' ? (
           <p className="text-support text-text3">Carregando as configurações…</p>
         ) : (
-          <DataFolderSection />
+          <>
+            <DataFolderSection />
+            <PeopleSection />
+          </>
         )}
       </div>
     </ScreenShell>

@@ -5,6 +5,7 @@ import type { DataFolderEntry } from '@/domain/repositories/DataFolderRepository
 import type { Allocation } from '@/domain/schemas/allocationSchema'
 import type { Person } from '@/domain/schemas/personSchema'
 import type { Phase } from '@/domain/schemas/phaseSchema'
+import type { EntityId } from '@/domain/schemas/primitives'
 import type { Task } from '@/domain/schemas/taskSchema'
 import {
   APP_SETTING_DEFAULTS,
@@ -44,7 +45,10 @@ type SettingsState = FolderSlice & {
   allocations: readonly Allocation[]
   dataFolderPath: string | null
   load: () => Promise<void>
+  refreshData: () => Promise<void>
   refreshFolder: () => Promise<void>
+  savePerson: (person: Person) => Promise<void>
+  removePerson: (id: EntityId) => Promise<void>
   chooseFolder: () => Promise<boolean>
   revealFolder: () => Promise<void>
   writeSetting: <TField extends AppSettingField>(
@@ -129,8 +133,35 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     }
   },
 
+  refreshData: async () => {
+    const [database, folder] = await Promise.all([
+      readDatabaseSlice(),
+      readFolderSlice(get().dataFolderPath),
+    ])
+
+    set(() => ({
+      settings: database.settings,
+      invalidSettingKeys: database.invalidKeys,
+      people: database.people,
+      phases: database.phases,
+      tasks: database.tasks,
+      allocations: database.allocations,
+      ...folder,
+    }))
+  },
+
   refreshFolder: async () => {
     set(await readFolderSlice(get().dataFolderPath))
+  },
+
+  savePerson: async (person) => {
+    await new SqlitePersonRepository(getSqlGateway()).save(person)
+    await get().refreshData()
+  },
+
+  removePerson: async (id) => {
+    await new SqlitePersonRepository(getSqlGateway()).remove(id)
+    await get().refreshData()
   },
 
   chooseFolder: async () => {

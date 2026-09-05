@@ -13,6 +13,28 @@ export function differenceInDays(from: IsoDate, to: IsoDate): number {
   return (toUtcTimestamp(to) - toUtcTimestamp(from)) / MILLISECONDS_PER_DAY
 }
 
+function toIsoDate(timestamp: number): IsoDate {
+  return new Date(timestamp).toISOString().slice(0, 10)
+}
+
+export function addDays(date: IsoDate, days: number): IsoDate {
+  return toIsoDate(toUtcTimestamp(date) + days * MILLISECONDS_PER_DAY)
+}
+
+// 0 é domingo no getUTCDay, e a semana do usuário pode começar na segunda.
+export function startOfWeek(date: IsoDate, firstWeekday: 'monday' | 'sunday'): IsoDate {
+  const weekday = new Date(toUtcTimestamp(date)).getUTCDay()
+  const offset = firstWeekday === 'sunday' ? weekday : (weekday + 6) % 7
+
+  return addDays(date, -offset)
+}
+
+export function weekPeriod(date: IsoDate, firstWeekday: 'monday' | 'sunday'): DatePeriod {
+  const start = startOfWeek(date, firstWeekday)
+
+  return { start, end: addDays(start, 6) }
+}
+
 export function earliestDate(first: IsoDate, second: IsoDate): IsoDate {
   return first <= second ? first : second
 }

@@ -16,7 +16,7 @@ export function TableHeaderCell({
     <th
       {...cellProps}
       className={classNames(
-        'border-b border-border px-2.5 py-[7px] text-label uppercase tracking-[0.06em] text-text2',
+        'border-b border-border px-2.5 py-[7px] text-column uppercase text-text2',
         numeric ? 'text-right' : 'text-left',
         className,
       )}
