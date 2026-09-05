@@ -84,9 +84,6 @@ export const SIDEBAR_SCREENS: readonly Screen[] = [
   'dashboards',
 ]
 
-export function formatShortcutHint(keys: string): string {
-  return keys.toUpperCase().replace('MOD+', '⌘')
-}
 
 function toPathPattern(path: string): RegExp {
   return new RegExp(`^${path.replace(/:[^/]+/g, '[^/]+')}$`)

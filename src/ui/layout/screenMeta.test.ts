@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatShortcutHint, resolveScreenFromPath, SCREEN_META } from './screenMeta'
+import { resolveScreenFromPath, SCREEN_META } from './screenMeta'
 
 describe('resolveScreenFromPath', () => {
   it('Should resolve each screen from its own path', () => {
@@ -17,16 +17,6 @@ describe('resolveScreenFromPath', () => {
 
   it('Should fall back to the first screen for an unknown path', () => {
     expect(resolveScreenFromPath('/inexistente')).toBe('today')
-  })
-})
-
-describe('formatShortcutHint', () => {
-  it('Should render a sequence in upper case', () => {
-    expect(formatShortcutHint('g t')).toBe('G T')
-  })
-
-  it('Should render the command modifier as a symbol', () => {
-    expect(formatShortcutHint('mod+k')).toBe('⌘K')
   })
 })
 

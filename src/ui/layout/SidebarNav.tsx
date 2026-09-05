@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router'
 import type { Screen } from '@/domain/schemas/savedViewSchema'
-import { formatShortcutHint, SCREEN_META, SIDEBAR_SCREENS } from './screenMeta'
+import { KeyHint } from '@/ui/primitives/KeyHint'
+import { SCREEN_META, SIDEBAR_SCREENS } from './screenMeta'
 
 type SidebarNavProps = {
   counts: Partial<Record<Screen, number>>
@@ -33,11 +34,11 @@ export function SidebarNav({ counts, showShortcutHints }: SidebarNavProps) {
               </span>
             )}
             {showShortcutHints && meta.navigationKeys !== null && (
-              <span
-                className={`${count === undefined ? 'ml-auto' : ''} rounded-[3px] border border-border bg-panel px-1 font-mono text-[9px] text-text3`}
-              >
-                {formatShortcutHint(meta.navigationKeys)}
-              </span>
+              <KeyHint
+                keys={meta.navigationKeys}
+                variant="nav"
+                className={count === undefined ? 'ml-auto' : undefined}
+              />
             )}
           </NavLink>
         )
