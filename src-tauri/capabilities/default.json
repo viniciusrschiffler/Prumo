@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Permissões mínimas do Prumo. Sem escopo estático de arquivos: o acesso vale apenas para a pasta que o usuário escolhe pelo diálogo, concedida em tempo de execução.",
+  "description": "Permissões mínimas do Prumo. Fora da própria pasta de configuração do app, não há escopo estático de arquivos: o acesso vale apenas para a pasta que o usuário escolhe pelo diálogo, concedida em tempo de execução.",
   "windows": [
     "main"
   ],
@@ -20,6 +20,8 @@
     "fs:allow-read-text-file",
     "fs:allow-write-text-file",
     "fs:allow-rename",
-    "fs:allow-remove"
+    "fs:allow-remove",
+    "fs:allow-appconfig-read-recursive",
+    "fs:allow-appconfig-write-recursive"
   ]
 }

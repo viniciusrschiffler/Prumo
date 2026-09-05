@@ -25,6 +25,19 @@ export function openDatabase(databaseUrl: string): Promise<number> {
   return openInProgress
 }
 
+// Trocar a pasta de dados exige soltar a conexão atual: o pool aponta para o arquivo antigo
+// e o openInProgress memoizado devolveria justamente ele.
+export async function closeDatabase(): Promise<void> {
+  const database = openConnection
+
+  openConnection = null
+  openInProgress = null
+
+  if (database !== null) {
+    await database.close()
+  }
+}
+
 async function connectAndMigrate(databaseUrl: string): Promise<number> {
   let database: Database
 

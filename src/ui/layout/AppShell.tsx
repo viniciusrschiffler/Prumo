@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { bootstrapDatabase } from '@/app/bootstrapDatabase'
 import { useDatabaseStore } from '@/app/stores/useDatabaseStore'
+import { useDataFolderStore } from '@/app/stores/useDataFolderStore'
 import { useNavigationCountsStore } from '@/app/stores/useNavigationCountsStore'
+import { useSettingsStore } from '@/app/stores/useSettingsStore'
 import type { Screen } from '@/domain/schemas/savedViewSchema'
-import { resolveDataFolderPath } from '@/infra/config/resolveDataFolderPath'
 import type { Shortcut } from '@/ui/shortcuts/shortcutRegistry'
 import { ShortcutListener } from '@/ui/shortcuts/ShortcutListener'
 import { useShortcuts } from '@/ui/shortcuts/useShortcuts'
@@ -20,7 +21,9 @@ export function AppShell() {
   const errorMessage = useDatabaseStore((state) => state.errorMessage)
   const counts = useNavigationCountsStore((state) => state.counts)
   const refreshCounts = useNavigationCountsStore((state) => state.refresh)
-  const [dataFolderPath, setDataFolderPath] = useState<string | null>(null)
+  const dataFolderPath = useDataFolderStore((state) => state.path)
+  const resolveDataFolder = useDataFolderStore((state) => state.resolve)
+  const showShortcutHints = useSettingsStore((state) => state.settings.showShortcutHints)
 
   const currentScreen = resolveScreenFromPath(location.pathname)
 
@@ -39,9 +42,8 @@ export function AppShell() {
   useShortcuts(navigationShortcuts)
 
   useEffect(() => {
-    void resolveDataFolderPath().then(setDataFolderPath)
-    void bootstrapDatabase(null)
-  }, [])
+    void resolveDataFolder().then((path) => bootstrapDatabase(path))
+  }, [resolveDataFolder])
 
   useEffect(() => {
     if (databaseStatus !== 'ready') {
@@ -61,7 +63,7 @@ export function AppShell() {
           currentScreen={currentScreen}
           counts={sidebarCounts}
           dataFolderPath={dataFolderPath}
-          showShortcutHints
+          showShortcutHints={showShortcutHints}
         />
         <main className="overflow-hidden">
           {errorMessage !== null && (
