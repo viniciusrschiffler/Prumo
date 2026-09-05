@@ -17,6 +17,8 @@ import { sortProjectRows, type ProjectSortKey } from '@/domain/projects/projectS
 import { sumProjectsTotals } from '@/domain/projects/projectTotals'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
 import type { NewProjectDraft } from '@/domain/projects/newProject'
+import { listOpenAllocationIds, type BlockProjectsDraft } from '@/domain/projects/blockProjects'
+import type { Priority } from '@/domain/schemas/primitives'
 import type { EntityId } from '@/domain/schemas/primitives'
 import { PROJECT_STATUS_LABELS } from '@/ui/labels/entityLabels'
 import { useSidebarContext } from '@/ui/layout/useSidebarContext'
@@ -31,6 +33,7 @@ import type { Shortcut } from '@/ui/shortcuts/shortcutRegistry'
 import { useShortcuts } from '@/ui/shortcuts/useShortcuts'
 import { SCREEN_META } from '@/ui/layout/screenMeta'
 import { ScreenShell } from '../ScreenShell'
+import { BlockProjectsModal } from './BlockProjectsModal'
 import { NewProjectModal } from './NewProjectModal'
 import { ProjectsFooter } from './ProjectsFooter'
 import { ProjectsTable } from './ProjectsTable'
@@ -52,6 +55,8 @@ export function ProjectsScreen() {
   const savedViews = useProjectsStore((state) => state.savedViews)
   const load = useProjectsStore((state) => state.load)
   const createProject = useProjectsStore((state) => state.createProject)
+  const setPriority = useProjectsStore((state) => state.setPriority)
+  const blockProjects = useProjectsStore((state) => state.blockProjects)
   const notify = useToastStore((state) => state.notify)
 
   const [effortMode, setEffortMode] = useState<EffortMode>('hours')
@@ -61,6 +66,7 @@ export function ProjectsScreen() {
   const [activeViewId, setActiveViewId] = useState<EntityId | null>(null)
   const [expandedIds, setExpandedIds] = useState<ReadonlySet<EntityId>>(new Set())
   const [isNewProjectOpen, setNewProjectOpen] = useState(false)
+  const [isBlockOpen, setBlockOpen] = useState(false)
 
   useEffect(() => {
     if (databaseStatus !== 'ready') {
@@ -163,6 +169,55 @@ export function ProjectsScreen() {
 
   useShortcuts(shortcuts)
 
+  const selectedRows = visibleRows.filter((row) => selection.selectedIds.has(row.project.id))
+  const blockableRows = selectedRows.filter((row) => row.project.status !== 'blocked')
+  const openAllocationCount = blockableRows.reduce(
+    (total, row) =>
+      total +
+      listOpenAllocationIds(
+        row.tasks.map((taskRow) => taskRow.task.id),
+        snapshot.allocations,
+      ).length,
+    0,
+  )
+
+  async function run(action: () => Promise<void>, success: string, failure: string) {
+    try {
+      await action()
+      notify(success)
+    } catch (cause) {
+      console.error(failure, cause)
+      notify(toPublicMessage(cause), 'danger')
+    }
+  }
+
+  async function handleBlock(draft: BlockProjectsDraft) {
+    setBlockOpen(false)
+    const count = blockableRows.length
+
+    await run(
+      () => blockProjects(blockableRows.map((row) => row.project.id), draft),
+      count === 1 ? '1 projeto bloqueado.' : `${count} projetos bloqueados.`,
+      'Não foi possível bloquear os projetos selecionados.',
+    )
+
+    selection.clear()
+  }
+
+  async function handleReprioritize(priority: Priority) {
+    const count = selectedRows.length
+
+    await run(
+      () => setPriority(selectedRows.map((row) => row.project.id), priority),
+      count === 1
+        ? `1 projeto movido para ${priority}.`
+        : `${count} projetos movidos para ${priority}.`,
+      'Não foi possível repriorizar os projetos selecionados.',
+    )
+
+    selection.clear()
+  }
+
   async function handleCreate(draft: NewProjectDraft) {
     setNewProjectOpen(false)
 
@@ -227,7 +282,15 @@ export function ProjectsScreen() {
         />
       }
       contentClassName="flex-1 overflow-auto"
-      footer={<ProjectsFooter totals={totals} />}
+      footer={
+        <ProjectsFooter
+          totals={totals}
+          selectedCount={selection.selectedIds.size}
+          onBlock={() => setBlockOpen(true)}
+          onReprioritize={(priority) => void handleReprioritize(priority)}
+          onClearSelection={selection.clear}
+        />
+      }
     >
       {status === 'error' ? (
         <div className="p-5">
@@ -280,6 +343,15 @@ export function ProjectsScreen() {
           onToggleExpand={toggleExpand}
           onSelect={selection.select}
           onOpen={openProject}
+        />
+      )}
+
+      {isBlockOpen && blockableRows.length > 0 && (
+        <BlockProjectsModal
+          projectNames={blockableRows.map((row) => row.project.name)}
+          openAllocationCount={openAllocationCount}
+          onClose={() => setBlockOpen(false)}
+          onSubmit={(draft) => void handleBlock(draft)}
         />
       )}
 

@@ -1,8 +1,15 @@
 import { create } from 'zustand'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
+import {
+  buildProjectBlock,
+  listOpenAllocationIds,
+  type BlockProjectsDraft,
+} from '@/domain/projects/blockProjects'
 import { buildNewProject, type NewProjectDraft } from '@/domain/projects/newProject'
 import type { ProjectsSnapshot } from '@/domain/projects/projectRow'
 import type { SavedView } from '@/domain/schemas/savedViewSchema'
+import type { EntityId, Priority } from '@/domain/schemas/primitives'
+import { todayIsoDate } from '@/app/clock'
 import { getSqlGateway } from '@/infra/database/DatabaseConnection'
 import { SqliteAllocationRepository } from '@/infra/repositories/SqliteAllocationRepository'
 import { SqliteBaselineRepository } from '@/infra/repositories/SqliteBaselineRepository'
@@ -37,6 +44,8 @@ type ProjectsState = {
   load: () => Promise<void>
   refresh: () => Promise<void>
   createProject: (draft: NewProjectDraft) => Promise<void>
+  setPriority: (projectIds: readonly EntityId[], priority: Priority) => Promise<void>
+  blockProjects: (projectIds: readonly EntityId[], draft: BlockProjectsDraft) => Promise<void>
 }
 
 async function readEverything(): Promise<{
@@ -121,6 +130,35 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
       newProject.tagNames.map((name) => ({ id: crypto.randomUUID(), name })),
     )
 
+    await get().refresh()
+  },
+
+  setPriority: async (projectIds, priority) => {
+    await new SqliteProjectRepository(getSqlGateway()).setPriority(projectIds, priority)
+    await get().refresh()
+  },
+
+  blockProjects: async (projectIds, draft) => {
+    const { tasks, allocations } = get().snapshot
+    const now = new Date().toISOString()
+    const today = todayIsoDate()
+
+    const blocks = projectIds.map((projectId) => {
+      const taskIds = tasks
+        .filter((task) => task.projectId === projectId)
+        .map((task) => task.id)
+
+      return buildProjectBlock(
+        projectId,
+        listOpenAllocationIds(taskIds, allocations),
+        draft,
+        crypto.randomUUID(),
+        today,
+        now,
+      )
+    })
+
+    await new SqliteProjectRepository(getSqlGateway()).blockMany(blocks)
     await get().refresh()
   },
 

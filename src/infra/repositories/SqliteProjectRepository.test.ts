@@ -187,3 +187,113 @@ describe('SqliteProjectRepository.create', () => {
     ).toEqual([{ total: 1 }])
   })
 })
+
+describe('SqliteProjectRepository.setPriority', () => {
+  it('Should reprioritize every project it receives at once', async () => {
+    await seedProject(['a', 'A', null, 'active', 'P3', null, null, null, '2026-02-20T09:00:00Z', null])
+    await seedProject(['b', 'B', null, 'active', 'P3', null, null, null, '2026-02-20T09:00:00Z', null])
+    await seedProject(['c', 'C', null, 'active', 'P3', null, null, null, '2026-02-20T09:00:00Z', null])
+
+    await repository.setPriority(['a', 'c'], 'P0')
+
+    expect((await repository.listAll()).map((project) => [project.id, project.priority])).toEqual([
+      ['a', 'P0'],
+      ['b', 'P3'],
+      ['c', 'P0'],
+    ])
+  })
+})
+
+describe('SqliteProjectRepository.blockMany', () => {
+  const block = {
+    projectId: 'parceiro',
+    endedAt: '2026-09-05T12:00:00Z',
+    endedAllocationIds: ['al-1'],
+    event: {
+      id: 'ev-block',
+      projectId: 'parceiro',
+      type: 'block' as const,
+      eventDate: '2026-09-05',
+      title: 'Aguardando validação jurídica',
+      bodyMarkdown: '1 alocação encerrada no bloqueio.',
+      revertsEventId: null,
+      riskOpen: false,
+      expectedResumeAt: '2026-09-26',
+      createdAt: '2026-09-05T12:00:00Z',
+    },
+  }
+
+  beforeEach(async () => {
+    await seedProject([
+      'parceiro',
+      'Portal do parceiro',
+      null,
+      'active',
+      'P0',
+      null,
+      null,
+      null,
+      '2026-01-15T09:00:00Z',
+      null,
+    ])
+
+    await gateway.executeBatch([
+      {
+        query: 'INSERT INTO person (id, name, initials) VALUES (?, ?, ?)',
+        values: ['ana', 'Ana Nogueira', 'AN'],
+      },
+      {
+        query: 'INSERT INTO task (id, project_id, phase_id, title, status) VALUES (?, ?, ?, ?, ?)',
+        values: ['pp-jur', 'parceiro', 'development', 'Aprovação jurídica', 'blocked'],
+      },
+      {
+        query:
+          'INSERT INTO allocation (id, task_id, person_id, start_date, end_date, percentage) VALUES (?, ?, ?, ?, ?, ?)',
+        values: ['al-1', 'pp-jur', 'ana', '2026-02-02', '2026-08-11', 50],
+      },
+    ])
+  })
+
+  it('Should move the project to blocked', async () => {
+    await repository.blockMany([block])
+
+    expect((await repository.listAll())[0]?.status).toBe('blocked')
+  })
+
+  it('Should record the block event with its reason and expected resume date', async () => {
+    await repository.blockMany([block])
+
+    expect(
+      await gateway.select<{ type: string; title: string; expected_resume_at: string }[]>(
+        'SELECT type, title, expected_resume_at FROM project_event',
+      ),
+    ).toEqual([
+      {
+        type: 'block',
+        title: 'Aguardando validação jurídica',
+        expected_resume_at: '2026-09-26',
+      },
+    ])
+  })
+
+  it('Should end the open allocation instead of deleting it', async () => {
+    await repository.blockMany([block])
+
+    expect(
+      await gateway.select<{ id: string; ended_at: string; ended_reason: string }[]>(
+        'SELECT id, ended_at, ended_reason FROM allocation',
+      ),
+    ).toEqual([
+      { id: 'al-1', ended_at: '2026-09-05T12:00:00Z', ended_reason: 'projeto bloqueado' },
+    ])
+  })
+
+  it('Should leave the project untouched when the event cannot be written', async () => {
+    const broken = { ...block, event: { ...block.event, projectId: 'inexistente' } }
+
+    await expect(repository.blockMany([broken])).rejects.toThrow()
+
+    expect((await repository.listAll())[0]?.status).toBe('active')
+    expect(await gateway.select<unknown[]>('SELECT * FROM project_event')).toEqual([])
+  })
+})
