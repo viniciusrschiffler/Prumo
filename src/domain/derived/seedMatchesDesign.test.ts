@@ -1,10 +1,7 @@
-import { DatabaseSync } from 'node:sqlite'
-import { readdirSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import type { DatabaseSync } from 'node:sqlite'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { buildSeedData } from '../../../scripts/seed/seedData.ts'
-import { createDateShifter, DESIGN_TODAY } from '../../../scripts/seed/seedDates.ts'
+import { DESIGN_TODAY } from '../../../scripts/seed/seedDates.ts'
+import { openSeedDatabase } from '@/domain/testing/seedDatabase'
 import {
   readAllocations,
   readBaselineTasks,
@@ -12,7 +9,6 @@ import {
   readPerson,
   readTasks,
 } from '@/domain/testing/seedReaders'
-import { splitSqlStatements } from '@/infra/database/splitSqlStatements'
 import { calculateBlockedDays } from './calculateBlockedDays'
 import { calculateDeviationInDays, isDelayed } from './calculateDeviationInDays'
 import { calculateProgress } from './calculateProgress'
@@ -21,40 +17,12 @@ import { calculateWeeklyCapacity, isOverallocated } from './calculateWeeklyCapac
 import { deriveBaselinePeriod, deriveProjectPeriod } from './deriveProjectPeriod'
 import { listActivePersonIds } from './listActivePersonIds'
 
-const MIGRATIONS_DIRECTORY = fileURLToPath(
-  new URL('../../infra/database/migrations', import.meta.url),
-)
 const WHOLE_HISTORY = { start: '2026-01-01', end: DESIGN_TODAY }
 
 let database: DatabaseSync
 
 beforeAll(() => {
-  database = new DatabaseSync(':memory:')
-  database.exec('PRAGMA foreign_keys = ON')
-
-  const migrations = readdirSync(MIGRATIONS_DIRECTORY)
-    .filter((name) => name.endsWith('.sql'))
-    .sort()
-
-  for (const file of migrations) {
-    for (const statement of splitSqlStatements(
-      readFileSync(join(MIGRATIONS_DIRECTORY, file), 'utf8'),
-    )) {
-      database.exec(statement)
-    }
-  }
-
-  // Sem deslocamento: as datas ficam iguais às do design, então os números são comparáveis.
-  for (const seed of buildSeedData(createDateShifter(DESIGN_TODAY))) {
-    const placeholders = seed.columns.map(() => '?').join(', ')
-    const statement = database.prepare(
-      `INSERT INTO ${seed.table} (${seed.columns.join(', ')}) VALUES (${placeholders})`,
-    )
-
-    for (const row of seed.rows) {
-      statement.run(...(row as never[]))
-    }
-  }
+  database = openSeedDatabase()
 })
 
 describe('Migração do gateway', () => {
