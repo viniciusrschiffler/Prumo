@@ -55,6 +55,7 @@ Já vem instalado no Windows 11. Em versões anteriores, baixe o
 | `npm run test` | Roda os testes uma vez |
 | `npm run test:watch` | Roda os testes em modo observador |
 | `npm run lint` | Roda o oxlint |
+| `npm run seed` | Recria o banco com os dados fictícios do design |
 | `npm run tauri build` | Gera o executável e os instaladores |
 | `npm run tauri build -- --no-bundle` | Gera só o executável de produção |
 
@@ -63,6 +64,16 @@ minutos. As seguintes são incrementais.
 
 `npm run dev` sozinho abre o frontend no navegador, mas sem o runtime do Tauri o
 banco não abre — serve para mexer em layout, não para exercitar o app.
+
+## Dados de desenvolvimento
+
+`npm run seed` apaga e recria o banco com as pessoas, projetos, tarefas, alocações,
+baselines, eventos, todos e notas das telas do design, e escreve as notas como
+arquivos `.md` de verdade em `notas/`. As datas do design são ancoradas em
+03/09/2026 e deslocadas para o hoje real, então a tela Hoje sempre tem conteúdo.
+
+O script recusa apagar um banco que não tenha a marca dele; use `--force` se
+quiser mesmo descartar.
 
 ## Onde ficam os dados
 

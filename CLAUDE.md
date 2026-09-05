@@ -28,6 +28,7 @@ Tauri v2 com frontend React. Roda 100% local.
 | `npm run test` | Vitest, uma passada |
 | `npm run lint` | oxlint |
 | `npm run tauri build -- --no-bundle` | Build de produção sem gerar instalador |
+| `npm run seed` | Recria o banco com os dados fictícios do design |
 
 ## Arquitetura
 
@@ -102,6 +103,18 @@ requisição. Antes de acrescentar uma entrada, confirme o contexto no bundle.
 
 **Testes têm projeto TypeScript próprio** (`tsconfig.test.json`), para que os tipos do Node
 não fiquem visíveis ao código do app, que roda no webview.
+
+## Seed de desenvolvimento
+
+`scripts/seed.ts` roda em TypeScript direto no Node e reusa `splitSqlStatements` para
+aplicar as migrações. Ele ancora as datas do design em 03/09/2026 e desloca tudo para o
+hoje real, preservando as distâncias.
+
+`src/domain/derived/seedMatchesDesign.test.ts` roda as funções derivadas sobre esse seed,
+sem deslocamento, e compara com os números impressos nas telas do design: 320h e +11d na
+Migração do gateway, 168h e +23d no Portal do parceiro, 23 dias bloqueado, −2d no App de
+campo e Rafael em 150% na semana de 01/06. Divergência ali significa seed errado ou função
+derivada errada.
 
 ## Design
 
