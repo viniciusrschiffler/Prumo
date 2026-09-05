@@ -1,5 +1,11 @@
 import type { InputHTMLAttributes } from 'react'
 import { classNames } from './classNames'
+import {
+  FIELD_SIZE_CLASSES,
+  FIELD_TEXT_CLASSES,
+  type FieldSize,
+  type FieldTextSize,
+} from './fieldSize'
 import { FIELD_FOCUS_RING } from './focusRing'
 
 // Sem w-full: o campo vive dentro de um grid ou flex, que já o estica, e um w-full na base
@@ -7,14 +13,21 @@ import { FIELD_FOCUS_RING } from './focusRing'
 export const FIELD_BASE_CLASSES =
   'rounded-button border bg-bg text-text placeholder:text-text3 disabled:cursor-not-allowed disabled:bg-sunken disabled:text-text3'
 
-export const NUMERIC_FIELD_CLASSES = 'font-mono text-support tabular-nums'
-
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   numeric?: boolean
   invalid?: boolean
+  fieldSize?: FieldSize
+  textSize?: FieldTextSize
 }
 
-export function Input({ numeric = false, invalid = false, className, ...inputProps }: InputProps) {
+export function Input({
+  numeric = false,
+  invalid = false,
+  fieldSize = 'default',
+  textSize,
+  className,
+  ...inputProps
+}: InputProps) {
   return (
     <input
       {...inputProps}
@@ -22,8 +35,10 @@ export function Input({ numeric = false, invalid = false, className, ...inputPro
       className={classNames(
         FIELD_BASE_CLASSES,
         FIELD_FOCUS_RING,
-        'h-7 px-[9px]',
-        numeric ? NUMERIC_FIELD_CLASSES : 'text-body',
+        FIELD_SIZE_CLASSES[fieldSize],
+        FIELD_TEXT_CLASSES[textSize ?? (numeric ? 'support' : 'body')],
+        numeric ? 'font-mono tabular-nums' : '',
+        'px-[9px]',
         invalid ? 'border-danger' : 'border-border-strong',
         className,
       )}

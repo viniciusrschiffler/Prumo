@@ -50,7 +50,8 @@ function SelectionActions({
               onReprioritize(event.target.value as Priority)
             }
           }}
-          className="h-6 text-label font-normal tracking-normal"
+          fieldSize="small"
+          textSize="label"
         >
           <option value={NO_PRIORITY}>—</option>
           {PRIORITIES.map((priority) => (

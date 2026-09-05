@@ -49,8 +49,9 @@ export function ProjectsToolbar({
         Ordenar
         <Select
           value={sortKey}
+          fieldSize="small"
+          textSize="label"
           onChange={(event) => onSortChange(event.target.value as ProjectSortKey)}
-          className="h-6 text-label font-normal tracking-normal"
         >
           {PROJECT_SORT_KEYS.map((key) => (
             <option key={key} value={key}>
