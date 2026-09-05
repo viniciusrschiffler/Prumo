@@ -3,6 +3,7 @@ import { PrumoError } from '@/domain/errors/PrumoError'
 import type { PersonRepository } from '@/domain/repositories/PersonRepository'
 import { personSchema, type Person } from '@/domain/schemas/personSchema'
 import type { EntityId } from '@/domain/schemas/primitives'
+import { parseRow, parseRows } from '@/infra/database/parseRow'
 import type { SqlGateway } from '@/infra/database/SqlGateway'
 
 const SELECT_COLUMNS = 'id, name, initials, role, weekly_capacity_hours, active'
@@ -41,18 +42,6 @@ const personRowSchema = z
   }))
   .pipe(personSchema)
 
-function parsePersonRow(row: unknown): Person {
-  const result = personRowSchema.safeParse(row)
-
-  if (!result.success) {
-    throw new PrumoError('INVALID_RECORD_SHAPE', `linha de person fora do formato: ${result.error.message}`, {
-      cause: result.error,
-    })
-  }
-
-  return result.data
-}
-
 function toRowValues(person: Person): unknown[] {
   return [
     person.id,
@@ -74,7 +63,7 @@ export class SqlitePersonRepository implements PersonRepository {
   async listAll(): Promise<Person[]> {
     const rows = await this.#gateway.select<unknown[]>(SELECT_ALL)
 
-    return rows.map(parsePersonRow)
+    return parseRows(personRowSchema, 'person', rows)
   }
 
   async findById(id: EntityId): Promise<Person | null> {
@@ -85,7 +74,7 @@ export class SqlitePersonRepository implements PersonRepository {
       return null
     }
 
-    return parsePersonRow(row)
+    return parseRow(personRowSchema, 'person', row)
   }
 
   async save(person: Person): Promise<void> {

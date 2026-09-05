@@ -3,6 +3,7 @@ import { PrumoError } from '@/domain/errors/PrumoError'
 import type { PhaseRepository } from '@/domain/repositories/PhaseRepository'
 import { phaseSchema, type Phase } from '@/domain/schemas/phaseSchema'
 import type { EntityId } from '@/domain/schemas/primitives'
+import { parseRow, parseRows } from '@/infra/database/parseRow'
 import type { SqlGateway } from '@/infra/database/SqlGateway'
 
 const SELECT_COLUMNS = 'id, name, sort_order, color, active'
@@ -39,20 +40,6 @@ const phaseRowSchema = z
   }))
   .pipe(phaseSchema)
 
-function parsePhaseRow(row: unknown): Phase {
-  const result = phaseRowSchema.safeParse(row)
-
-  if (!result.success) {
-    throw new PrumoError(
-      'INVALID_RECORD_SHAPE',
-      `linha de phase fora do formato: ${result.error.message}`,
-      { cause: result.error },
-    )
-  }
-
-  return result.data
-}
-
 function toRowValues(phase: Phase): unknown[] {
   return [phase.id, phase.name, phase.sortOrder, phase.color, phase.active ? 1 : 0]
 }
@@ -67,7 +54,7 @@ export class SqlitePhaseRepository implements PhaseRepository {
   async listAll(): Promise<Phase[]> {
     const rows = await this.#gateway.select<unknown[]>(SELECT_ALL)
 
-    return rows.map(parsePhaseRow)
+    return parseRows(phaseRowSchema, 'phase', rows)
   }
 
   async findById(id: EntityId): Promise<Phase | null> {
@@ -78,7 +65,7 @@ export class SqlitePhaseRepository implements PhaseRepository {
       return null
     }
 
-    return parsePhaseRow(row)
+    return parseRow(phaseRowSchema, 'phase', row)
   }
 
   async save(phase: Phase): Promise<void> {

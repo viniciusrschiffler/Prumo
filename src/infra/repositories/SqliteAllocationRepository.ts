@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { PrumoError } from '@/domain/errors/PrumoError'
 import type { AllocationRepository } from '@/domain/repositories/AllocationRepository'
 import { allocationSchema, type Allocation } from '@/domain/schemas/allocationSchema'
+import { parseRows } from '@/infra/database/parseRow'
 import type { SqlGateway } from '@/infra/database/SqlGateway'
 
 const SELECT_ALL = `
@@ -33,20 +33,6 @@ const allocationRowSchema = z
   }))
   .pipe(allocationSchema)
 
-function parseAllocationRow(row: unknown): Allocation {
-  const result = allocationRowSchema.safeParse(row)
-
-  if (!result.success) {
-    throw new PrumoError(
-      'INVALID_RECORD_SHAPE',
-      `linha de allocation fora do formato: ${result.error.message}`,
-      { cause: result.error },
-    )
-  }
-
-  return result.data
-}
-
 export class SqliteAllocationRepository implements AllocationRepository {
   readonly #gateway: SqlGateway
 
@@ -57,6 +43,6 @@ export class SqliteAllocationRepository implements AllocationRepository {
   async listAll(): Promise<Allocation[]> {
     const rows = await this.#gateway.select<unknown[]>(SELECT_ALL)
 
-    return rows.map(parseAllocationRow)
+    return parseRows(allocationRowSchema, 'allocation', rows)
   }
 }

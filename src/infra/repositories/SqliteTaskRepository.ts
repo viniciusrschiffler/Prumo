@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { PrumoError } from '@/domain/errors/PrumoError'
 import type { TaskRepository } from '@/domain/repositories/TaskRepository'
 import { taskSchema, type Task } from '@/domain/schemas/taskSchema'
+import { parseRows } from '@/infra/database/parseRow'
 import type { SqlGateway } from '@/infra/database/SqlGateway'
 
 const SELECT_ALL = `
@@ -40,20 +40,6 @@ const taskRowSchema = z
   }))
   .pipe(taskSchema)
 
-function parseTaskRow(row: unknown): Task {
-  const result = taskRowSchema.safeParse(row)
-
-  if (!result.success) {
-    throw new PrumoError(
-      'INVALID_RECORD_SHAPE',
-      `linha de task fora do formato: ${result.error.message}`,
-      { cause: result.error },
-    )
-  }
-
-  return result.data
-}
-
 export class SqliteTaskRepository implements TaskRepository {
   readonly #gateway: SqlGateway
 
@@ -64,6 +50,6 @@ export class SqliteTaskRepository implements TaskRepository {
   async listAll(): Promise<Task[]> {
     const rows = await this.#gateway.select<unknown[]>(SELECT_ALL)
 
-    return rows.map(parseTaskRow)
+    return parseRows(taskRowSchema, 'task', rows)
   }
 }
