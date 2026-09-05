@@ -1,9 +1,12 @@
 import { deriveProjectPeriod } from '@/domain/derived/deriveProjectPeriod'
 import { calculateTotalEffort } from '@/domain/derived/calculateTotalEffort'
 import type { Allocation } from '@/domain/schemas/allocationSchema'
+import type { Person } from '@/domain/schemas/personSchema'
 import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
+import type { Project } from '@/domain/schemas/projectSchema'
 import type { Task } from '@/domain/schemas/taskSchema'
 import type { DatePeriod } from '@/domain/types/DatePeriod'
+import { findAllocationConflicts, type AllocationConflict } from './allocationConflicts'
 
 const INITIAL_STATUS = 'todo'
 const FIRST_SORT_ORDER = 1
@@ -153,4 +156,36 @@ export function previewTaskImpact(
     periodBefore: deriveProjectPeriod(currentTasks),
     periodAfter: deriveProjectPeriod(withPreview),
   }
+}
+
+export const PREVIEW_TASK_ID = 'nova-tarefa'
+
+export type PreviewConflictsInput = {
+  draft: NewTaskDraft
+  tasks: readonly Task[]
+  allocations: readonly Allocation[]
+  projects: readonly Project[]
+  people: readonly Person[]
+}
+
+// A prévia mede o conflito no mundo em que a tarefa já existe, então a tarefa e as alocações
+// dela entram na varredura com um id que nunca chega ao banco.
+export function previewAllocationConflicts(input: PreviewConflictsInput): AllocationConflict[] {
+  const preview = buildNewTask(
+    input.draft,
+    {
+      taskId: PREVIEW_TASK_ID,
+      allocationIds: input.draft.assignees.map((_, index) => `${PREVIEW_TASK_ID}-${index}`),
+    },
+    0,
+  )
+
+  return findAllocationConflicts({
+    projectId: input.draft.projectId,
+    taskIds: [PREVIEW_TASK_ID],
+    allocations: [...input.allocations, ...preview.allocations],
+    tasks: [...input.tasks, preview.task],
+    projects: input.projects,
+    people: input.people,
+  })
 }

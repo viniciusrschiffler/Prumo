@@ -139,8 +139,8 @@ export type AllocationConflictInput = {
   people: readonly Person[]
 }
 
-// Só entra aqui o conflito em que este projeto participa: quem soma acima de 100% inteiramente
-// em outros projetos é problema da tela de Capacidade, não desta.
+// Só entra o conflito de que as tarefas pedidas participam: quem soma acima de 100% fora
+// delas é problema da tela de Capacidade, e a prévia do modal passa só a tarefa que vai nascer.
 export function findAllocationConflicts(input: AllocationConflictInput): AllocationConflict[] {
   const taskIdSet = new Set(input.taskIds)
   const index: ConflictIndex = {
@@ -171,7 +171,9 @@ export function findAllocationConflicts(input: AllocationConflictInput): Allocat
           ),
         }))
         .filter((conflict) =>
-          conflict.contributions.some((contribution) => contribution.isSameProject),
+          conflict.contributions.some((contribution) =>
+            taskIdSet.has(contribution.allocation.taskId),
+          ),
         )
     })
     .toSorted((first, second) => first.period.start.localeCompare(second.period.start))
