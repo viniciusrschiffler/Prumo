@@ -5,6 +5,7 @@ import { useShortcuts } from '@/ui/shortcuts/useShortcuts'
 import type { BadgeTone } from './Badge'
 import { Button, type ButtonVariant } from './Button'
 import { classNames } from './classNames'
+import { IconButton } from './IconButton'
 import { KeyHint } from './KeyHint'
 import { useFocusTrap } from './useFocusTrap'
 
@@ -17,11 +18,45 @@ const DOT_CLASSES: Record<BadgeTone, string> = {
   accent: 'bg-accent',
 }
 
+export type ModalSize = 'default' | 'wide'
+
+const OVERLAY_CLASSES: Record<ModalSize, string> = {
+  default: 'items-center justify-center p-7',
+  wide: 'items-start justify-center px-6 py-12',
+}
+
+const PANEL_CLASSES: Record<ModalSize, string> = {
+  default: 'max-w-[520px]',
+  wide: 'max-h-full max-w-[680px]',
+}
+
+const HEADER_CLASSES: Record<ModalSize, string> = {
+  default: 'px-3.5 py-3',
+  wide: 'bg-sunken px-4 py-[13px]',
+}
+
+const TITLE_CLASSES: Record<ModalSize, string> = {
+  default: 'text-[14px] font-semibold',
+  wide: 'text-body font-semibold',
+}
+
+const BODY_CLASSES: Record<ModalSize, string> = {
+  default: 'gap-2.5 p-3.5',
+  wide: 'gap-3.5 overflow-auto p-4',
+}
+
+const FOOTER_CLASSES: Record<ModalSize, string> = {
+  default: 'px-3.5 py-3',
+  wide: 'px-4 py-3',
+}
+
 type ModalProps = {
   open: boolean
   title: string
   tone?: BadgeTone
-  hint?: string
+  note?: string
+  size?: ModalSize
+  hint?: ReactNode
   submitLabel?: string
   submitVariant?: ButtonVariant
   submitDisabled?: boolean
@@ -34,6 +69,8 @@ export function Modal({
   open,
   title,
   tone,
+  note,
+  size = 'default',
   hint,
   submitLabel,
   submitVariant = 'primary',
@@ -87,7 +124,7 @@ export function Modal({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-7">
+    <div className={classNames('fixed inset-0 z-50 flex', OVERLAY_CLASSES[size])}>
       <div
         className="absolute inset-0 bg-[oklch(0.2_0.02_265_/_0.35)]"
         onClick={onClose}
@@ -99,22 +136,45 @@ export function Modal({
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className="relative w-full max-w-[520px] overflow-hidden rounded-modal border border-border-strong bg-panel shadow-modal"
+        className={classNames(
+          'relative flex w-full flex-col overflow-hidden rounded-modal border border-border-strong bg-panel shadow-modal',
+          PANEL_CLASSES[size],
+        )}
       >
-        <div className="flex items-center justify-between border-b border-border px-3.5 py-3">
-          <div className="flex items-center gap-2">
-            {tone !== undefined && (
-              <span className={classNames('h-[7px] w-[7px] rounded-full', DOT_CLASSES[tone])} />
+        <div
+          className={classNames(
+            'flex flex-none items-center gap-2.5 border-b border-border',
+            HEADER_CLASSES[size],
+          )}
+        >
+          {tone !== undefined && (
+            <span className={classNames('h-[7px] w-[7px] rounded-full', DOT_CLASSES[tone])} />
+          )}
+          <span className={TITLE_CLASSES[size]}>{title}</span>
+          {note !== undefined && <span className="font-mono text-micro text-text3">{note}</span>}
+          <span className="ml-auto flex items-center gap-2">
+            <KeyHint keys="escape" variant="inline" className="text-text3" />
+            {size === 'wide' && (
+              <IconButton
+                label="Fechar"
+                onClick={onClose}
+                className="h-[22px] w-[22px] rounded-[5px] border-border text-support"
+              >
+                ✕
+              </IconButton>
             )}
-            <span className="text-[14px] font-semibold">{title}</span>
-          </div>
-          <KeyHint keys="escape" variant="inline" className="text-text3" />
+          </span>
         </div>
 
-        <div className="grid gap-2.5 p-3.5">{children}</div>
+        <div className={classNames('grid content-start', BODY_CLASSES[size])}>{children}</div>
 
-        <div className="flex items-center justify-between gap-2.5 border-t border-border bg-sunken px-3.5 py-3">
-          <span className="text-label font-normal text-text3">{hint}</span>
+        <div
+          className={classNames(
+            'flex flex-none items-center justify-between gap-2.5 border-t border-border bg-sunken',
+            FOOTER_CLASSES[size],
+          )}
+        >
+          <span className="text-label font-normal tracking-normal text-text3">{hint}</span>
           <div className="flex gap-2">
             <Button onClick={onClose}>Cancelar</Button>
             {submitLabel !== undefined && onSubmit !== undefined && (

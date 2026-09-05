@@ -3,11 +3,13 @@ import { classNames } from './classNames'
 
 type TableHeaderCellProps = ThHTMLAttributes<HTMLTableCellElement> & {
   numeric?: boolean
+  sticky?: boolean
   children?: ReactNode
 }
 
 export function TableHeaderCell({
   numeric = false,
+  sticky = false,
   children,
   className,
   ...cellProps
@@ -18,6 +20,7 @@ export function TableHeaderCell({
       className={classNames(
         'border-b border-border px-2.5 py-[7px] text-column uppercase text-text2',
         numeric ? 'text-right' : 'text-left',
+        sticky ? 'sticky top-0 z-10 bg-sunken' : '',
         className,
       )}
     >

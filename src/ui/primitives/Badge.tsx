@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { classNames } from './classNames'
 
 export type BadgeTone = 'neutral' | 'ok' | 'warn' | 'danger' | 'info' | 'accent'
-export type BadgeVariant = 'soft' | 'solid' | 'cancelled'
+export type BadgeVariant = 'soft' | 'solid' | 'outline' | 'cancelled'
 export type BadgeSize = 'default' | 'small'
 
 const SOFT_CLASSES: Record<BadgeTone, string> = {
@@ -32,6 +32,15 @@ const BORDER_CLASSES: Record<BadgeTone, string> = {
   accent: 'border border-accent',
 }
 
+const OUTLINE_TEXT_CLASSES: Record<BadgeTone, string> = {
+  neutral: 'text-text3',
+  ok: 'text-ok',
+  warn: 'text-warn',
+  danger: 'text-danger',
+  info: 'text-info',
+  accent: 'text-accent',
+}
+
 const DOT_CLASSES: Record<BadgeTone, string> = {
   neutral: 'bg-text3',
   ok: 'bg-ok',
@@ -52,9 +61,22 @@ type BadgeProps = {
   size?: BadgeSize
   dot?: boolean
   bordered?: boolean
+  dashed?: boolean
   uppercase?: boolean
   children: ReactNode
   className?: string
+}
+
+function toSurfaceClasses(tone: BadgeTone, variant: BadgeVariant): string {
+  if (variant === 'cancelled') {
+    return 'border border-dashed border-border-strong bg-transparent text-text3 line-through'
+  }
+
+  if (variant === 'outline') {
+    return classNames('bg-transparent', BORDER_CLASSES[tone], OUTLINE_TEXT_CLASSES[tone])
+  }
+
+  return variant === 'solid' ? SOLID_CLASSES[tone] : SOFT_CLASSES[tone]
 }
 
 export function Badge({
@@ -63,6 +85,7 @@ export function Badge({
   size = 'default',
   dot = false,
   bordered = false,
+  dashed = false,
   uppercase = false,
   children,
   className,
@@ -74,12 +97,9 @@ export function Badge({
       className={classNames(
         'inline-flex items-center gap-1.5 rounded-badge font-semibold',
         SIZE_CLASSES[size],
-        isCancelled
-          ? 'border border-dashed border-border-strong bg-transparent text-text3 line-through'
-          : variant === 'solid'
-            ? SOLID_CLASSES[tone]
-            : SOFT_CLASSES[tone],
-        bordered && !isCancelled ? BORDER_CLASSES[tone] : '',
+        toSurfaceClasses(tone, variant),
+        bordered && variant !== 'outline' && !isCancelled ? BORDER_CLASSES[tone] : '',
+        dashed && !isCancelled ? 'border-dashed' : '',
         uppercase ? 'uppercase tracking-[0.02em]' : '',
         className,
       )}
