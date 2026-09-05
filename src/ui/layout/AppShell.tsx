@@ -11,6 +11,7 @@ import { useShortcuts } from '@/ui/shortcuts/useShortcuts'
 import { ThemeProvider } from '@/ui/theme/ThemeProvider'
 import { resolveScreenFromPath, SCREEN_META } from './screenMeta'
 import { Sidebar } from './Sidebar'
+import { ToastRegion } from './ToastRegion'
 
 export function AppShell() {
   const location = useLocation()
@@ -71,6 +72,7 @@ export function AppShell() {
           <Outlet />
         </main>
         <ShortcutListener />
+        <ToastRegion />
       </div>
     </ThemeProvider>
   )

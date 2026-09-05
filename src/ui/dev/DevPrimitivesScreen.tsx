@@ -3,6 +3,7 @@ import { BadgesSection } from './BadgesSection'
 import { ButtonsSection } from './ButtonsSection'
 import { FeedbackSection } from './FeedbackSection'
 import { FormSection } from './FormSection'
+import { SurfacesSection } from './SurfacesSection'
 import { TableSection } from './TableSection'
 
 export function DevPrimitivesScreen() {
@@ -14,6 +15,7 @@ export function DevPrimitivesScreen() {
         <BadgesSection />
         <TableSection />
         <FeedbackSection />
+        <SurfacesSection />
       </div>
     </ScreenShell>
   )
