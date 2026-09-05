@@ -60,7 +60,7 @@ function CapacityField({ person, onCommit }: CapacityFieldProps) {
         numeric
         invalid={!isValid}
         aria-label={`Capacidade semanal de ${person.name}`}
-        className="h-[26px] w-[52px] px-[7px] text-right"
+        className="h-[26px] w-13 px-[7px] text-right"
         value={text}
         onChange={(event) => setText(event.target.value)}
         onBlur={commit}

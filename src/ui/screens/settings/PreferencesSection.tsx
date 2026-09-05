@@ -130,7 +130,7 @@ export function PreferencesSection() {
           <label className="grid gap-1">
             <span className="text-meta text-text2">Início da semana</span>
             <Select
-              className="w-[180px]"
+              className="w-45"
               value={settings.weekStart}
               onChange={(event) => save('weekStart', event.target.value as WeekStart)}
             >

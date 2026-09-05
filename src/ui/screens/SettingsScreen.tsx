@@ -81,9 +81,9 @@ export function SettingsScreen() {
       title="Configurações"
       subhead={subhead}
       actions={status === 'ready' ? <SaveStamp /> : undefined}
-      contentClassName="flex-1 overflow-auto px-5 pb-8 pt-4"
+      contentClassName="px-5 pb-8 pt-4"
     >
-      <div className="grid max-w-[1040px] auto-rows-max content-start gap-4">
+      <div className="grid max-w-260 auto-rows-max content-start gap-4">
         {status === 'error' && (
           <Alert
             level="danger"
