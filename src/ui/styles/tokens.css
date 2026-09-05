@@ -28,6 +28,11 @@
   --info-soft: oklch(0.95 0.03 232);
   --neutral-soft: oklch(0.94 0.004 260);
 
+  /* Mudança de escopo é o único tipo de evento sem cor semântica no catálogo. O roxo do
+     design vem dos --ph-*, que são seed de fase: repetir o valor aqui dá dono a ele. */
+  --event-scope: oklch(0.545 0.16 292);
+  --event-scope-soft: oklch(0.95 0.035 292);
+
   --ph-dev: oklch(0.545 0.16 292);
   --ph-dev-soft: oklch(0.95 0.035 292);
   --ph-hi: oklch(0.55 0.11 212);
@@ -72,6 +77,9 @@
   --info: oklch(0.705 0.095 232);
   --info-soft: oklch(0.3 0.045 232);
   --neutral-soft: oklch(0.285 0.008 265);
+
+  --event-scope: oklch(0.695 0.145 292);
+  --event-scope-soft: oklch(0.315 0.055 292);
 
   --ph-dev: oklch(0.695 0.145 292);
   --ph-dev-soft: oklch(0.315 0.055 292);

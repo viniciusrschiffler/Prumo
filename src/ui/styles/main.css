@@ -36,6 +36,8 @@
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
   --color-neutral-soft: var(--neutral-soft);
+  --color-event-scope: var(--event-scope);
+  --color-event-scope-soft: var(--event-scope-soft);
 
   --text-screen-title: 28px;
   --text-screen-title--line-height: 1.15;

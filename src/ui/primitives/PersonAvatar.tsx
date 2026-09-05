@@ -1,10 +1,11 @@
 import { classNames } from './classNames'
 
-export type PersonAvatarSize = 'default' | 'small' | 'tiny'
+export type PersonAvatarSize = 'default' | 'small' | 'compact' | 'tiny'
 
 const SIZE_CLASSES: Record<PersonAvatarSize, string> = {
   default: 'h-[22px] w-[22px] text-micro',
   small: 'h-5 w-5 text-[9px]',
+  compact: 'h-[18px] w-[18px] text-[8px]',
   tiny: 'h-4 w-4 text-[8px]',
 }
 
