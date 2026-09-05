@@ -1,6 +1,7 @@
 import { create } from 'zustand'
+import type { ThemePreference } from '@/domain/settings/appSettings'
 
-export type ThemePreference = 'light' | 'dark' | 'system'
+export type { ThemePreference }
 
 type ThemeState = {
   preference: ThemePreference

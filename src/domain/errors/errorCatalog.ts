@@ -8,6 +8,10 @@ export const ERROR_CATALOG = {
     'Não foi possível concluir a operação. Nenhuma alteração foi gravada.',
   PERSON_HAS_HISTORY:
     'Esta pessoa tem alocações registradas. Marque como inativa para preservar o histórico.',
+  PHASE_HAS_TASKS:
+    'Esta fase tem tarefas. Mova as tarefas para outra fase antes de excluí-la.',
+  DATA_FOLDER_UNREADABLE: 'Não foi possível ler a pasta de dados.',
+  EXPORT_FAILED: 'Não foi possível gravar a exportação na pasta de dados.',
   SHORTCUT_CONFLICT: 'Dois comandos disputam o mesmo atalho.',
   RECORD_NOT_FOUND: 'O registro não foi encontrado.',
   INVALID_RECORD_SHAPE: 'Um registro do banco está em formato inesperado.',

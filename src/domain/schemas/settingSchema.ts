@@ -1,10 +1,11 @@
 import { z } from 'zod'
 
+// As preferências do usuário e suas chaves ficam em domain/settings/appSettings.ts.
+// Aqui só entram as chaves operacionais, escritas pelo app e não pelo usuário.
+// O caminho da pasta de dados não cabe aqui: ele localiza o banco onde esta tabela mora.
 export const SETTING_KEYS = {
-  dataFolderPath: 'data_folder_path',
-  themePreference: 'theme_preference',
-  rowDensity: 'row_density',
-  showShortcutHints: 'show_shortcut_hints',
+  lastIntegrityCheckAt: 'last_integrity_check_at',
+  lastIntegrityCheckResult: 'last_integrity_check_result',
 } as const
 
 export const settingSchema = z.object({
