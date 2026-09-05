@@ -16,7 +16,7 @@ import { buildProjectRows } from '@/domain/projects/projectRow'
 import { sortProjectRows, type ProjectSortKey } from '@/domain/projects/projectSort'
 import { sumProjectsTotals } from '@/domain/projects/projectTotals'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
-import type { NewProjectDraft } from '@/domain/projects/newProject'
+import { SUGGESTED_PRIORITY, type NewProjectDraft } from '@/domain/projects/newProject'
 import { listOpenAllocationIds, type BlockProjectsDraft } from '@/domain/projects/blockProjects'
 import type { Priority } from '@/domain/schemas/primitives'
 import type { EntityId } from '@/domain/schemas/primitives'
@@ -248,8 +248,9 @@ export function ProjectsScreen() {
           value={search}
           placeholder="Filtrar por nome ou tag"
           aria-label="Filtrar por nome ou tag"
+          textSize="support"
           onChange={(event) => setSearch(event.target.value)}
-          className="ml-2 max-w-70 flex-1 text-support"
+          className="ml-2 max-w-70 flex-1"
         />
       }
       actions={
@@ -358,6 +359,7 @@ export function ProjectsScreen() {
       {isNewProjectOpen && (
         <NewProjectModal
           people={snapshot.people}
+          defaultPriority={SUGGESTED_PRIORITY}
           onClose={() => setNewProjectOpen(false)}
           onSubmit={(draft) => void handleCreate(draft)}
         />

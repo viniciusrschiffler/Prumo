@@ -1,17 +1,19 @@
 import type { Baseline } from '@/domain/schemas/baselineSchema'
-import type { EntityId, IsoDate, IsoDateTime } from '@/domain/schemas/primitives'
+import type { EntityId, IsoDate, IsoDateTime, Priority } from '@/domain/schemas/primitives'
 import type { Project } from '@/domain/schemas/projectSchema'
 
-// O modal do design não pergunta prioridade nem status: todo projeto nasce em descoberta,
-// na prioridade do meio, e é repriorizado depois pela própria tabela.
+// O modal do design não pergunta status: todo projeto nasce em descoberta e muda pelas
+// ações da tabela. A prioridade o modal pergunta, e sugere a do meio.
 const INITIAL_STATUS = 'discovery'
-const INITIAL_PRIORITY = 'P2'
+
+export const SUGGESTED_PRIORITY: Priority = 'P2'
 const FIRST_BASELINE_VERSION = 1
 const FIRST_BASELINE_REASON = 'plano inicial'
 
 export type NewProjectDraft = {
   name: string
   ownerPersonId: EntityId | null
+  priority: Priority
   tagNames: readonly string[]
   plannedStart: IsoDate | null
   plannedEnd: IsoDate | null
@@ -71,7 +73,7 @@ export function buildNewProject(
       name: draft.name.trim(),
       description: normalizeDescription(draft.description),
       status: INITIAL_STATUS,
-      priority: INITIAL_PRIORITY,
+      priority: draft.priority,
       ownerPersonId: draft.ownerPersonId,
       plannedStart: draft.plannedStart,
       plannedEnd: draft.plannedEnd,

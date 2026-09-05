@@ -8,6 +8,7 @@ function buildDraft(overrides: Partial<NewProjectDraft> = {}): NewProjectDraft {
   return {
     name: 'Portal do cliente',
     ownerPersonId: 'ana',
+    priority: 'P2',
     tagNames: ['financeiro', 'web'],
     plannedStart: '2026-09-14',
     plannedEnd: '2026-12-18',
@@ -45,6 +46,10 @@ describe('validateNewProject', () => {
 describe('buildNewProject', () => {
   it('Should start the project in discovery, as the modal announces', () => {
     expect(buildNewProject(buildDraft(), IDS, NOW).project.status).toBe('discovery')
+  })
+
+  it('Should keep the priority the modal collected', () => {
+    expect(buildNewProject(buildDraft({ priority: 'P0' }), IDS, NOW).project.priority).toBe('P0')
   })
 
   it('Should create the first baseline with the initial plan as its reason', () => {
