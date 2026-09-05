@@ -32,27 +32,34 @@ type GroupHeaderProps = {
 export function PhaseGroupHeader({ group }: GroupHeaderProps) {
   return (
     <div
+      role="row"
       style={group.phase === null ? undefined : phaseColorStyle(group.phase.color)}
       className={classNames(
-        'flex items-center gap-2 border-b border-border px-3 py-1.5',
+        'border-b border-border',
         group.phase === null ? 'bg-sunken' : 'phase-tinted bg-[var(--phase-tone-soft)]',
       )}
     >
-      <span
-        className={classNames(
-          'h-3 w-[3px] flex-none rounded-[2px]',
-          group.phase === null ? 'bg-text3' : 'bg-[var(--phase-tone)]',
-        )}
-      />
-      <span className="text-label font-semibold tracking-normal text-text">
-        {group.phase?.name ?? 'Sem fase'}
-      </span>
-      <span className="font-mono text-micro tabular-nums text-text2">{describeGroup(group)}</span>
-      {group.period !== null && (
-        <span className="ml-auto font-mono text-micro tabular-nums text-text2">
-          {toShortDate(group.period.start)} → {toShortDate(group.period.end)}
+      <div
+        role="rowheader"
+        aria-colindex={1}
+        className="flex items-center gap-2 px-3 py-1.5"
+      >
+        <span
+          className={classNames(
+            'h-3 w-[3px] flex-none rounded-[2px]',
+            group.phase === null ? 'bg-text3' : 'bg-[var(--phase-tone)]',
+          )}
+        />
+        <span className="text-label font-semibold tracking-normal text-text">
+          {group.phase?.name ?? 'Sem fase'}
         </span>
-      )}
+        <span className="font-mono text-micro tabular-nums text-text2">{describeGroup(group)}</span>
+        {group.period !== null && (
+          <span className="ml-auto font-mono text-micro tabular-nums text-text2">
+            {toShortDate(group.period.start)} → {toShortDate(group.period.end)}
+          </span>
+        )}
+      </div>
     </div>
   )
 }
@@ -78,7 +85,7 @@ export function TaskLine({ row, percentageByPerson, dependsOn, rowProps }: TaskL
         FOCUS_RING,
       )}
     >
-      <span className="flex min-w-0 items-center gap-2">
+      <span role="cell" className="flex min-w-0 items-center gap-2">
         <span title={task.title} className="truncate text-body">
           {task.title}
         </span>
@@ -93,11 +100,11 @@ export function TaskLine({ row, percentageByPerson, dependsOn, rowProps }: TaskL
         ))}
       </span>
 
-      <span>
+      <span role="cell">
         <TaskStatusBadge status={task.status} />
       </span>
 
-      <span className="flex min-w-0 gap-1">
+      <span role="cell" className="flex min-w-0 gap-1">
         {row.people.length === 0 ? (
           row.hasOnlyEndedAllocations ? (
             <span className="font-mono text-micro text-text3">alocações encerradas</span>
@@ -116,16 +123,17 @@ export function TaskLine({ row, percentageByPerson, dependsOn, rowProps }: TaskL
         )}
       </span>
 
-      <span className="text-right font-mono text-support tabular-nums">
+      <span role="cell" className="text-right font-mono text-support tabular-nums">
         {task.estimatedHours === null ? '—' : `${task.estimatedHours}h`}
       </span>
-      <span className="text-right font-mono text-support tabular-nums text-text2">
+      <span role="cell" className="text-right font-mono text-support tabular-nums text-text2">
         {formatIsoDate(task.actualStart ?? task.plannedStart)}
       </span>
-      <span className="text-right font-mono text-support tabular-nums text-text2">
+      <span role="cell" className="text-right font-mono text-support tabular-nums text-text2">
         {formatIsoDate(task.actualEnd ?? task.plannedEnd)}
       </span>
       <span
+        role="cell"
         className={classNames(
           'text-right font-mono text-support tabular-nums',
           row.deviationInDays !== null && row.deviationInDays > 0

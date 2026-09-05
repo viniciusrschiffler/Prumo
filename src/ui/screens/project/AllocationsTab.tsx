@@ -63,7 +63,7 @@ export function AllocationsTab({ rows, conflicts }: AllocationsTabProps) {
             className={`${GRID_COLUMNS} border-b border-border bg-sunken px-3 py-[7px] text-column uppercase text-text2`}
           >
             {COLUMNS.map((column) => (
-              <span key={column.label} className={column.numeric ? 'text-right' : undefined}>
+              <span role="columnheader" key={column.label} className={column.numeric ? 'text-right' : undefined}>
                 {column.label}
               </span>
             ))}
@@ -86,7 +86,7 @@ export function AllocationsTab({ rows, conflicts }: AllocationsTabProps) {
                   FOCUS_RING,
                 )}
               >
-                <span className="flex min-w-0 items-center gap-[7px]">
+                <span role="cell" className="flex min-w-0 items-center gap-[7px]">
                   <PersonAvatar
                     initials={row.person?.initials ?? '—'}
                     name={row.person?.name}
@@ -103,11 +103,12 @@ export function AllocationsTab({ rows, conflicts }: AllocationsTabProps) {
                   </span>
                 </span>
 
-                <span className={classNames('truncate text-support', muted)}>
+                <span role="cell" className={classNames('truncate text-support', muted)}>
                   {row.task?.title ?? 'Tarefa removida'}
                 </span>
 
                 <span
+                  role="cell"
                   className={classNames(
                     'text-right font-mono text-support tabular-nums',
                     row.isEnded ? 'text-text3' : isOverloaded ? 'text-warn' : 'text-text',
@@ -117,16 +118,19 @@ export function AllocationsTab({ rows, conflicts }: AllocationsTabProps) {
                 </span>
 
                 <span
+                  role="cell"
                   className={classNames('text-right font-mono text-support tabular-nums', muted)}
                 >
                   {row.consumedWeeklyHours}h/sem
                 </span>
                 <span
+                  role="cell"
                   className={classNames('text-right font-mono text-support tabular-nums', muted)}
                 >
                   {formatIsoDate(row.allocation.startDate)}
                 </span>
                 <span
+                  role="cell"
                   className={classNames('text-right font-mono text-support tabular-nums', muted)}
                 >
                   {formatIsoDate(row.allocation.endDate)}

@@ -135,32 +135,38 @@ export function TasksTab({
           }
         />
       ) : (
-        <div role="table" aria-label="Tarefas do projeto" className="overflow-hidden rounded-card border border-border bg-panel">
-          <div
-            role="row"
-            className={`${TASK_GRID_COLUMNS} border-b border-border bg-sunken px-3 py-[7px] text-column uppercase text-text2`}
-          >
-            {COLUMNS.map((column) => (
-              <span key={column.label} className={column.numeric ? 'text-right' : undefined}>
-                {column.label}
-              </span>
+        <div className="overflow-hidden rounded-card border border-border bg-panel">
+          <div role="table" aria-label="Tarefas do projeto">
+            <div
+              role="row"
+              className={`${TASK_GRID_COLUMNS} border-b border-border bg-sunken px-3 py-[7px] text-column uppercase text-text2`}
+            >
+              {COLUMNS.map((column) => (
+                <span
+                  role="columnheader"
+                  key={column.label}
+                  className={column.numeric ? 'text-right' : undefined}
+                >
+                  {column.label}
+                </span>
+              ))}
+            </div>
+
+            {groups.map((group) => (
+              <Fragment key={group.phase?.id ?? 'sem-fase'}>
+                <PhaseGroupHeader group={group} />
+                {group.tasks.map((row) => (
+                  <TaskLine
+                    key={row.task.id}
+                    row={row}
+                    percentageByPerson={percentages.get(row.task.id) ?? new Map()}
+                    dependsOn={dependenciesOf(row.task.id)}
+                    rowProps={navigation.getRowProps(row.task.id)}
+                  />
+                ))}
+              </Fragment>
             ))}
           </div>
-
-          {groups.map((group) => (
-            <Fragment key={group.phase?.id ?? 'sem-fase'}>
-              <PhaseGroupHeader group={group} />
-              {group.tasks.map((row) => (
-                <TaskLine
-                  key={row.task.id}
-                  row={row}
-                  percentageByPerson={percentages.get(row.task.id) ?? new Map()}
-                  dependsOn={dependenciesOf(row.task.id)}
-                  rowProps={navigation.getRowProps(row.task.id)}
-                />
-              ))}
-            </Fragment>
-          ))}
 
           <div className="flex items-center gap-2 px-3 pb-2 pt-1.5">
             <AddButton keys="t" onClick={onNewTask}>
