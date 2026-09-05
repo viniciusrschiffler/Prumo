@@ -82,3 +82,59 @@ describe('SqliteProjectEventRepository', () => {
     expect(reverting?.revertsEventId).toBe('ev-dec1')
   })
 })
+
+describe('Gravação de evento', () => {
+  it('Should write a registered risk with its open flag', async () => {
+    await repository.create({
+      id: 'ev-novo',
+      projectId: 'gateway',
+      type: 'risk',
+      eventDate: '2026-09-05',
+      title: 'Fornecedor sem resposta',
+      bodyMarkdown: 'Sem retorno desde 20/08.',
+      revertsEventId: null,
+      riskOpen: true,
+      expectedResumeAt: null,
+      createdAt: '2026-09-05T10:00:00Z',
+    })
+
+    expect((await repository.listAll())[0]).toMatchObject({
+      id: 'ev-novo',
+      type: 'risk',
+      riskOpen: true,
+      bodyMarkdown: 'Sem retorno desde 20/08.',
+    })
+  })
+
+  it('Should list the tasks a event touches', async () => {
+    await seedEvent([
+      'ev-realloc',
+      'gateway',
+      'reallocation',
+      '2026-08-28',
+      'Rafael Brito 100% → 50%',
+      null,
+      null,
+      0,
+      null,
+      '2026-08-28T11:20:00Z',
+    ])
+    await gateway.executeBatch([
+      {
+        query: `
+          INSERT INTO task (id, project_id, phase_id, title, status, sort_order)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `,
+        values: ['gw-rew', 'gateway', 'development', 'Rewrite do roteador', 'in_progress', 2],
+      },
+      {
+        query: 'INSERT INTO project_event_task (project_event_id, task_id) VALUES (?, ?)',
+        values: ['ev-realloc', 'gw-rew'],
+      },
+    ])
+
+    expect(await repository.listEventTasks()).toEqual([
+      { projectEventId: 'ev-realloc', taskId: 'gw-rew' },
+    ])
+  })
+})

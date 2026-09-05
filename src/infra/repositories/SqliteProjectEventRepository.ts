@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import type { ProjectEventRepository } from '@/domain/repositories/ProjectEventRepository'
-import { projectEventSchema, type ProjectEvent } from '@/domain/schemas/projectEventSchema'
+import {
+  projectEventSchema,
+  projectEventTaskSchema,
+  type ProjectEvent,
+  type ProjectEventTask,
+} from '@/domain/schemas/projectEventSchema'
 import { parseRows } from '@/infra/database/parseRow'
 import type { SqlGateway } from '@/infra/database/SqlGateway'
 
@@ -9,6 +14,17 @@ const SELECT_ALL = `
          risk_open, expected_resume_at, created_at
   FROM project_event
   ORDER BY event_date, created_at
+`
+
+const SELECT_EVENT_TASKS = `
+  SELECT project_event_id, task_id
+  FROM project_event_task
+`
+
+const INSERT_EVENT = `
+  INSERT INTO project_event (id, project_id, type, event_date, title, body_md,
+                             reverts_event_id, risk_open, expected_resume_at, created_at)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 const projectEventRowSchema = z
@@ -38,6 +54,17 @@ const projectEventRowSchema = z
   }))
   .pipe(projectEventSchema)
 
+const projectEventTaskRowSchema = z
+  .object({
+    project_event_id: z.string(),
+    task_id: z.string(),
+  })
+  .transform((row) => ({
+    projectEventId: row.project_event_id,
+    taskId: row.task_id,
+  }))
+  .pipe(projectEventTaskSchema)
+
 export class SqliteProjectEventRepository implements ProjectEventRepository {
   readonly #gateway: SqlGateway
 
@@ -51,5 +78,33 @@ export class SqliteProjectEventRepository implements ProjectEventRepository {
       'project_event',
       await this.#gateway.select<unknown[]>(SELECT_ALL),
     )
+  }
+
+  async listEventTasks(): Promise<ProjectEventTask[]> {
+    return parseRows(
+      projectEventTaskRowSchema,
+      'project_event_task',
+      await this.#gateway.select<unknown[]>(SELECT_EVENT_TASKS),
+    )
+  }
+
+  async create(event: ProjectEvent): Promise<void> {
+    await this.#gateway.executeBatch([
+      {
+        query: INSERT_EVENT,
+        values: [
+          event.id,
+          event.projectId,
+          event.type,
+          event.eventDate,
+          event.title,
+          event.bodyMarkdown,
+          event.revertsEventId,
+          event.riskOpen ? 1 : 0,
+          event.expectedResumeAt,
+          event.createdAt,
+        ],
+      },
+    ])
   }
 }

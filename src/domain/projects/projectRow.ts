@@ -11,24 +11,28 @@ import { hasOpenRisk } from '@/domain/derived/hasOpenRisk'
 import { selectCurrentBaseline } from '@/domain/derived/selectCurrentBaseline'
 import type { Allocation } from '@/domain/schemas/allocationSchema'
 import type { Baseline, BaselineTask } from '@/domain/schemas/baselineSchema'
+import type { Note } from '@/domain/schemas/noteSchema'
 import type { Person } from '@/domain/schemas/personSchema'
 import type { Phase } from '@/domain/schemas/phaseSchema'
 import type { EntityId } from '@/domain/schemas/primitives'
-import type { ProjectEvent } from '@/domain/schemas/projectEventSchema'
+import type { ProjectEvent, ProjectEventTask } from '@/domain/schemas/projectEventSchema'
 import type { Project } from '@/domain/schemas/projectSchema'
 import type { ProjectTag, Tag } from '@/domain/schemas/tagSchema'
-import type { Task } from '@/domain/schemas/taskSchema'
+import type { Task, TaskDependency } from '@/domain/schemas/taskSchema'
 import type { DatePeriod } from '@/domain/types/DatePeriod'
 
 export type ProjectsSnapshot = {
   projects: readonly Project[]
   tasks: readonly Task[]
+  taskDependencies: readonly TaskDependency[]
   phases: readonly Phase[]
   people: readonly Person[]
   allocations: readonly Allocation[]
   baselines: readonly Baseline[]
   baselineTasks: readonly BaselineTask[]
   events: readonly ProjectEvent[]
+  eventTasks: readonly ProjectEventTask[]
+  notes: readonly Note[]
   tags: readonly Tag[]
   projectTags: readonly ProjectTag[]
 }

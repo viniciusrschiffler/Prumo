@@ -1,14 +1,37 @@
 import { z } from 'zod'
+import type { NewTask } from '@/domain/projects/newTask'
 import type { TaskRepository } from '@/domain/repositories/TaskRepository'
-import { taskSchema, type Task } from '@/domain/schemas/taskSchema'
+import {
+  taskDependencySchema,
+  taskSchema,
+  type Task,
+  type TaskDependency,
+} from '@/domain/schemas/taskSchema'
 import { parseRows } from '@/infra/database/parseRow'
-import type { SqlGateway } from '@/infra/database/SqlGateway'
+import type { BatchStatement, SqlGateway } from '@/infra/database/SqlGateway'
 
 const SELECT_ALL = `
   SELECT id, project_id, phase_id, title, status, planned_start, planned_end,
          actual_start, actual_end, estimated_hours, sort_order
   FROM task
   ORDER BY project_id, sort_order
+`
+
+const SELECT_DEPENDENCIES = `
+  SELECT task_id, depends_on_task_id
+  FROM task_dependency
+`
+
+const INSERT_TASK = `
+  INSERT INTO task (id, project_id, phase_id, title, status, planned_start, planned_end,
+                    actual_start, actual_end, estimated_hours, sort_order)
+  VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
+`
+
+const INSERT_ALLOCATION = `
+  INSERT INTO allocation (id, task_id, person_id, start_date, end_date, percentage,
+                          ended_at, ended_reason)
+  VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)
 `
 
 const taskRowSchema = z
@@ -40,6 +63,49 @@ const taskRowSchema = z
   }))
   .pipe(taskSchema)
 
+const taskDependencyRowSchema = z
+  .object({
+    task_id: z.string(),
+    depends_on_task_id: z.string(),
+  })
+  .transform((row) => ({
+    taskId: row.task_id,
+    dependsOnTaskId: row.depends_on_task_id,
+  }))
+  .pipe(taskDependencySchema)
+
+function toCreateStatements(newTask: NewTask): BatchStatement[] {
+  const { task } = newTask
+
+  return [
+    {
+      query: INSERT_TASK,
+      values: [
+        task.id,
+        task.projectId,
+        task.phaseId,
+        task.title,
+        task.status,
+        task.plannedStart,
+        task.plannedEnd,
+        task.estimatedHours,
+        task.sortOrder,
+      ],
+    },
+    ...newTask.allocations.map((allocation) => ({
+      query: INSERT_ALLOCATION,
+      values: [
+        allocation.id,
+        allocation.taskId,
+        allocation.personId,
+        allocation.startDate,
+        allocation.endDate,
+        allocation.percentage,
+      ],
+    })),
+  ]
+}
+
 export class SqliteTaskRepository implements TaskRepository {
   readonly #gateway: SqlGateway
 
@@ -51,5 +117,17 @@ export class SqliteTaskRepository implements TaskRepository {
     const rows = await this.#gateway.select<unknown[]>(SELECT_ALL)
 
     return parseRows(taskRowSchema, 'task', rows)
+  }
+
+  async listDependencies(): Promise<TaskDependency[]> {
+    const rows = await this.#gateway.select<unknown[]>(SELECT_DEPENDENCIES)
+
+    return parseRows(taskDependencyRowSchema, 'task_dependency', rows)
+  }
+
+  // Tarefa e alocações vão no mesmo lote: gravar a tarefa sem quem a executa perderia a
+  // atribuição sem nada na tela dizendo que faltou.
+  async create(newTask: NewTask): Promise<void> {
+    await this.#gateway.executeBatch(toCreateStatements(newTask))
   }
 }

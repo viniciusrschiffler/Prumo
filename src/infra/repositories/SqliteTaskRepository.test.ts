@@ -153,3 +153,94 @@ describe('SqliteAllocationRepository', () => {
     expect(countActiveAllocationsByPerson(await allocationRepository.listAll()).get('ana')).toBe(2)
   })
 })
+
+describe('Gravação de tarefa', () => {
+  it('Should write the task and its allocations in one batch', async () => {
+    await taskRepository.create({
+      task: {
+        id: 'gw-conc',
+        projectId: 'gateway',
+        phaseId: 'production',
+        title: 'Conciliação automática',
+        status: 'todo',
+        plannedStart: '2026-09-07',
+        plannedEnd: '2026-10-09',
+        actualStart: null,
+        actualEnd: null,
+        estimatedHours: 80,
+        sortOrder: 5,
+      },
+      allocations: [
+        {
+          id: 'al-conc-1',
+          taskId: 'gw-conc',
+          personId: 'ana',
+          startDate: '2026-09-07',
+          endDate: '2026-10-09',
+          percentage: 50,
+          endedAt: null,
+          endedReason: null,
+        },
+      ],
+    })
+
+    const written = (await taskRepository.listAll()).find((task) => task.id === 'gw-conc')
+    const allocations = await gateway.select<{ id: string }[]>(
+      'SELECT id FROM allocation WHERE task_id = ?',
+      ['gw-conc'],
+    )
+
+    expect(written).toMatchObject({ title: 'Conciliação automática', estimatedHours: 80 })
+    expect(allocations).toEqual([{ id: 'al-conc-1' }])
+  })
+
+  it('Should leave no task behind when an allocation of the batch is refused', async () => {
+    const write = taskRepository.create({
+      task: {
+        id: 'gw-orfa',
+        projectId: 'gateway',
+        phaseId: 'production',
+        title: 'Tarefa sem dono válido',
+        status: 'todo',
+        plannedStart: '2026-09-07',
+        plannedEnd: '2026-10-09',
+        actualStart: null,
+        actualEnd: null,
+        estimatedHours: 8,
+        sortOrder: 6,
+      },
+      allocations: [
+        {
+          id: 'al-orfa',
+          taskId: 'gw-orfa',
+          personId: 'pessoa-inexistente',
+          startDate: '2026-09-07',
+          endDate: '2026-10-09',
+          percentage: 50,
+          endedAt: null,
+          endedReason: null,
+        },
+      ],
+    })
+
+    await expect(write).rejects.toThrow()
+    expect((await taskRepository.listAll()).some((task) => task.id === 'gw-orfa')).toBe(false)
+  })
+})
+
+describe('Dependência entre tarefas', () => {
+  it('Should list which task depends on which', async () => {
+    await insertTask('gw-rew', 'development', 'in_progress')
+    await insertTask('gw-tes', 'internal_homologation', 'todo')
+    await gateway.executeBatch([
+      {
+        query: 'INSERT INTO task_dependency (task_id, depends_on_task_id) VALUES (?, ?)',
+        values: ['gw-tes', 'gw-rew'],
+      },
+    ])
+
+    expect(await taskRepository.listDependencies()).toEqual([
+      { taskId: 'gw-tes', dependsOnTaskId: 'gw-rew' },
+    ])
+  })
+})

@@ -199,6 +199,23 @@ type ProjectTagRow = {
   tag_id: string
 }
 
+type TaskDependencyRow = {
+  task_id: string
+  depends_on_task_id: string
+}
+
+type ProjectEventTaskRow = {
+  project_event_id: string
+  task_id: string
+}
+
+type NoteRow = {
+  path: string
+  project_id: string | null
+  project_event_id: string | null
+  updated_at: string
+}
+
 export function readProjectsSnapshot(database: DatabaseSync): ProjectsSnapshot {
   return {
     projects: selectRows<ProjectRow>(database, 'SELECT * FROM project ORDER BY name').map((row) => ({
@@ -228,6 +245,13 @@ export function readProjectsSnapshot(database: DatabaseSync): ProjectsSnapshot {
         sortOrder: row.sort_order,
       }),
     ),
+    taskDependencies: selectRows<TaskDependencyRow>(
+      database,
+      'SELECT * FROM task_dependency',
+    ).map((row) => ({
+      taskId: row.task_id,
+      dependsOnTaskId: row.depends_on_task_id,
+    })),
     phases: selectRows<PhaseRow>(database, 'SELECT * FROM phase ORDER BY sort_order').map((row) => ({
       id: row.id,
       name: row.name,
@@ -272,6 +296,21 @@ export function readProjectsSnapshot(database: DatabaseSync): ProjectsSnapshot {
       expectedResumeAt: row.expected_resume_at,
       createdAt: row.created_at,
     })),
+    eventTasks: selectRows<ProjectEventTaskRow>(
+      database,
+      'SELECT * FROM project_event_task',
+    ).map((row) => ({
+      projectEventId: row.project_event_id,
+      taskId: row.task_id,
+    })),
+    notes: selectRows<NoteRow>(database, 'SELECT * FROM note ORDER BY updated_at DESC').map(
+      (row) => ({
+        path: row.path,
+        projectId: row.project_id,
+        projectEventId: row.project_event_id,
+        updatedAt: row.updated_at,
+      }),
+    ),
     tags: selectRows<TagRow>(database, 'SELECT * FROM tag ORDER BY name').map((row) => ({
       id: row.id,
       name: row.name,

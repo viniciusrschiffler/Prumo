@@ -13,6 +13,7 @@ import { todayIsoDate } from '@/app/clock'
 import { getSqlGateway } from '@/infra/database/DatabaseConnection'
 import { SqliteAllocationRepository } from '@/infra/repositories/SqliteAllocationRepository'
 import { SqliteBaselineRepository } from '@/infra/repositories/SqliteBaselineRepository'
+import { SqliteNoteRepository } from '@/infra/repositories/SqliteNoteRepository'
 import { SqlitePersonRepository } from '@/infra/repositories/SqlitePersonRepository'
 import { SqlitePhaseRepository } from '@/infra/repositories/SqlitePhaseRepository'
 import { SqliteProjectEventRepository } from '@/infra/repositories/SqliteProjectEventRepository'
@@ -26,12 +27,15 @@ export type ProjectsStatus = 'idle' | 'loading' | 'ready' | 'error'
 const EMPTY_SNAPSHOT: ProjectsSnapshot = {
   projects: [],
   tasks: [],
+  taskDependencies: [],
   phases: [],
   people: [],
   allocations: [],
   baselines: [],
   baselineTasks: [],
   events: [],
+  eventTasks: [],
+  notes: [],
   tags: [],
   projectTags: [],
 }
@@ -55,28 +59,36 @@ async function readEverything(): Promise<{
   const gateway = getSqlGateway()
   const baselineRepository = new SqliteBaselineRepository(gateway)
   const tagRepository = new SqliteTagRepository(gateway)
+  const taskRepository = new SqliteTaskRepository(gateway)
+  const eventRepository = new SqliteProjectEventRepository(gateway)
 
   const [
     projects,
     tasks,
+    taskDependencies,
     phases,
     people,
     allocations,
     baselines,
     baselineTasks,
     events,
+    eventTasks,
+    notes,
     tags,
     projectTags,
     savedViews,
   ] = await Promise.all([
     new SqliteProjectRepository(gateway).listAll(),
-    new SqliteTaskRepository(gateway).listAll(),
+    taskRepository.listAll(),
+    taskRepository.listDependencies(),
     new SqlitePhaseRepository(gateway).listAll(),
     new SqlitePersonRepository(gateway).listAll(),
     new SqliteAllocationRepository(gateway).listAll(),
     baselineRepository.listAll(),
     baselineRepository.listTasks(),
-    new SqliteProjectEventRepository(gateway).listAll(),
+    eventRepository.listAll(),
+    eventRepository.listEventTasks(),
+    new SqliteNoteRepository(gateway).listAll(),
     tagRepository.listAll(),
     tagRepository.listProjectTags(),
     new SqliteSavedViewRepository(gateway).listByScreen('projects'),
@@ -86,12 +98,15 @@ async function readEverything(): Promise<{
     snapshot: {
       projects,
       tasks,
+      taskDependencies,
       phases,
       people,
       allocations,
       baselines,
       baselineTasks,
       events,
+      eventTasks,
+      notes,
       tags,
       projectTags,
     },
