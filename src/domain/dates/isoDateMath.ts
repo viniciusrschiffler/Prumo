@@ -1,4 +1,4 @@
-import type { IsoDate } from '@/domain/schemas/primitives'
+import type { IsoDate, IsoDateTime } from '@/domain/schemas/primitives'
 import type { DatePeriod } from '@/domain/types/DatePeriod'
 
 const MILLISECONDS_PER_DAY = 86_400_000
@@ -56,4 +56,12 @@ export function intersectPeriods(first: DatePeriod, second: DatePeriod): DatePer
     start: latestDate(first.start, second.start),
     end: earliestDate(first.end, second.end),
   }
+}
+
+export function weekdayIndex(date: IsoDate): number {
+  return new Date(toUtcTimestamp(date)).getUTCDay()
+}
+
+export function toIsoDateOf(timestamp: IsoDateTime): IsoDate {
+  return timestamp.split('T')[0] ?? timestamp
 }
