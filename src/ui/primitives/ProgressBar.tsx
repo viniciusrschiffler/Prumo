@@ -13,6 +13,14 @@ const TONE_CLASSES: Record<ProgressTone, string> = {
   ok: 'bg-ok',
 }
 
+// A tabela densa desenha a barra em 5px; o cartão de progresso do sistema de design, em 6px.
+export type ProgressSize = 'default' | 'dense'
+
+const SIZE_CLASSES: Record<ProgressSize, string> = {
+  default: 'h-1.5',
+  dense: 'h-[5px]',
+}
+
 const TRACK_CLASSES: Record<ProgressTrack, string> = {
   sunken: 'bg-sunken',
   border: 'bg-border',
@@ -28,6 +36,7 @@ type ProgressBarProps = {
   segments?: readonly ProgressSegment[]
   tone?: ProgressTone
   track?: ProgressTrack
+  size?: ProgressSize
   hatched?: boolean
   className?: string
 }
@@ -51,6 +60,7 @@ export function ProgressBar({
   segments,
   tone = 'default',
   track = 'sunken',
+  size = 'default',
   hatched = false,
   className,
 }: ProgressBarProps) {
@@ -59,7 +69,8 @@ export function ProgressBar({
   return (
     <div
       className={classNames(
-        'flex h-1.5 overflow-hidden rounded-[3px]',
+        'flex overflow-hidden rounded-[3px]',
+        SIZE_CLASSES[size],
         TRACK_CLASSES[track],
         hatched ? HATCH_CLASSES : '',
         className,

@@ -144,6 +144,7 @@ export function ProjectTableRow({
           <ProgressBar
             value={progress}
             tone={isBlocked ? 'muted' : 'default'}
+            size="dense"
             hatched={isBlocked}
             className="w-16 flex-none"
           />
@@ -263,6 +264,7 @@ export function TaskTableRow({ row }: { row: ProjectTaskRow }) {
             value={isDone ? 1 : 0}
             tone={taskProgressTone(task.status)}
             track="border"
+            size="dense"
             hatched={isBlocked}
             className="w-16 flex-none"
           />
