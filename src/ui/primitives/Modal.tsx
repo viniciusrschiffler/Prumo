@@ -16,6 +16,7 @@ const DOT_CLASSES: Record<BadgeTone, string> = {
   danger: 'bg-danger',
   info: 'bg-info',
   accent: 'bg-accent',
+  scope: 'bg-event-scope',
 }
 
 export type ModalSize = 'default' | 'wide'

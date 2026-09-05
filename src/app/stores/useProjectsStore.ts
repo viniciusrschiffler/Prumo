@@ -6,6 +6,11 @@ import {
   type BlockProjectsDraft,
 } from '@/domain/projects/blockProjects'
 import { buildNewProject, type NewProjectDraft } from '@/domain/projects/newProject'
+import {
+  buildNewProjectEvent,
+  type NewProjectEventDraft,
+} from '@/domain/projects/newProjectEvent'
+import { buildNewTask, nextSortOrder, type NewTaskDraft } from '@/domain/projects/newTask'
 import type { ProjectsSnapshot } from '@/domain/projects/projectRow'
 import type { SavedView } from '@/domain/schemas/savedViewSchema'
 import type { EntityId, Priority } from '@/domain/schemas/primitives'
@@ -48,6 +53,8 @@ type ProjectsState = {
   load: () => Promise<void>
   refresh: () => Promise<void>
   createProject: (draft: NewProjectDraft) => Promise<void>
+  createTask: (draft: NewTaskDraft) => Promise<void>
+  registerEvent: (draft: NewProjectEventDraft) => Promise<void>
   setPriority: (projectIds: readonly EntityId[], priority: Priority) => Promise<void>
   blockProjects: (projectIds: readonly EntityId[], draft: BlockProjectsDraft) => Promise<void>
 }
@@ -145,6 +152,28 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
       newProject.tagNames.map((name) => ({ id: crypto.randomUUID(), name })),
     )
 
+    await get().refresh()
+  },
+
+  createTask: async (draft) => {
+    const projectTasks = get().snapshot.tasks.filter((task) => task.projectId === draft.projectId)
+    const newTask = buildNewTask(
+      draft,
+      {
+        taskId: crypto.randomUUID(),
+        allocationIds: draft.assignees.map(() => crypto.randomUUID()),
+      },
+      nextSortOrder(projectTasks),
+    )
+
+    await new SqliteTaskRepository(getSqlGateway()).create(newTask)
+    await get().refresh()
+  },
+
+  registerEvent: async (draft) => {
+    const event = buildNewProjectEvent(draft, crypto.randomUUID(), new Date().toISOString())
+
+    await new SqliteProjectEventRepository(getSqlGateway()).create(event)
     await get().refresh()
   },
 

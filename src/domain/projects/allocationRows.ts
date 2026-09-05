@@ -68,3 +68,27 @@ export function buildAllocationRows(
 export function countOpenAllocations(rows: readonly AllocationRow[]): number {
   return rows.filter((row) => !row.isEnded).length
 }
+
+// O chip de pessoa na linha da tarefa mostra o percentual da alocação aberta. A encerrada
+// não entra: ela já não consome capacidade e a pessoa nem aparece mais na linha.
+export function mapOpenPercentagesByTask(
+  rows: readonly AllocationRow[],
+): Map<EntityId, Map<EntityId, number>> {
+  const byTask = new Map<EntityId, Map<EntityId, number>>()
+
+  for (const row of rows) {
+    if (row.isEnded) {
+      continue
+    }
+
+    const byPerson = byTask.get(row.allocation.taskId) ?? new Map<EntityId, number>()
+
+    byPerson.set(
+      row.allocation.personId,
+      (byPerson.get(row.allocation.personId) ?? 0) + row.allocation.percentage,
+    )
+    byTask.set(row.allocation.taskId, byPerson)
+  }
+
+  return byTask
+}

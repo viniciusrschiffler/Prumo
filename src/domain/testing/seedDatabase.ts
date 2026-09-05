@@ -2,7 +2,7 @@ import { DatabaseSync } from 'node:sqlite'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { buildSeedData } from '../../../scripts/seed/seedData.ts'
+import { buildNotes, buildSeedData } from '../../../scripts/seed/seedData.ts'
 import { createDateShifter, DESIGN_TODAY } from '../../../scripts/seed/seedDates.ts'
 import { splitSqlStatements } from '@/infra/database/splitSqlStatements'
 
@@ -37,6 +37,15 @@ export function openSeedDatabase(): DatabaseSync {
     for (const row of seed.rows) {
       statement.run(...(row as never[]))
     }
+  }
+
+  // A nota vive num arquivo markdown fora do banco; aqui só a linha que a indexa importa.
+  const noteStatement = database.prepare(
+    'INSERT INTO note (path, project_id, project_event_id, updated_at) VALUES (?, ?, ?, ?)',
+  )
+
+  for (const note of buildNotes()) {
+    noteStatement.run(note.path, note.projectId, note.projectEventId, `${DESIGN_TODAY}T09:00:00Z`)
   }
 
   return database

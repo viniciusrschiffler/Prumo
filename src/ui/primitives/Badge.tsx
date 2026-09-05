@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { classNames } from './classNames'
 
-export type BadgeTone = 'neutral' | 'ok' | 'warn' | 'danger' | 'info' | 'accent'
+export type BadgeTone = 'neutral' | 'ok' | 'warn' | 'danger' | 'info' | 'accent' | 'scope'
 export type BadgeVariant = 'soft' | 'solid' | 'outline' | 'cancelled'
 export type BadgeSize = 'default' | 'small'
 
@@ -12,6 +12,7 @@ const SOFT_CLASSES: Record<BadgeTone, string> = {
   danger: 'bg-danger-soft text-danger',
   info: 'bg-info-soft text-info',
   accent: 'bg-accent-soft text-accent',
+  scope: 'bg-event-scope-soft text-event-scope',
 }
 
 const SOLID_CLASSES: Record<BadgeTone, string> = {
@@ -21,6 +22,7 @@ const SOLID_CLASSES: Record<BadgeTone, string> = {
   danger: 'bg-danger text-accent-fg',
   info: 'bg-info text-accent-fg',
   accent: 'bg-accent text-accent-fg',
+  scope: 'bg-event-scope text-accent-fg',
 }
 
 const BORDER_CLASSES: Record<BadgeTone, string> = {
@@ -30,6 +32,7 @@ const BORDER_CLASSES: Record<BadgeTone, string> = {
   danger: 'border border-danger',
   info: 'border border-info',
   accent: 'border border-accent',
+  scope: 'border border-event-scope',
 }
 
 const OUTLINE_TEXT_CLASSES: Record<BadgeTone, string> = {
@@ -39,6 +42,7 @@ const OUTLINE_TEXT_CLASSES: Record<BadgeTone, string> = {
   danger: 'text-danger',
   info: 'text-info',
   accent: 'text-accent',
+  scope: 'text-event-scope',
 }
 
 const DOT_CLASSES: Record<BadgeTone, string> = {
@@ -48,6 +52,7 @@ const DOT_CLASSES: Record<BadgeTone, string> = {
   danger: 'bg-danger',
   info: 'bg-info',
   accent: 'bg-accent',
+  scope: 'bg-event-scope',
 }
 
 const SIZE_CLASSES: Record<BadgeSize, string> = {

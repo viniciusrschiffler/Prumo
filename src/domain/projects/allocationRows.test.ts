@@ -3,7 +3,12 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { buildAllocation, buildPerson, buildTask } from '@/domain/testing/entityBuilders'
 import { openSeedDatabase } from '@/domain/testing/seedDatabase'
 import { readProjectsSnapshot } from '@/domain/testing/seedReaders'
-import { buildAllocationRows, countOpenAllocations, type AllocationRow } from './allocationRows'
+import {
+  buildAllocationRows,
+  countOpenAllocations,
+  mapOpenPercentagesByTask,
+  type AllocationRow,
+} from './allocationRows'
 import type { ProjectsSnapshot } from './projectRow'
 
 function rowsOf(snapshot: ProjectsSnapshot, projectId: string): AllocationRow[] {
@@ -100,5 +105,29 @@ describe('buildAllocationRows', () => {
     )
 
     expect(rows[0]).toMatchObject({ person: null, consumedWeeklyHours: 0 })
+  })
+})
+
+describe('mapOpenPercentagesByTask', () => {
+  it('Should read the percentage each person holds on the rewrite of the gateway', () => {
+    const byPerson = mapOpenPercentagesByTask(gatewayRows).get('gw-rew')
+
+    expect([...(byPerson ?? [])]).toEqual([
+      ['ana', 50],
+      ['rafael', 100],
+    ])
+  })
+
+  it('Should keep only the open allocation of a task that had its team replaced', () => {
+    const byPerson = mapOpenPercentagesByTask(gatewayRows).get('gw-tes')
+
+    expect([...(byPerson ?? [])]).toEqual([
+      ['ana', 50],
+      ['rafael', 50],
+    ])
+  })
+
+  it('Should leave a task nobody is on out of the map', () => {
+    expect(mapOpenPercentagesByTask(gatewayRows).has('gw-cut')).toBe(false)
   })
 })

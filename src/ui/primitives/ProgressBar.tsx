@@ -5,7 +5,7 @@ import { phaseColorStyle } from './phaseColorStyle'
 const HATCH_CLASSES = 'bg-[repeating-linear-gradient(45deg,transparent_0_3px,var(--hatch)_3px_6px)]'
 
 export type ProgressTone = 'default' | 'muted' | 'ok'
-export type ProgressTrack = 'sunken' | 'border'
+export type ProgressTrack = 'sunken' | 'border' | 'danger'
 
 const TONE_CLASSES: Record<ProgressTone, string> = {
   default: 'bg-text2',
@@ -14,16 +14,18 @@ const TONE_CLASSES: Record<ProgressTone, string> = {
 }
 
 // A tabela densa desenha a barra em 5px; o cartão de progresso do sistema de design, em 6px.
-export type ProgressSize = 'default' | 'dense'
+export type ProgressSize = 'default' | 'dense' | 'wide'
 
 const SIZE_CLASSES: Record<ProgressSize, string> = {
   default: 'h-1.5',
   dense: 'h-[5px]',
+  wide: 'h-2.5',
 }
 
 const TRACK_CLASSES: Record<ProgressTrack, string> = {
   sunken: 'bg-sunken',
   border: 'bg-border',
+  danger: 'bg-danger-soft',
 }
 
 export type ProgressSegment = {

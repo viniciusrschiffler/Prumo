@@ -11,12 +11,18 @@ type TabsProps = {
   items: readonly TabItem[]
   activeId: string
   onSelect: (id: string) => void
+  // A borda é do próprio grupo, exceto quando ele fecha um cabeçalho que já desenha a dele.
+  // Não vira className: entre duas utilidades da mesma propriedade quem decide é a folha.
+  bordered?: boolean
   className?: string
 }
 
-export function Tabs({ items, activeId, onSelect, className }: TabsProps) {
+export function Tabs({ items, activeId, onSelect, bordered = true, className }: TabsProps) {
   return (
-    <div role="tablist" className={classNames('flex gap-0.5 border-b border-border', className)}>
+    <div
+      role="tablist"
+      className={classNames('flex gap-0.5', bordered ? 'border-b border-border' : '', className)}
+    >
       {items.map((item) => {
         const isActive = item.id === activeId
 
