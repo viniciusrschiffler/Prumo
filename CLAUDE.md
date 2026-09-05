@@ -101,6 +101,28 @@ Testado e revertido. A saída real é barra de título própria com `decorations
 documentação no *texto* de mensagens de erro; URL em comentário CSS também não faz
 requisição. Antes de acrescentar uma entrada, confirme o contexto no bundle.
 
+**A pasta de dados não pode ser gravada no `setting`.** É ela que localiza o banco onde a
+tabela `setting` mora. O caminho escolhido vai num arquivo de uma linha, `data-folder.txt`,
+na pasta de configuração do app, lido no boot antes de abrir o banco.
+
+**Trocar de pasta exige fechar a conexão.** O `openInProgress` do `DatabaseConnection` é
+memoizado de propósito, então sem o `closeDatabase` o app reabriria o arquivo antigo.
+
+**A capability tem escopo de fs só na pasta de configuração do app.** `appconfig-read-recursive`
+e `appconfig-write-recursive` existem porque o card de arquivos e o exportar precisam ler e
+escrever na pasta padrão, que ninguém escolheu pelo diálogo e portanto não tem escopo de
+runtime. Fora dela nada mudou: o acesso continua vindo só do diálogo, guardado entre
+sessões pelo `persisted-scope`.
+
+**O w-full não pode morar na base de campo de formulário.** Entre duas utilidades de width
+quem decide é a ordem na folha de estilo, não a ordem na string de classes, então um
+`w-full` na base vence qualquer largura que a tela passe. O `FIELD_BASE_CLASSES` não tem
+largura; o grid ou o flex ao redor estica o campo.
+
+**Peso e espacejamento de um token tipográfico são sobrescrevíveis, tamanho não.** O
+Tailwind v4 emite `font-weight: var(--tw-font-weight, 600)`, então `font-medium` e
+`tracking-normal` vencem o token sem depender de ordem. Verificado no bundle.
+
 **Testes têm projeto TypeScript próprio** (`tsconfig.test.json`), para que os tipos do Node
 não fiquem visíveis ao código do app, que roda no webview.
 
@@ -132,6 +154,15 @@ com quatro correções já aplicadas:
 O catálogo tipográfico define título de tela em 28px, mas todas as 9 telas renderizam o
 `h1` em 20px. As telas ganham.
 
+O catálogo também não cobre dois usos que aparecem nas 9 telas, e que por isso viraram
+token. O passo de 11px do catálogo é o **título de grupo**, com peso 600 e espacejamento de
+0.08em (`--text-label`). O **subtítulo mono do cabeçalho** é 11px com peso 400 e sem
+espacejamento (`--text-meta`), e o **rótulo de coluna de tabela densa** é 10px com 0.06em
+(`--text-column`). Não confunda os três.
+
+O cabeçalho é idêntico nas 9 telas: `padding: 12px 20px`, fundo `--panel` e borda embaixo. É
+o que o `ScreenShell` faz.
+
 ## Modelagem que precisa ser respeitada
 
 - **"Atrasado" e "Risco" não são status.** Atrasado é derivado do fim atual contra a
@@ -156,10 +187,12 @@ O catálogo tipográfico define título de tela em 28px, mas todas as 9 telas re
 
 ## Pendências conhecidas
 
-- A pasta de dados ainda é a de configuração do app; falta a tela de Configurações escolher
-  a pasta e gravar em `setting`.
-- A preferência de tema vive em memória; falta persistir em `setting`.
-- `phase.color` é uma coluna só e o design tem variante clara e escura. A intenção é derivar
-  a variante escura em CSS com `oklch(from ...)`, mantendo a coluna única.
-- O rodapé mostra estado de gravação; vira carimbo de hora quando houver escrita real.
-- Só existem três contratos de repositório. Cada novo entra junto com a feature que o usa.
+- **Importar de pasta não existe.** O botão está na tela de Configurações e avisa isso ao
+  ser clicado. O par dele, o exportar, já grava o dump JSON completo em `export/`.
+- **Backup automático não existe.** Mesma situação: o alerta e o botão estão montados como
+  no design, e o clique avisa que a funcionalidade ainda não chegou.
+- `phase.color` é uma coluna só e o design tem variante clara e escura. A variante escura é
+  derivada em CSS pela classe `phase-tinted`, com `oklch(from ...)`, mantendo a coluna única.
+- Cada contrato de repositório novo entra junto com a feature que o usa.
+- Configurações não tem atalho de navegação: o `screenMeta` dá `navigationKeys: null` e o
+  rodapé do design não mostra tecla. Chega-se lá pelo link do rodapé, alcançável por Tab.

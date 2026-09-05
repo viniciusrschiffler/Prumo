@@ -77,9 +77,14 @@ quiser mesmo descartar.
 
 ## Onde ficam os dados
 
-Enquanto a tela de Configurações não permite escolher a pasta, o banco é criado
-em `%APPDATA%\com.prumo.app\prumo.db`, com as migrações aplicadas e as quatro
-fases padrão semeadas no primeiro boot. Apagar esse arquivo recria tudo do zero.
+Por padrão o banco é criado em `%APPDATA%\com.prumo.app\prumo.db`, com as
+migrações aplicadas e as quatro fases padrão semeadas no primeiro boot. Apagar
+esse arquivo recria tudo do zero.
+
+A tela de Configurações troca a pasta pelo diálogo do sistema. O caminho
+escolhido fica num arquivo `data-folder.txt` ao lado do banco padrão, porque é
+ele que localiza o banco onde as preferências moram. A mesma tela exporta todas
+as tabelas para um JSON em `export/` e verifica a integridade dos arquivos.
 
 ## Navegação por teclado
 
