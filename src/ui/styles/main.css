@@ -86,3 +86,17 @@
     -webkit-font-smoothing: antialiased;
   }
 }
+
+/* A fase guarda uma cor só no banco. As variantes por tema são derivadas com a mesma
+   sintaxe de cor relativa que o design usa no mapa de calor, mantendo a coluna única. */
+@layer components {
+  .phase-tinted {
+    --phase-tone: var(--phase-color);
+    --phase-tone-soft: oklch(from var(--phase-color) 0.95 0.04 h);
+  }
+
+  [data-theme='dark'] .phase-tinted {
+    --phase-tone: oklch(from var(--phase-color) calc(l + 0.16) c h);
+    --phase-tone-soft: oklch(from var(--phase-color) 0.31 0.05 h);
+  }
+}
