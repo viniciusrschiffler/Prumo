@@ -79,7 +79,7 @@ export function FeedbackSection() {
 
         <GalleryRow label="pessoas">
           <PersonAvatar initials="AN" name="Ana Nogueira" />
-          <PersonAvatar initials="RB" name="Rafael Brito" overallocated />
+          <PersonAvatar initials="RB" name="Rafael Brito" tone="danger" />
           <span className="text-label font-normal text-text3">RB em 150% · sobrealocado</span>
         </GalleryRow>
 

@@ -20,7 +20,7 @@ const PROJECT_ROW_IDS = ['gateway', 'parceiro']
 
 const PEOPLE = [
   { id: 'ana', initials: 'AN', name: 'Ana Nogueira' },
-  { id: 'rafael', initials: 'RB', name: 'Rafael Brito', overallocated: true },
+  { id: 'rafael', initials: 'RB', name: 'Rafael Brito', tone: 'danger' as const },
 ]
 
 const DENSITY_TABS = [
@@ -131,7 +131,7 @@ export function TableSection() {
                     initials="RB"
                     name="Rafael Brito"
                     percentage={100}
-                    overallocated
+                    tone="danger"
                   />
                 </div>
               </TableCell>

@@ -4,6 +4,7 @@ import type { ProjectEventType } from '@/domain/schemas/projectEventSchema'
 import { AccentCard, type AccentCardTone } from '@/ui/primitives/AccentCard'
 import { Badge, type BadgeTone } from '@/ui/primitives/Badge'
 import { classNames } from '@/ui/primitives/classNames'
+import { MarkdownText } from '@/ui/primitives/MarkdownText'
 import { phaseColorStyle } from '@/ui/primitives/phaseColorStyle'
 import { ProgressBar } from '@/ui/primitives/ProgressBar'
 import { PROJECT_EVENT_LABELS } from '@/ui/labels/entityLabels'
@@ -66,7 +67,7 @@ export function ProjectEventCard({ entry, phaseColorByTaskId }: ProjectEventCard
       <h3 className="text-body font-semibold">{event.title}</h3>
 
       {event.bodyMarkdown !== null && (
-        <p className="text-pretty text-support text-text2">{event.bodyMarkdown}</p>
+        <MarkdownText text={event.bodyMarkdown} className="text-support text-text2" />
       )}
 
       {entry.tasks.length > 0 && (

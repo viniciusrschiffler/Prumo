@@ -180,7 +180,7 @@ export function PeopleSection() {
                   <PersonAvatar
                     initials={person.initials}
                     name={person.role ?? person.name}
-                    overallocated={overallocated}
+                    tone={overallocated ? 'danger' : 'default'}
                   />
                   <span
                     className={classNames(

@@ -98,7 +98,12 @@ export function NewTaskModal({
       onClose={onClose}
       onSubmit={() => onSubmit(draft)}
     >
-      <FieldGroup variant="column" label="Título" htmlFor="new-task-title" error={errors.title}>
+      <FieldGroup
+        variant="column"
+        label="Título"
+        htmlFor="new-task-title"
+        error={title === '' ? undefined : errors.title}
+      >
         <Input
           id="new-task-title"
           fieldSize="large"

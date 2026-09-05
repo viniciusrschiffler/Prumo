@@ -79,11 +79,14 @@ export function TaskLine({ row, percentageByPerson, dependsOn, rowProps }: TaskL
       )}
     >
       <span className="flex min-w-0 items-center gap-2">
-        <span className="truncate text-body">{task.title}</span>
+        <span title={task.title} className="truncate text-body">
+          {task.title}
+        </span>
         {dependsOn.map((title) => (
           <span
             key={title}
-            className="flex-none rounded-badge border border-border px-[5px] font-mono text-micro text-text3"
+            title={`Depende de ${title}`}
+            className="max-w-[104px] shrink-0 truncate rounded-badge border border-border px-[5px] font-mono text-micro text-text3"
           >
             dep. {title}
           </span>

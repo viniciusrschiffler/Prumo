@@ -90,7 +90,7 @@ export function AllocationsTab({ rows, conflicts }: AllocationsTabProps) {
                   <PersonAvatar
                     initials={row.person?.initials ?? '—'}
                     name={row.person?.name}
-                    overallocated={isOverloaded}
+                    tone={isOverloaded ? 'warn' : 'default'}
                     size="small"
                   />
                   <span

@@ -1,11 +1,11 @@
 import { classNames } from './classNames'
-import { PersonAvatar } from './PersonAvatar'
+import { PersonAvatar, type PersonAvatarTone } from './PersonAvatar'
 
 type PersonAllocationChipProps = {
   initials: string
   name: string
   percentage: number
-  overallocated?: boolean
+  tone?: PersonAvatarTone
   className?: string
 }
 
@@ -13,7 +13,7 @@ export function PersonAllocationChip({
   initials,
   name,
   percentage,
-  overallocated = false,
+  tone,
   className,
 }: PersonAllocationChipProps) {
   return (
@@ -24,7 +24,7 @@ export function PersonAllocationChip({
         className,
       )}
     >
-      <PersonAvatar initials={initials} size="tiny" overallocated={overallocated} />
+      <PersonAvatar initials={initials} size="tiny" tone={tone} />
       <span className="font-mono tabular-nums">{percentage}%</span>
     </span>
   )

@@ -1,11 +1,11 @@
 import { classNames } from './classNames'
-import { PersonAvatar, type PersonAvatarSize } from './PersonAvatar'
+import { PersonAvatar, type PersonAvatarSize, type PersonAvatarTone } from './PersonAvatar'
 
 export type StackedPerson = {
   id: string
   initials: string
   name: string
-  overallocated?: boolean
+  tone?: PersonAvatarTone
 }
 
 type PersonStackProps = {
@@ -31,7 +31,7 @@ export function PersonStack({
           key={person.id}
           initials={person.initials}
           name={person.name}
-          overallocated={person.overallocated}
+          tone={person.tone}
           size={size}
         />
       ))}

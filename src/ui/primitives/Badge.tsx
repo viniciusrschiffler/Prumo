@@ -68,6 +68,8 @@ type BadgeProps = {
   bordered?: boolean
   dashed?: boolean
   uppercase?: boolean
+  // A pílula de tag do design não tem peso: é texto de apoio dentro de uma borda, não rótulo.
+  weight?: 'semibold' | 'normal'
   children: ReactNode
   className?: string
 }
@@ -92,6 +94,7 @@ export function Badge({
   bordered = false,
   dashed = false,
   uppercase = false,
+  weight = 'semibold',
   children,
   className,
 }: BadgeProps) {
@@ -100,7 +103,8 @@ export function Badge({
   return (
     <span
       className={classNames(
-        'inline-flex items-center gap-1.5 rounded-badge font-semibold',
+        'inline-flex items-center gap-1.5 rounded-badge',
+        weight === 'semibold' ? 'font-semibold' : 'font-normal tracking-normal',
         SIZE_CLASSES[size],
         toSurfaceClasses(tone, variant),
         bordered && variant !== 'outline' && !isCancelled ? BORDER_CLASSES[tone] : '',
