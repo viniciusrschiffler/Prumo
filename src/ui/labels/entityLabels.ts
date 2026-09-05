@@ -1,3 +1,4 @@
+import type { ProjectSortKey } from '@/domain/projects/projectSort'
 import type { ProjectStatus } from '@/domain/schemas/projectSchema'
 import type { TaskStatus } from '@/domain/schemas/taskSchema'
 
@@ -16,4 +17,11 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   done: 'Concluída',
   blocked: 'Bloqueada',
   cancelled: 'Cancelada',
+}
+
+export const PROJECT_SORT_LABELS: Record<ProjectSortKey, string> = {
+  priority: 'Prioridade',
+  deviation: 'Desvio da baseline',
+  plannedEnd: 'Fim previsto',
+  effort: 'Esforço total',
 }

@@ -8,6 +8,7 @@ const KEY_SYMBOLS: Record<string, string> = {
   enter: '↵',
   escape: 'esc',
   space: 'espaço',
+  click: 'clique',
   up: '↑',
   down: '↓',
   left: '←',

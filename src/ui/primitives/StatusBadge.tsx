@@ -1,7 +1,7 @@
 import type { ProjectStatus } from '@/domain/schemas/projectSchema'
 import type { TaskStatus } from '@/domain/schemas/taskSchema'
 import { PROJECT_STATUS_LABELS, TASK_STATUS_LABELS } from '@/ui/labels/entityLabels'
-import { Badge, type BadgeTone, type BadgeVariant } from './Badge'
+import { Badge, type BadgeSize, type BadgeTone, type BadgeVariant } from './Badge'
 
 type BadgeLook = {
   tone: BadgeTone
@@ -27,14 +27,21 @@ const TASK_STATUS_LOOK: Record<TaskStatus, BadgeLook> = {
 
 type ProjectStatusBadgeProps = {
   status: ProjectStatus
+  size?: BadgeSize
+  dot?: boolean
   uppercase?: boolean
 }
 
-export function ProjectStatusBadge({ status, uppercase = false }: ProjectStatusBadgeProps) {
+export function ProjectStatusBadge({
+  status,
+  size = 'default',
+  dot = true,
+  uppercase = false,
+}: ProjectStatusBadgeProps) {
   const look = PROJECT_STATUS_LOOK[status]
 
   return (
-    <Badge tone={look.tone} variant={look.variant} dot uppercase={uppercase}>
+    <Badge tone={look.tone} variant={look.variant} size={size} dot={dot} uppercase={uppercase}>
       {PROJECT_STATUS_LABELS[status]}
     </Badge>
   )
