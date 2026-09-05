@@ -9,6 +9,7 @@ import { Button } from '@/ui/primitives/Button'
 import { useSidebarContext } from '@/ui/layout/useSidebarContext'
 import { DataFolderSection } from './settings/DataFolderSection'
 import { PeopleSection } from './settings/PeopleSection'
+import { PhasesSection } from './settings/PhasesSection'
 import { SETTINGS_SECTIONS, scrollToSection, type SettingsSectionId } from './settings/settingsSections'
 import { ScreenShell } from './ScreenShell'
 
@@ -107,6 +108,7 @@ export function SettingsScreen() {
           <>
             <DataFolderSection />
             <PeopleSection />
+            <PhasesSection />
           </>
         )}
       </div>

@@ -49,6 +49,9 @@ type SettingsState = FolderSlice & {
   refreshFolder: () => Promise<void>
   savePerson: (person: Person) => Promise<void>
   removePerson: (id: EntityId) => Promise<void>
+  savePhase: (phase: Phase) => Promise<void>
+  removePhase: (id: EntityId) => Promise<void>
+  reorderPhases: (orderedIds: readonly EntityId[]) => Promise<void>
   chooseFolder: () => Promise<boolean>
   revealFolder: () => Promise<void>
   writeSetting: <TField extends AppSettingField>(
@@ -161,6 +164,21 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
 
   removePerson: async (id) => {
     await new SqlitePersonRepository(getSqlGateway()).remove(id)
+    await get().refreshData()
+  },
+
+  savePhase: async (phase) => {
+    await new SqlitePhaseRepository(getSqlGateway()).save(phase)
+    await get().refreshData()
+  },
+
+  removePhase: async (id) => {
+    await new SqlitePhaseRepository(getSqlGateway()).remove(id)
+    await get().refreshData()
+  },
+
+  reorderPhases: async (orderedIds) => {
+    await new SqlitePhaseRepository(getSqlGateway()).reorder(orderedIds)
     await get().refreshData()
   },
 
