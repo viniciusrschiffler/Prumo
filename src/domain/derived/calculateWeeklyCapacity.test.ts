@@ -37,17 +37,34 @@ describe('calculateWeeklyCapacity', () => {
     expect(calculateWeeklyCapacity(person, allocations, WEEK).percentage).toBe(0)
   })
 
-  it('Should ignore an allocation already ended, keeping it in history', () => {
+  it('Should ignore an allocation ended before the week started', () => {
     const person = buildPerson()
     const allocations = [
       buildAllocation({
         percentage: 100,
+        startDate: '2026-05-01',
+        endDate: '2026-06-30',
         endedAt: '2026-05-20T10:00:00Z',
         endedReason: 'projeto bloqueado',
       }),
     ]
 
     expect(calculateWeeklyCapacity(person, allocations, WEEK).percentage).toBe(0)
+  })
+
+  it('Should still count a week the allocation was live in, even if it ended later', () => {
+    const person = buildPerson()
+    const allocations = [
+      buildAllocation({
+        percentage: 100,
+        startDate: '2026-05-01',
+        endDate: '2026-06-30',
+        endedAt: '2026-06-20T10:00:00Z',
+        endedReason: 'projeto bloqueado',
+      }),
+    ]
+
+    expect(calculateWeeklyCapacity(person, allocations, WEEK).percentage).toBe(100)
   })
 
   it('Should ignore the allocations of other people', () => {

@@ -10,6 +10,17 @@ export type PersonCapacity = {
   hours: number
 }
 
+// Uma alocação encerrada consumiu capacidade até ser encerrada. Descartá-la de toda semana
+// tornaria inútil o histórico que a regra manda preservar, então ela sai apenas das semanas
+// que começam depois do encerramento.
+function wasLiveDuring(allocation: Allocation, week: DatePeriod): boolean {
+  if (allocation.endedAt === null) {
+    return true
+  }
+
+  return allocation.endedAt.slice(0, 10) >= week.start
+}
+
 export function calculateWeeklyCapacity(
   person: Person,
   allocations: readonly Allocation[],
@@ -17,7 +28,7 @@ export function calculateWeeklyCapacity(
 ): PersonCapacity {
   const percentage = allocations
     .filter((allocation) => allocation.personId === person.id)
-    .filter((allocation) => allocation.endedAt === null)
+    .filter((allocation) => wasLiveDuring(allocation, week))
     .filter((allocation) =>
       periodsOverlap({ start: allocation.startDate, end: allocation.endDate }, week),
     )
