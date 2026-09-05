@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
+import { buildNewProject, type NewProjectDraft } from '@/domain/projects/newProject'
 import type { ProjectsSnapshot } from '@/domain/projects/projectRow'
 import type { SavedView } from '@/domain/schemas/savedViewSchema'
 import { getSqlGateway } from '@/infra/database/DatabaseConnection'
@@ -35,6 +36,7 @@ type ProjectsState = {
   savedViews: readonly SavedView[]
   load: () => Promise<void>
   refresh: () => Promise<void>
+  createProject: (draft: NewProjectDraft) => Promise<void>
 }
 
 async function readEverything(): Promise<{
@@ -105,6 +107,21 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
       console.error('Não foi possível carregar a tela de Projetos.', cause)
       set(() => ({ status: 'error', errorMessage: toPublicMessage(cause) }))
     }
+  },
+
+  createProject: async (draft) => {
+    const newProject = buildNewProject(
+      draft,
+      { projectId: crypto.randomUUID(), baselineId: crypto.randomUUID() },
+      new Date().toISOString(),
+    )
+
+    await new SqliteProjectRepository(getSqlGateway()).create(
+      newProject,
+      newProject.tagNames.map((name) => ({ id: crypto.randomUUID(), name })),
+    )
+
+    await get().refresh()
   },
 
   refresh: async () => {

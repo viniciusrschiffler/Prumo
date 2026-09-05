@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useDatabaseStore } from '@/app/stores/useDatabaseStore'
 import { useProjectsStore } from '@/app/stores/useProjectsStore'
+import { useToastStore } from '@/app/stores/useToastStore'
 import type { SidebarContextItem } from '@/app/stores/useSidebarContextStore'
 import {
   ALL_STATUSES,
@@ -14,6 +15,8 @@ import {
 import { buildProjectRows } from '@/domain/projects/projectRow'
 import { sortProjectRows, type ProjectSortKey } from '@/domain/projects/projectSort'
 import { sumProjectsTotals } from '@/domain/projects/projectTotals'
+import { toPublicMessage } from '@/domain/errors/PrumoError'
+import type { NewProjectDraft } from '@/domain/projects/newProject'
 import type { EntityId } from '@/domain/schemas/primitives'
 import { PROJECT_STATUS_LABELS } from '@/ui/labels/entityLabels'
 import { useSidebarContext } from '@/ui/layout/useSidebarContext'
@@ -24,8 +27,11 @@ import { Input } from '@/ui/primitives/Input'
 import { SegmentedControl } from '@/ui/primitives/SegmentedControl'
 import { useGridNavigation } from '@/ui/primitives/useGridNavigation'
 import { useRowSelection } from '@/ui/primitives/useRowSelection'
+import type { Shortcut } from '@/ui/shortcuts/shortcutRegistry'
+import { useShortcuts } from '@/ui/shortcuts/useShortcuts'
 import { SCREEN_META } from '@/ui/layout/screenMeta'
 import { ScreenShell } from '../ScreenShell'
+import { NewProjectModal } from './NewProjectModal'
 import { ProjectsFooter } from './ProjectsFooter'
 import { ProjectsTable } from './ProjectsTable'
 import { ProjectsToolbar } from './ProjectsToolbar'
@@ -45,6 +51,8 @@ export function ProjectsScreen() {
   const snapshot = useProjectsStore((state) => state.snapshot)
   const savedViews = useProjectsStore((state) => state.savedViews)
   const load = useProjectsStore((state) => state.load)
+  const createProject = useProjectsStore((state) => state.createProject)
+  const notify = useToastStore((state) => state.notify)
 
   const [effortMode, setEffortMode] = useState<EffortMode>('hours')
   const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>(ALL_STATUSES)
@@ -52,6 +60,7 @@ export function ProjectsScreen() {
   const [search, setSearch] = useState('')
   const [activeViewId, setActiveViewId] = useState<EntityId | null>(null)
   const [expandedIds, setExpandedIds] = useState<ReadonlySet<EntityId>>(new Set())
+  const [isNewProjectOpen, setNewProjectOpen] = useState(false)
 
   useEffect(() => {
     if (databaseStatus !== 'ready') {
@@ -139,6 +148,33 @@ export function ProjectsScreen() {
       }),
   })
 
+  const shortcuts = useMemo<Shortcut[]>(
+    () => [
+      {
+        id: 'projects-new',
+        keys: 'mod+n',
+        scope: 'screen',
+        description: 'Novo projeto',
+        run: () => setNewProjectOpen(true),
+      },
+    ],
+    [],
+  )
+
+  useShortcuts(shortcuts)
+
+  async function handleCreate(draft: NewProjectDraft) {
+    setNewProjectOpen(false)
+
+    try {
+      await createProject(draft)
+      notify(`${draft.name.trim()} foi criado com a baseline v1.`)
+    } catch (cause) {
+      console.error('Não foi possível criar o projeto.', cause)
+      notify(toPublicMessage(cause), 'danger')
+    }
+  }
+
   const subhead =
     status === 'ready'
       ? `${visibleRows.length} de ${allRows.length} projetos · filtro: ${
@@ -175,6 +211,9 @@ export function ProjectsScreen() {
             }
           >
             {isAnyExpanded ? 'Recolher tudo' : 'Expandir tudo'}
+          </Button>
+          <Button variant="primary" keys="mod+n" onClick={() => setNewProjectOpen(true)}>
+            Novo projeto
           </Button>
         </>
       }
@@ -241,6 +280,14 @@ export function ProjectsScreen() {
           onToggleExpand={toggleExpand}
           onSelect={selection.select}
           onOpen={openProject}
+        />
+      )}
+
+      {isNewProjectOpen && (
+        <NewProjectModal
+          people={snapshot.people}
+          onClose={() => setNewProjectOpen(false)}
+          onSubmit={(draft) => void handleCreate(draft)}
         />
       )}
     </ScreenShell>
