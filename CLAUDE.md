@@ -119,6 +119,20 @@ quem decide é a ordem na folha de estilo, não a ordem na string de classes, en
 `w-full` na base vence qualquer largura que a tela passe. O `FIELD_BASE_CLASSES` não tem
 largura; o grid ou o flex ao redor estica o campo.
 
+**O `min-w-0` na base do campo é outra coisa, e é necessário.** Sem ele o input não encolhe
+abaixo da largura intrínseca do atributo `size` e vaza de trilha de grid estreita — verificado
+na coluna de data de 130px do modal de registrar evento. Não é utilidade de width, não disputa
+com nenhuma classe que a tela passe.
+
+**Variação de aparência em primitivo vira prop, nunca className.** Vale para toda propriedade
+CSS, não só width: `Tabs` ganhou `bordered`, `Badge` ganhou `weight`, `PriorityBadge` ganhou
+`variant` e `ProgressBar` ganhou `track` e `size` exatamente por isso. Passar `font-normal` ou
+`border-b-0` por className depende da ordem na folha de estilo e falha em silêncio.
+
+**Avatar tem duas cores de alerta e elas não são sinônimos.** Vermelho é passar da capacidade,
+como a tela de Capacidade marca; âmbar é disputar o período com outro projeto, o conflito da
+tela de Projeto. A pessoa pode estar num sem estar no outro, então `PersonAvatar` recebe `tone`.
+
 **Peso e espacejamento de um token tipográfico são sobrescrevíveis, tamanho não.** O
 Tailwind v4 emite `font-weight: var(--tw-font-weight, 600)`, então `font-medium` e
 `tracking-normal` vencem o token sem depender de ordem. Verificado no bundle.
@@ -196,3 +210,34 @@ o que o `ScreenShell` faz.
 - Cada contrato de repositório novo entra junto com a feature que o usa.
 - Configurações não tem atalho de navegação: o `screenMeta` dá `navigationKeys: null` e o
   rodapé do design não mostra tecla. Chega-se lá pelo link do rodapé, alcançável por Tab.
+- **Simular e ⋯ não existem na tela de Projeto.** O design desenha o botão "Simular" no alerta
+  de conflito e um "⋯" no canto do cabeçalho, sem definir o que qualquer um dos dois faz.
+  Ficaram de fora: botão que não faz nada é pior que botão ausente.
+
+## A tela de Projeto contra o mockup
+
+O `Projeto.dc.html` se contradiz em seis pontos. Em todos vale o valor derivado, e o teste que
+prova cada um está em `domain/projects/`. Não "conserte" a tela para bater com o mockup.
+
+| Onde | Mockup | Derivado |
+| --- | --- | --- |
+| Progresso | 33% | **13%** — 40h concluídas de 320h, o que `calculateProgress` já media |
+| Aba Alocações | 4 | **8** — 5 abertas e 3 encerradas, que nunca são deletadas |
+| Aba Notas | 6 | **2** — o que a tabela `note` liga a `gateway` |
+| Histórico | 14 | **8** — paginado de sete em sete, então "Carregar 1 evento anterior" |
+| Desvio do Cutover | — | **+11d** — o mesmo desvio do projeto, que sai justamente dele |
+| Diff do evento de escopo | fim 18/09 → 29/09 | **26/06 → 18/09** — o mockup mistura baseline v1→v2 no esforço com v2→atual no fim; congelar baseline compara v1 com v2 nos dois |
+
+Duas escolhas de leitura que o mockup deixou ambíguas:
+
+- **"Capacidade" na tabela de alocações é o que aquela alocação consome por semana**, percentual
+  × capacidade da pessoa — e não a capacidade crua dela. O percentual já está na coluna ao lado.
+- **O conflito é varrido por fronteira de data**, não por semana fixa, então o alerta mostra o
+  período exato. Uma alocação encerrada num dia para de contar nesse dia: a realocação abre a
+  nova na mesma data em que fecha a antiga, e contar as duas inventaria um conflito de 24 horas.
+
+O mockup mostra só o conflito do Rafael porque tem menos alocações que o seed. Sobre o seed a
+Ana também estoura, em março, contra o Portal do parceiro — e os dois alertas aparecem.
+
+**Mudança de escopo tem token próprio, `--event-scope`.** É o único tipo de evento sem cor
+semântica no catálogo; o design usa `--ph-dev`, que é seed de fase. O valor é o mesmo roxo.
