@@ -231,6 +231,9 @@ o que o `ScreenShell` faz.
   que hachura a partir dela, mas nenhuma tela grava nela ainda: quem preenche é o seed.
 - **O "Abrir simulador" do rodapé da Timeline ficou de fora**, pelo mesmo critério do "Simular"
   da tela de Projeto.
+- **O ponto vermelho de sobrecarga na navegação não existe.** Os nove mockups o desenham ao
+  lado de "Capacidade"; ele mora na Sidebar e pede uma leitura que os contadores da navegação
+  ainda não fazem.
 
 ## A tela de Projeto contra o mockup
 
@@ -367,3 +370,86 @@ caminho oficial exige desligar a chave estrangeira e o `PRAGMA` é ignorado dent
 
 **`project.paused_at` também nasceu aqui**, porque a hachura de pausa precisa saber desde quando.
 A ação de pausar ainda não existe em tela nenhuma: quem preenche a coluna hoje é o seed.
+
+## A tela de Capacidade contra o mockup
+
+A janela bate: doze semanas a partir da semana corrente, **S36 → S47**, exatamente o que o
+cabeçalho do design imprime. Os números dentro dela não batem, e a diferença muda a tela
+inteira — as sobrecargas do seed são de março e junho, e a janela olha para frente. O teste
+que prova cada linha está em `domain/capacity/capacityScreen.seed.test.ts`.
+
+| Onde | Mockup | Derivado |
+| --- | --- | --- |
+| Ana | 80 80 80 80 80 60 60 40 40 20 20 0 | **50 50 50 50** e livre daí em diante |
+| Rafael | 100 **150 150 150 150** 100 100 75 75 50 50 25 | **50 50 50 50** e livre daí em diante |
+| Marcos | 30 ×5, depois 0 | **30 ×5**, depois 0 |
+| Júlia | 0…10 10 10 0 | **—** em toda semana: inativa e sem alocação viva |
+| Alerta vermelho | "Rafael acima de 100% em 4 semanas" | **nenhum** — o pico do seed na janela é 50% |
+| Semanas com sobrealocação | 4 · "todas concentradas em 1 pessoa" | **0** |
+| Folga do time | — | **1115h · 84% da capacidade total** |
+| Quem tem mais folga | Marcos Teles · 100% livre a partir de S41 | **Ana Nogueira · 100% livre a partir de S40** |
+| Alerta "Júlia inativa com alocação futura" | presente | **fora** — a alocação dela foi encerrada em 11/08 |
+| Uso médio do time | — | **16%**, com "Capacidade sobrando de S41 em diante" igual ao mockup |
+| Mês no subtítulo | "set a nov 2026" | **"ago a nov 2026"** — a semana S36 começa em 31/08 |
+
+**A semana vale o pico dos dias dela, não a soma do que a cruza.** Duas alocações que se
+revezam dentro da mesma semana nunca dividiram um dia, e somá-las pintava de vermelho uma
+semana em que ninguém passou da capacidade — verificado no seed deslocado, onde a realocação
+do Rafael fecha uma alocação e abre a outra em 31/08 e a matriz inventava 150% em S36. A
+varredura de conflito já responde por dia; a matriz precisa dizer a mesma coisa que ela.
+`calculateWeeklyCapacity` foi corrigido e passou a ser a única definição de "quando a alocação
+para de consumir capacidade", com o `effectiveEndOf` que `allocationConflicts` já usava.
+
+**A capacidade do time só conta pessoa ativa.** A inativa fica na matriz porque o histórico
+dela não some, mas emprestar a capacidade dela diluiria o uso médio com horas que ninguém pode
+gastar. Dá os mesmos 110h/sem do mockup por outro caminho: lá a Júlia entra com capacidade 0.
+
+**O empate de folga é desempatado por nome.** Ana e Rafael terminam a janela com as mesmas
+400h livres e a tela precisa de uma resposta só; por nome ela é estável entre dois
+carregamentos da mesma janela.
+
+**"Quem eu consigo tirar" responde ao problema da pessoa selecionada.** Quando ela estoura, o
+período é o da sobrecarga dela — os S37–S40 do mockup; quando não estoura, é a semana sob o
+cursor. Entra só quem tem hora sobrando *no período*, e o texto de cada cartão é derivado das
+alocações, sem a prosa editorial do mockup ("substituto natural em Observabilidade").
+
+**O atraso do simulador sai das horas, não da régua.** Tirar alguém por N semanas custa
+`N × percentual × capacidade` horas, que quem fica na tarefa precisa de tempo a mais para
+cobrir; sem ninguém para cobrir, o trabalho espera a volta e o atraso é o próprio afastamento.
+Isso reduz exatamente aos +21d que o mockup mostra, onde a pessoa está sozinha a 100%.
+
+**A tabela do simulador só lista trabalho que ainda corre.** Alocação já cumprida não tem
+plano a deslocar, e listá-la encheria o "o que não se move" de tarefa antiga — verificado na
+Ana, que tem duas alocações do gateway terminadas em março e maio.
+
+**Aplicar grava cinco coisas num `executeBatch` só**: encerra a alocação com motivo (nunca
+deleta), abre a alocação de volta a partir do dia seguinte ao afastamento, desloca o
+`planned_end` da tarefa, registra o evento `reallocation` ligado à tarefa e congela a baseline
+seguinte **já com as datas novas** — congelá-la antes do deslocamento faria o desvio nascer
+diferente de zero. Quando o afastamento passa do novo fim da tarefa, não há a que voltar e a
+alocação nova não nasce.
+
+**Duas leituras que o mockup deixou ambíguas:**
+
+- **"Por" é `Select` de "N semanas"**, não campo de texto livre. O texto na tela fica idêntico
+  ao do mockup e some o caminho de interpretar linguagem natural.
+- **"Filtrar projeto" abre modal de escolha**, no molde do "Vincular projeto" da TodoList. O
+  design desenha o botão e não desenha o que ele abre.
+
+**As pessoas entram por nome, com a inativa por último** — não na ordem do mockup, que não
+segue nenhuma regra.
+
+**O vazio não está no design.** As nove telas não desenham a Capacidade sem pessoa, então o
+texto ("Nenhuma pessoa cadastrada") foi escrito no mesmo tom dos outros `EmptyState`.
+
+**As três opacidades do mapa de calor viraram classe.** `.heat-light`, `.heat-medium` e
+`.heat-heavy` derivam do `--heat-base` com `oklch(from ...)`, a mesma técnica do
+`phase-tinted`, mantendo o token único e deixando o tema trocar o verde por baixo.
+
+**A divisória de coluna da célula vai em estilo inline.** A célula pinta a borda inteira pelo
+grau de calor, e uma segunda utilidade de cor de borda na mesma string dependeria da ordem na
+folha de estilo para decidir quem vence.
+
+**O ponto vermelho da navegação ficou de fora.** Os nove mockups desenham um ponto ao lado de
+"Capacidade" como sinal global de que há gente estourada, mas ele mora na Sidebar e depende de
+uma leitura que o `useNavigationCountsStore` ainda não faz. Sobre o seed ele ficaria apagado.
