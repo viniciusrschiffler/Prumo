@@ -9,6 +9,7 @@ import type { TodosSnapshot } from '@/domain/todos/todoRow'
 import { findConsistencyAlerts, type ConsistencyAlert } from './consistencyAlerts'
 import { findPendingDecisions, type PendingDecision } from './pendingDecisions'
 import { buildTodayAgenda, countTodayItems, type TodayAgenda } from './todayAgenda'
+import { summarizeWeek, type WeekNumbers } from './weekNumbers'
 
 const STALE_AFTER_DAYS = 14
 
@@ -17,6 +18,7 @@ let todos: TodosSnapshot
 let agenda: TodayAgenda
 let decisions: PendingDecision[]
 let alerts: ConsistencyAlert[]
+let week: WeekNumbers
 
 beforeAll(() => {
   const database: DatabaseSync = openSeedDatabase()
@@ -41,6 +43,15 @@ beforeAll(() => {
     today: DESIGN_TODAY,
     weekStart: 'monday',
     staleAfterDays: STALE_AFTER_DAYS,
+  })
+  week = summarizeWeek({
+    projects: projects.projects,
+    events: projects.events,
+    allocations: projects.allocations,
+    people: projects.people,
+    todos: todos.todos,
+    today: DESIGN_TODAY,
+    weekStart: 'monday',
   })
   agenda = buildTodayAgenda({
     todos: todos.todos,
@@ -162,6 +173,28 @@ describe('Alertas de consistência sobre o seed', () => {
     expect(stale?.project.id).toBe('observabilidade')
     expect(stale?.lastActivityDate).toBe('2026-08-16')
     expect(stale?.idleDays).toBe(18)
+  })
+})
+
+describe('Semana em números sobre o seed', () => {
+  it('Should open on the week 36 the header prints', () => {
+    expect(week.weekNumber).toBe(36)
+    expect(week.period).toEqual({ start: '2026-08-31', end: '2026-09-06' })
+  })
+
+  it('Should spend 49h of the 110h the active team has, not the 94% of the mockup', () => {
+    expect(week.usedHours).toBe(49)
+    expect(week.capacityHours).toBe(110)
+    expect(week.capacityUsedPercentage).toBe(45)
+  })
+
+  it('Should count three blocked days, from monday to today, not the five of the mockup', () => {
+    expect(week.blockedDays).toBe(3)
+  })
+
+  it('Should count one event and one todo finished, not the seven and the twelve', () => {
+    expect(week.eventCount).toBe(1)
+    expect(week.completedTodoCount).toBe(1)
   })
 })
 
