@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { useNavigationCountsStore } from '@/app/stores/useNavigationCountsStore'
 import type { ReallocationSimulation } from '@/domain/capacity/reallocationImpact'
 import { buildReallocation } from '@/domain/capacity/reallocationWrite'
 import { toIsoDateOf } from '@/domain/dates/isoDateMath'
@@ -357,5 +358,6 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
     }
 
     set(await readEverything())
+    await useNavigationCountsStore.getState().refresh()
   },
 }))
