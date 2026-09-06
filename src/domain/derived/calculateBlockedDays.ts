@@ -17,7 +17,7 @@ function compareByDateThenBlockFirst(first: ProjectEvent, second: ProjectEvent):
   return first.type === 'block' ? -1 : 1
 }
 
-function collectBlockedPeriods(events: readonly ProjectEvent[], openEnd: IsoDate): DatePeriod[] {
+export function collectBlockedPeriods(events: readonly ProjectEvent[], openEnd: IsoDate): DatePeriod[] {
   const ordered = events
     .filter((event) => BLOCKING_TYPES.has(event.type))
     .toSorted(compareByDateThenBlockFirst)

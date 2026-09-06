@@ -22,6 +22,13 @@ export type AllocationConflict = {
   contributions: readonly ConflictContribution[]
 }
 
+export type PersonOverload = {
+  person: Person
+  period: DatePeriod
+  totalPercentage: number
+  allocations: readonly Allocation[]
+}
+
 type Segment = {
   period: DatePeriod
   allocations: readonly Allocation[]
@@ -130,6 +137,36 @@ function toContribution(
   }
 }
 
+function compareByPeriodStart(
+  first: { period: DatePeriod },
+  second: { period: DatePeriod },
+): number {
+  return first.period.start.localeCompare(second.period.start)
+}
+
+// A sobrecarga é da pessoa, não do projeto: a Timeline pinta todas, e a tela de Projeto filtra
+// depois as que tocam as tarefas dela.
+export function findPersonOverloads(
+  people: readonly Person[],
+  allocations: readonly Allocation[],
+): PersonOverload[] {
+  return people
+    .flatMap((person) => {
+      const own = allocations.filter(
+        (allocation) =>
+          allocation.personId === person.id && allocation.startDate <= effectiveEnd(allocation),
+      )
+
+      return mergeAdjacent(collectOverloadedSegments(own)).map((segment) => ({
+        person,
+        period: segment.period,
+        totalPercentage: sumPercentage(segment.allocations),
+        allocations: segment.allocations,
+      }))
+    })
+    .toSorted(compareByPeriodStart)
+}
+
 export type AllocationConflictInput = {
   projectId: EntityId
   taskIds: readonly EntityId[]
@@ -153,28 +190,19 @@ export function findAllocationConflicts(input: AllocationConflictInput): Allocat
       .map((allocation) => allocation.personId),
   )
 
-  return input.people
-    .filter((person) => personIds.has(person.id))
-    .flatMap((person) => {
-      const own = input.allocations.filter(
-        (allocation) =>
-          allocation.personId === person.id && allocation.startDate <= effectiveEnd(allocation),
-      )
-
-      return mergeAdjacent(collectOverloadedSegments(own))
-        .map((segment) => ({
-          person,
-          period: segment.period,
-          totalPercentage: sumPercentage(segment.allocations),
-          contributions: segment.allocations.map((allocation) =>
-            toContribution(allocation, input.projectId, index),
-          ),
-        }))
-        .filter((conflict) =>
-          conflict.contributions.some((contribution) =>
-            taskIdSet.has(contribution.allocation.taskId),
-          ),
-        )
-    })
-    .toSorted((first, second) => first.period.start.localeCompare(second.period.start))
+  return findPersonOverloads(
+    input.people.filter((person) => personIds.has(person.id)),
+    input.allocations,
+  )
+    .map((overload) => ({
+      person: overload.person,
+      period: overload.period,
+      totalPercentage: overload.totalPercentage,
+      contributions: overload.allocations.map((allocation) =>
+        toContribution(allocation, input.projectId, index),
+      ),
+    }))
+    .filter((conflict) =>
+      conflict.contributions.some((contribution) => taskIdSet.has(contribution.allocation.taskId)),
+    )
 }
