@@ -44,6 +44,16 @@ export function collectBlockedPeriods(events: readonly ProjectEvent[], openEnd: 
   return periods
 }
 
+export function findOpenBlockEvent(events: readonly ProjectEvent[]): ProjectEvent | null {
+  return events
+    .filter((event) => BLOCKING_TYPES.has(event.type))
+    .toSorted(compareByDateThenBlockFirst)
+    .reduce<ProjectEvent | null>(
+      (_previous, event) => (event.type === 'block' ? event : null),
+      null,
+    )
+}
+
 export function calculateBlockedDays(events: readonly ProjectEvent[], period: DatePeriod): number {
   return collectBlockedPeriods(events, period.end)
     .map((blocked) => intersectPeriods(blocked, period))
