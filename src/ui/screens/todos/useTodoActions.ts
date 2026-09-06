@@ -1,0 +1,57 @@
+import { useCallback, useMemo } from 'react'
+import { useTodosStore } from '@/app/stores/useTodosStore'
+import { useToastStore } from '@/app/stores/useToastStore'
+import { toPublicMessage } from '@/domain/errors/PrumoError'
+import type { EntityId } from '@/domain/schemas/primitives'
+import { DEFAULT_TODO_PRIORITY, type NewTodoDraft } from '@/domain/todos/newTodo'
+import type { QuickCapture } from '@/domain/todos/quickCapture'
+
+export type TodoActions = {
+  capture: (capture: QuickCapture) => void
+  create: (draft: NewTodoDraft) => void
+  toggle: (todoId: EntityId) => void
+  snooze: (todoId: EntityId) => void
+  link: (todoId: EntityId, projectId: EntityId | null) => void
+}
+
+export function useTodoActions(): TodoActions {
+  const createTodo = useTodosStore((state) => state.createTodo)
+  const toggleTodo = useTodosStore((state) => state.toggleTodo)
+  const snoozeTodo = useTodosStore((state) => state.snoozeTodo)
+  const linkProject = useTodosStore((state) => state.linkProject)
+  const notify = useToastStore((state) => state.notify)
+
+  const run = useCallback(
+    (action: () => Promise<void>, failure: string) => {
+      void action().catch((cause: unknown) => {
+        console.error(failure, cause)
+        notify(toPublicMessage(cause), 'danger')
+      })
+    },
+    [notify],
+  )
+
+  return useMemo(
+    () => ({
+      capture: (capture) =>
+        run(
+          () =>
+            createTodo({
+              title: capture.title,
+              description: '',
+              projectId: capture.projectId,
+              dueDate: capture.dueDate,
+              priority: capture.priority ?? DEFAULT_TODO_PRIORITY,
+              tagNames: capture.tagNames,
+            }),
+          'Não foi possível capturar o todo.',
+        ),
+      create: (draft) => run(() => createTodo(draft), 'Não foi possível criar o todo.'),
+      toggle: (todoId) => run(() => toggleTodo(todoId), 'Não foi possível marcar o todo.'),
+      snooze: (todoId) => run(() => snoozeTodo(todoId), 'Não foi possível adiar o todo.'),
+      link: (todoId, projectId) =>
+        run(() => linkProject(todoId, projectId), 'Não foi possível vincular o projeto.'),
+    }),
+    [run, createTodo, toggleTodo, snoozeTodo, linkProject],
+  )
+}

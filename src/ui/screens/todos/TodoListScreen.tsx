@@ -4,12 +4,8 @@ import { useDatabaseStore } from '@/app/stores/useDatabaseStore'
 import { useSettingsStore } from '@/app/stores/useSettingsStore'
 import type { SidebarContextItem } from '@/app/stores/useSidebarContextStore'
 import { useTodosStore } from '@/app/stores/useTodosStore'
-import { useToastStore } from '@/app/stores/useToastStore'
-import { toPublicMessage } from '@/domain/errors/PrumoError'
 import type { EntityId } from '@/domain/schemas/primitives'
 import type { NewTodoDraft } from '@/domain/todos/newTodo'
-import { DEFAULT_TODO_PRIORITY } from '@/domain/todos/newTodo'
-import type { QuickCapture } from '@/domain/todos/quickCapture'
 import {
   groupTodos,
   TODO_GROUP_MODES,
@@ -30,6 +26,7 @@ import { TodoGroupList } from './TodoGroupList'
 import { NewTodoModal } from './NewTodoModal'
 import { TodoQuickCapture } from './TodoQuickCapture'
 import { TodoSidePanel } from './TodoSidePanel'
+import { useTodoActions } from './useTodoActions'
 import { isRowShortcut, useTodoRowFocus } from './useTodoRowFocus'
 
 const GROUP_OPTIONS = TODO_GROUP_MODES.map((mode) => ({
@@ -50,12 +47,8 @@ export function TodoListScreen() {
   const errorMessage = useTodosStore((state) => state.errorMessage)
   const snapshot = useTodosStore((state) => state.snapshot)
   const load = useTodosStore((state) => state.load)
-  const createTodo = useTodosStore((state) => state.createTodo)
-  const toggleTodo = useTodosStore((state) => state.toggleTodo)
-  const snoozeTodo = useTodosStore((state) => state.snoozeTodo)
-  const linkProject = useTodosStore((state) => state.linkProject)
   const weekStart = useSettingsStore((state) => state.settings.weekStart)
-  const notify = useToastStore((state) => state.notify)
+  const actions = useTodoActions()
 
   const [groupMode, setGroupMode] = useState<TodoGroupMode>('due')
   const [showDone, setShowDone] = useState(false)
@@ -134,18 +127,6 @@ export function TodoListScreen() {
 
   useShortcuts(shortcuts)
 
-  const run = useCallback(
-    async (action: () => Promise<void>, failure: string) => {
-      try {
-        await action()
-      } catch (cause) {
-        console.error(failure, cause)
-        notify(toPublicMessage(cause), 'danger')
-      }
-    },
-    [notify],
-  )
-
   const handleRowKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>, todoId: EntityId) => {
       if (!isRowShortcut(event)) {
@@ -162,7 +143,7 @@ export function TodoListScreen() {
 
       if (event.key.toLowerCase() === SNOOZE_KEY) {
         event.preventDefault()
-        void run(() => snoozeTodo(todoId), 'Não foi possível adiar o todo.')
+        actions.snooze(todoId)
         return
       }
 
@@ -171,38 +152,17 @@ export function TodoListScreen() {
         setLinkingTodoId(todoId)
       }
     },
-    [rowFocus, run, snoozeTodo],
+    [rowFocus, actions],
   )
 
-  async function handleCapture(capture: QuickCapture) {
-    await run(
-      () =>
-        createTodo({
-          title: capture.title,
-          description: '',
-          projectId: capture.projectId,
-          dueDate: capture.dueDate,
-          priority: capture.priority ?? DEFAULT_TODO_PRIORITY,
-          tagNames: capture.tagNames,
-        }),
-      'Não foi possível capturar o todo.',
-    )
-  }
-
-  async function handleCreate(draft: NewTodoDraft) {
+  function handleCreate(draft: NewTodoDraft) {
     setNewTodoDraft(null)
-
-    await run(() => createTodo(draft), 'Não foi possível criar o todo.')
+    actions.create(draft)
   }
 
-  async function handleLink(projectId: EntityId | null) {
-    const todoId = linkingTodoId
-
+  function handleLink(todoId: EntityId, projectId: EntityId | null) {
     setLinkingTodoId(null)
-
-    if (todoId !== null) {
-      await run(() => linkProject(todoId, projectId), 'Não foi possível vincular o projeto.')
-    }
+    actions.link(todoId, projectId)
   }
 
   const linkingRow = allRows.find((row) => row.todo.id === linkingTodoId) ?? null
@@ -244,7 +204,7 @@ export function TodoListScreen() {
       toolbar={
         <TodoQuickCapture
           context={{ today: context.today, projects: projects.map((entry) => entry.project) }}
-          onCapture={(capture) => void handleCapture(capture)}
+          onCapture={actions.capture}
         />
       }
       contentClassName="grid flex-1 grid-cols-[1fr_320px] overflow-hidden"
@@ -262,9 +222,7 @@ export function TodoListScreen() {
             setActiveTagId(null)
             setShowDone(false)
           }}
-          onToggle={(todoId) =>
-            void run(() => toggleTodo(todoId), 'Não foi possível marcar o todo.')
-          }
+          onToggle={actions.toggle}
           onRowKeyDown={handleRowKeyDown}
         />
       </div>
@@ -282,7 +240,7 @@ export function TodoListScreen() {
           context={context}
           initialDraft={newTodoDraft}
           onClose={() => setNewTodoDraft(null)}
-          onSubmit={(draft) => void handleCreate(draft)}
+          onSubmit={handleCreate}
         />
       )}
 
@@ -292,7 +250,7 @@ export function TodoListScreen() {
           projects={projects}
           selectedProjectId={linkingRow.todo.projectId}
           onClose={() => setLinkingTodoId(null)}
-          onSelect={(projectId) => void handleLink(projectId)}
+          onSelect={(projectId) => handleLink(linkingRow.todo.id, projectId)}
         />
       )}
     </ScreenShell>
