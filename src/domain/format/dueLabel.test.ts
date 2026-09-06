@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  formatCompletedLabel,
   formatDueLabel,
   formatShortDate,
   formatWeekdayShortDate,
@@ -36,5 +37,23 @@ describe('formatWeekdayShortDate', () => {
   it('Should prefix the abbreviated weekday', () => {
     expect(formatWeekdayShortDate('2026-09-03')).toBe('qui, 03/09')
     expect(formatWeekdayShortDate('2026-09-06')).toBe('dom, 06/09')
+  })
+})
+
+describe('formatCompletedLabel', () => {
+  it('Should show only the time for what was completed today', () => {
+    const completedToday = new Date(2026, 8, 3, 14, 2).toISOString()
+
+    expect(formatCompletedLabel(completedToday, TODAY)).toBe('14:02')
+  })
+
+  it('Should show the short date for what was completed on another day', () => {
+    const completedBefore = new Date(2026, 8, 1, 17, 30).toISOString()
+
+    expect(formatCompletedLabel(completedBefore, TODAY)).toBe('01/09')
+  })
+
+  it('Should fall back to the text of the design without a completion time', () => {
+    expect(formatCompletedLabel(null, TODAY)).toBe('sem data')
   })
 })

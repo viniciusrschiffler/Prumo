@@ -1,5 +1,5 @@
 import { differenceInDays, weekdayIndex } from '@/domain/dates/isoDateMath'
-import type { IsoDate } from '@/domain/schemas/primitives'
+import type { IsoDate, IsoDateTime } from '@/domain/schemas/primitives'
 
 const WITHOUT_DATE = 'sem data'
 
@@ -39,4 +39,31 @@ export function formatDueLabel(dueDate: IsoDate | null, today: IsoDate): string 
   }
 
   return formatShortDate(dueDate)
+}
+
+const TIME_PART_LENGTH = 2
+
+function pad(value: number): string {
+  return String(value).padStart(TIME_PART_LENGTH, '0')
+}
+
+function toLocalIsoDate(moment: Date): IsoDate {
+  return `${moment.getFullYear()}-${pad(moment.getMonth() + 1)}-${pad(moment.getDate())}`
+}
+
+// A mesma razão do formatModifiedAt: hora sozinha só é honesta para o que foi concluído hoje.
+export function formatCompletedLabel(completedAt: IsoDateTime | null, today: IsoDate): string {
+  if (completedAt === null) {
+    return WITHOUT_DATE
+  }
+
+  const moment = new Date(completedAt)
+
+  if (Number.isNaN(moment.getTime())) {
+    return WITHOUT_DATE
+  }
+
+  return toLocalIsoDate(moment) === today
+    ? `${pad(moment.getHours())}:${pad(moment.getMinutes())}`
+    : formatShortDate(toLocalIsoDate(moment))
 }

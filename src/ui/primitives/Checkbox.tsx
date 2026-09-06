@@ -1,13 +1,22 @@
 import type { InputHTMLAttributes, ReactNode } from 'react'
 import { classNames } from './classNames'
 
+export type CheckboxBoxSize = 'small' | 'large'
+
+const BOX_SIZE_CLASSES: Record<CheckboxBoxSize, string> = {
+  small: 'h-3.5 w-3.5 rounded-[3px]',
+  large: 'h-[15px] w-[15px] rounded-badge',
+}
+
 type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
   description?: string
-  children: ReactNode
+  boxSize?: CheckboxBoxSize
+  children?: ReactNode
 }
 
 export function Checkbox({
   description,
+  boxSize,
   children,
   className,
   disabled,
@@ -28,9 +37,8 @@ export function Checkbox({
       <span
         className={classNames(
           'inline-flex flex-none items-center justify-center border border-border-strong bg-bg text-[9px] leading-none text-transparent peer-checked:border-accent peer-checked:bg-accent peer-checked:text-accent-fg peer-focus-visible:ring-[3px] peer-focus-visible:ring-accent-soft',
-          hasDescription
-            ? 'mt-px h-[15px] w-[15px] rounded-badge'
-            : 'h-3.5 w-3.5 rounded-[3px]',
+          BOX_SIZE_CLASSES[boxSize ?? (hasDescription ? 'large' : 'small')],
+          hasDescription ? 'mt-px' : '',
         )}
       >
         ✓

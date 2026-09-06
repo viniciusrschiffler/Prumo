@@ -19,35 +19,41 @@ const DOT_CLASSES: Record<BadgeTone, string> = {
   scope: 'bg-event-scope',
 }
 
-export type ModalSize = 'default' | 'wide'
+export type ModalSize = 'default' | 'medium' | 'wide'
 
 const OVERLAY_CLASSES: Record<ModalSize, string> = {
   default: 'items-center justify-center p-7',
+  medium: 'items-center justify-center p-7',
   wide: 'items-start justify-center px-6 py-12',
 }
 
 const PANEL_CLASSES: Record<ModalSize, string> = {
   default: 'max-w-[520px]',
+  medium: 'max-w-[560px]',
   wide: 'max-h-full max-w-[680px]',
 }
 
 const HEADER_CLASSES: Record<ModalSize, string> = {
   default: 'px-3.5 py-3',
+  medium: 'px-3.5 py-3',
   wide: 'bg-sunken px-4 py-[13px]',
 }
 
 const TITLE_CLASSES: Record<ModalSize, string> = {
   default: 'text-[14px] font-semibold',
+  medium: 'text-[14px] font-semibold',
   wide: 'text-body font-semibold',
 }
 
 const BODY_CLASSES: Record<ModalSize, string> = {
   default: 'gap-2.5 p-3.5',
+  medium: 'gap-[11px] p-3.5',
   wide: 'gap-3.5 overflow-auto p-4',
 }
 
 const FOOTER_CLASSES: Record<ModalSize, string> = {
   default: 'px-3.5 py-3',
+  medium: 'px-3.5 py-3',
   wide: 'px-4 py-3',
 }
 
