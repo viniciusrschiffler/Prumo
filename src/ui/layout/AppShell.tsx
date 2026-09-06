@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router'
 import { bootstrapDatabase } from '@/app/bootstrapDatabase'
+import { useCommandPaletteStore } from '@/app/stores/useCommandPaletteStore'
 import { useDatabaseStore } from '@/app/stores/useDatabaseStore'
 import { useDataFolderStore } from '@/app/stores/useDataFolderStore'
 import { useNavigationCountsStore } from '@/app/stores/useNavigationCountsStore'
@@ -10,6 +11,7 @@ import type { Shortcut } from '@/ui/shortcuts/shortcutRegistry'
 import { ShortcutListener } from '@/ui/shortcuts/ShortcutListener'
 import { useShortcuts } from '@/ui/shortcuts/useShortcuts'
 import { ThemeProvider } from '@/ui/theme/ThemeProvider'
+import { CommandPalette, COMMAND_PALETTE_SHORTCUT_ID } from './CommandPalette'
 import { resolveScreenFromPath, SCREEN_META } from './screenMeta'
 import { Sidebar } from './Sidebar'
 import { ToastRegion } from './ToastRegion'
@@ -24,11 +26,13 @@ export function AppShell() {
   const dataFolderPath = useDataFolderStore((state) => state.path)
   const resolveDataFolder = useDataFolderStore((state) => state.resolve)
   const showShortcutHints = useSettingsStore((state) => state.settings.showShortcutHints)
+  const openCommandPalette = useCommandPaletteStore((state) => state.open)
+  const isCommandPaletteOpen = useCommandPaletteStore((state) => state.isOpen)
 
   const currentScreen = resolveScreenFromPath(location.pathname)
 
-  const navigationShortcuts = useMemo<Shortcut[]>(() => {
-    return Object.values(SCREEN_META)
+  const globalShortcuts = useMemo<Shortcut[]>(() => {
+    const navigation: Shortcut[] = Object.values(SCREEN_META)
       .filter((meta) => meta.navigationKeys !== null)
       .map((meta) => ({
         id: `navigate-${meta.screen}`,
@@ -37,9 +41,20 @@ export function AppShell() {
         description: `Ir para ${meta.title}`,
         run: () => void navigate(meta.path),
       }))
-  }, [navigate])
 
-  useShortcuts(navigationShortcuts)
+    return [
+      ...navigation,
+      {
+        id: COMMAND_PALETTE_SHORTCUT_ID,
+        keys: 'mod+k',
+        scope: 'global',
+        description: 'Abrir a paleta de comandos',
+        run: openCommandPalette,
+      },
+    ]
+  }, [navigate, openCommandPalette])
+
+  useShortcuts(globalShortcuts)
 
   useEffect(() => {
     void resolveDataFolder().then((path) => bootstrapDatabase(path))
@@ -73,6 +88,7 @@ export function AppShell() {
           )}
           <Outlet />
         </main>
+        {isCommandPaletteOpen && <CommandPalette />}
         <ShortcutListener />
         <ToastRegion />
       </div>

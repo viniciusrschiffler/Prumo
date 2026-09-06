@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, type KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router'
+import { useCommandPaletteStore } from '@/app/stores/useCommandPaletteStore'
 import type { SidebarContextItem } from '@/app/stores/useSidebarContextStore'
 import { formatIsoDate } from '@/domain/format/displayDate'
 import { formatWeekdayAbbreviation } from '@/domain/format/dueLabel'
@@ -43,6 +44,7 @@ export function TodayScreen() {
   const navigate = useNavigate()
   const { status, errorMessage, today, agenda, decisions, alerts, week, projects, retry } =
     useTodayScreenData()
+  const openCommandPalette = useCommandPaletteStore((state) => state.open)
   const actions = useTodayActions()
   const todoActions = useTodoActions()
 
@@ -143,9 +145,14 @@ export function TodayScreen() {
         />
       }
       actions={
-        <Button variant="primary" keys="mod+n" onClick={() => setOpenModal({ kind: 'project' })}>
-          Novo projeto
-        </Button>
+        <>
+          <Button keys="mod+k" onClick={openCommandPalette}>
+            Comandos
+          </Button>
+          <Button variant="primary" keys="mod+n" onClick={() => setOpenModal({ kind: 'project' })}>
+            Novo projeto
+          </Button>
+        </>
       }
       contentClassName="grid flex-1 grid-cols-[1fr_372px] overflow-hidden"
     >
