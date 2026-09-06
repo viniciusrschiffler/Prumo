@@ -270,6 +270,7 @@ export function TodoListScreen() {
           <p className="text-support text-text3">Carregando os todos…</p>
         ) : allRows.length === 0 ? (
           <EmptyState
+            size="large"
             title="Nenhum todo em aberto"
             description={
               <>
@@ -280,6 +281,7 @@ export function TodoListScreen() {
           />
         ) : groups.length === 0 ? (
           <EmptyState
+            size="large"
             title="Nenhum todo neste filtro"
             description="Ajuste a tag na barra lateral ou mostre os concluídos para ver o resto da lista."
             action={

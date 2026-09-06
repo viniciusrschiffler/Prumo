@@ -104,7 +104,7 @@ export function NewTodoModal({
         <Input
           id="new-todo-title"
           autoFocus
-          fieldSize="large"
+          fieldSize="medium"
           value={title}
           placeholder="O que precisa ser feito"
           onChange={(event) => setTitle(event.target.value)}
@@ -126,6 +126,7 @@ export function NewTodoModal({
         <FieldGroup label="Projeto vinculado" htmlFor="new-todo-project">
           <Select
             id="new-todo-project"
+            fieldSize="medium"
             textSize="support"
             value={projectId ?? WITHOUT_PROJECT_VALUE}
             onChange={(event) =>
@@ -149,6 +150,7 @@ export function NewTodoModal({
           <Input
             id="new-todo-due"
             numeric
+            fieldSize="medium"
             value={dueText}
             placeholder="dd/mm/aaaa"
             invalid={hasBrokenDue}

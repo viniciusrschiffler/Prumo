@@ -168,11 +168,18 @@ com quatro correções já aplicadas:
 O catálogo tipográfico define título de tela em 28px, mas todas as 9 telas renderizam o
 `h1` em 20px. As telas ganham.
 
-O catálogo também não cobre dois usos que aparecem nas 9 telas, e que por isso viraram
+O catálogo também não cobre três usos que aparecem nas 9 telas, e que por isso viraram
 token. O passo de 11px do catálogo é o **título de grupo**, com peso 600 e espacejamento de
 0.08em (`--text-label`). O **subtítulo mono do cabeçalho** é 11px com peso 400 e sem
 espacejamento (`--text-meta`), e o **rótulo de coluna de tabela densa** é 10px com 0.06em
-(`--text-column`). Não confunda os três.
+(`--text-column`). Não confunda os três. O quarto é o **número grande do cartão de
+indicador**, 18px com peso 600 (`--text-metric`), que Hoje, Capacidade e TodoList imprimem
+no mesmo cartão — não é o `--text-section-title` de 15px da faixa de métricas da tela de
+Projeto.
+
+O vazio segue a mesma regra do título de tela: o catálogo desenha 26px de respiro com título
+de 13px, as telas imprimem 40 a 44px com título de 15px. O `EmptyState` nasceu pelo catálogo
+e ganhou `size="large"` para as telas; as telas de Projeto e Projetos ainda usam o padrão.
 
 O cabeçalho é idêntico nas 9 telas: `padding: 12px 20px`, fundo `--panel` e borda embaixo. É
 o que o `ScreenShell` faz.
@@ -213,6 +220,13 @@ o que o `ScreenShell` faz.
 - **Simular e ⋯ não existem na tela de Projeto.** O design desenha o botão "Simular" no alerta
   de conflito e um "⋯" no canto do cabeçalho, sem definir o que qualquer um dos dois faz.
   Ficaram de fora: botão que não faz nada é pior que botão ausente.
+- **A paleta de comandos não existe.** O botão "Comandos ⌘K" aparece em Hoje, Painéis e
+  TodoList sem que o design diga o que ele abre, então ficou de fora pelo mesmo critério do
+  "Simular". Entra junto com a tela de Hoje, que é a próxima a pedir ele.
+- **O ⋯ da linha de todo também ficou de fora**, pela mesma razão. Adiar e vincular projeto,
+  que seriam o conteúdo natural do menu, já têm atalho de teclado na linha.
+- **Recorrente não gera todo.** A tabela `todo_recurrence` é lida e o painel lateral mostra a
+  cadência e o último disparo, mas nada agenda a geração — o design não desenha esse gatilho.
 
 ## A tela de Projeto contra o mockup
 
@@ -241,3 +255,39 @@ Ana também estoura, em março, contra o Portal do parceiro — e os dois alerta
 
 **Mudança de escopo tem token próprio, `--event-scope`.** É o único tipo de evento sem cor
 semântica no catálogo; o design usa `--ph-dev`, que é seed de fase. O valor é o mesmo roxo.
+
+## A tela de TodoList contra o mockup
+
+O mockup tem 12 todos inventados; o seed tem 8. Vale o derivado, e o teste que prova cada
+número está em `domain/todos/todoScreen.seed.test.ts`.
+
+| Onde | Mockup | Derivado |
+| --- | --- | --- |
+| Subtítulo | 11 em aberto · 2 atrasados · 6 vinculados | **7 em aberto · 1 atrasado · 5 vinculados a projeto** |
+| Concluídos na semana | 1 | **1** — o `td-alertas`, concluído em 01/09 |
+| Atrasados · Em aberto · Sem projeto | 2 · 11 · 5 | **1 · 7 · 2** |
+| Por projeto | 4 projetos | **4 não arquivados + Sem projeto** — o ERP cancelado tem `archived_at` |
+| Recorrentes | 2 cartões fictícios | **1** — "Revisão semanal de capacidade", `semanal-seg` |
+| Tags da sidebar | 1:1, contratação, arquitetura, pessoal, reunião | **as 5 da tabela `tag`** |
+
+Quatro leituras que o mockup deixou ambíguas:
+
+- **"Esta semana" fecha no fim da semana corrente**, não em `hoje + 3`. As duas leituras dão
+  06/09 no design, mas só esta respeita o início de semana das Configurações.
+- **"Concluídos" no painel lateral é da semana corrente.** O cartão está sob o título "Esta
+  semana"; somar todo concluído de qualquer data faria o número só crescer.
+- **O grupo de concluídos virou dois.** O mockup só desenha "Concluídos hoje", mas o botão
+  revela todo concluído de qualquer data — o de 01/09 do seed cairia num grupo que mente
+  sobre ele. Quem foi concluído em outro dia vai para **"Concluídos antes"**.
+- **A coluna de data de um item concluído mostra a hora só se ele foi concluído hoje**, a
+  mesma razão do `formatModifiedAt` na tela de Notas. Nos outros dias sai a data curta.
+
+**P1 é âmbar aqui e vermelho na tela de Projetos.** Não é descuido de nenhuma das duas: a de
+Projetos separa crítico de não crítico, o recorte da visão salva que o próprio produto traz,
+e pinta P0 e P1 igual; a de TodoList gradua a urgência. É o que o `scale` do `PriorityBadge`
+distingue.
+
+**O foco da linha mora na caixa de marcar.** Ela é um `input` de verdade, então o espaço já
+alterna sem `preventDefault` e o Tab alcança toda linha sem tabindex móvel. As setas, o `S`
+de adiar e o `@` de vincular projeto saem do `onKeyDown` da linha, que recebe o evento por
+propagação.
