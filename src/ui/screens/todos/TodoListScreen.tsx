@@ -20,18 +20,14 @@ import { buildTodoRows, listProjectsWithPhase, listTodoRecurrences } from '@/dom
 import { countOpenTodosByProject, summarizeTodos } from '@/domain/todos/todoSummary'
 import { TODO_GROUP_MODE_LABELS } from '@/ui/labels/entityLabels'
 import { useSidebarContext } from '@/ui/layout/useSidebarContext'
-import { Alert } from '@/ui/primitives/Alert'
 import { Button } from '@/ui/primitives/Button'
-import { EmptyState } from '@/ui/primitives/EmptyState'
 import { SegmentedControl } from '@/ui/primitives/SegmentedControl'
 import type { Shortcut } from '@/ui/shortcuts/shortcutRegistry'
 import { useShortcuts } from '@/ui/shortcuts/useShortcuts'
 import { ScreenShell } from '../ScreenShell'
 import { LinkProjectModal } from './LinkProjectModal'
+import { TodoGroupList } from './TodoGroupList'
 import { NewTodoModal } from './NewTodoModal'
-import { buildGroupHeader } from './todoGroupStyles'
-import { TodoGroupSection } from './TodoGroupSection'
-import { TodoItemRow } from './TodoItemRow'
 import { TodoQuickCapture } from './TodoQuickCapture'
 import { TodoSidePanel } from './TodoSidePanel'
 import { isRowShortcut, useTodoRowFocus } from './useTodoRowFocus'
@@ -214,7 +210,7 @@ export function TodoListScreen() {
   const subhead =
     status === 'ready'
       ? [
-          pluralize(summary.open, 'em aberto', 'em aberto'),
+          `${summary.open} em aberto`,
           pluralize(summary.late, 'atrasado', 'atrasados'),
           `${pluralize(summary.linkedToProject, 'vinculado', 'vinculados')} a projeto`,
         ].join(' · ')
@@ -254,79 +250,23 @@ export function TodoListScreen() {
       contentClassName="grid flex-1 grid-cols-[1fr_320px] overflow-hidden"
     >
       <div className="grid content-start gap-3.5 overflow-auto px-5 pb-6 pt-3.5">
-        {status === 'error' ? (
-          <Alert
-            level="danger"
-            title="Não foi possível abrir a lista"
-            action={
-              <Button variant="danger" size="small" onClick={() => void load()}>
-                Tentar de novo
-              </Button>
-            }
-          >
-            {errorMessage}
-          </Alert>
-        ) : status !== 'ready' ? (
-          <p className="text-support text-text3">Carregando os todos…</p>
-        ) : allRows.length === 0 ? (
-          <EmptyState
-            size="large"
-            title="Nenhum todo em aberto"
-            description={
-              <>
-                Capture o próximo na barra acima. Tudo que você escrever fica em{' '}
-                <span className="font-mono text-meta">prumo.db</span> na sua pasta local.
-              </>
-            }
-          />
-        ) : groups.length === 0 ? (
-          <EmptyState
-            size="large"
-            title="Nenhum todo neste filtro"
-            description="Ajuste a tag na barra lateral ou mostre os concluídos para ver o resto da lista."
-            action={
-              <Button
-                onClick={() => {
-                  setActiveTagId(null)
-                  setShowDone(false)
-                }}
-              >
-                Limpar filtros
-              </Button>
-            }
-          />
-        ) : (
-          groups.map((group) => {
-            const header = buildGroupHeader(group, context)
-
-            return (
-              <TodoGroupSection
-                key={group.id}
-                title={header.title}
-                count={group.items.length}
-                meta={header.meta}
-                tone={header.tone}
-                titleTone={header.titleTone}
-                phaseColor={header.phaseColor}
-              >
-                <div role="list" aria-label={header.title}>
-                  {group.items.map((row) => (
-                    <TodoItemRow
-                      key={row.todo.id}
-                      row={row}
-                      context={context}
-                      registerRef={rowFocus.registerRef}
-                      onToggle={(id) =>
-                        void run(() => toggleTodo(id), 'Não foi possível marcar o todo.')
-                      }
-                      onKeyDown={handleRowKeyDown}
-                    />
-                  ))}
-                </div>
-              </TodoGroupSection>
-            )
-          })
-        )}
+        <TodoGroupList
+          status={status}
+          errorMessage={errorMessage}
+          groups={groups}
+          context={context}
+          hasAnyTodo={allRows.length > 0}
+          rowFocus={rowFocus}
+          onRetry={() => void load()}
+          onClearFilters={() => {
+            setActiveTagId(null)
+            setShowDone(false)
+          }}
+          onToggle={(todoId) =>
+            void run(() => toggleTodo(todoId), 'Não foi possível marcar o todo.')
+          }
+          onRowKeyDown={handleRowKeyDown}
+        />
       </div>
 
       <TodoSidePanel

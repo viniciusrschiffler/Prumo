@@ -87,6 +87,7 @@ export function NewTodoModal({
   const errors = validateNewTodo(draft)
   const isValid = Object.keys(errors).length === 0 && !hasBrokenDue
   const linkedProject = projects.find((project) => project.id === projectId) ?? null
+  const previewLabel = describePreview(draft, groupMode, context, projects)
 
   return (
     <Modal
@@ -190,8 +191,8 @@ export function NewTodoModal({
           i
         </span>
         <span className="text-support text-text2">
-          Vai para <span className="font-semibold text-text">{describePreview(draft, groupMode, context, projects)}</span> no
-          agrupamento atual
+          Vai para <span className="font-semibold text-text">{previewLabel}</span> no agrupamento
+          atual
           {linkedProject !== null && ` · vinculado a ${linkedProject.name}`}
         </span>
       </div>
