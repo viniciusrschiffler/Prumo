@@ -533,3 +533,90 @@ juntos, a contextual, nenhum dos dois.
 
 **O ponto do `SidebarContextItem` é sinal sem número.** O `metaDot` desenha o ponto vermelho que
 os mockups põem ao lado do projeto com risco em aberto, onde o desvio não tem o que dizer.
+
+## A tela de Notas contra o mockup
+
+**Ela é a única das nove que não usa o `ScreenShell`, e não é descuido.** O cabeçalho de Notas
+pertence ao documento aberto, não à tela: o `h1` é o nome do arquivo, o `padding` é `12px 18px`
+contra os `12px 20px` das outras oito, e ele não cobre a árvore — vive dentro do painel direito.
+O nome "Notas" aparece só na navegação.
+
+Por isso nasceram dois tokens tipográficos. O `--text-doc-title` de 17px é o cabeçalho do
+documento e o `--text-article-title` de 22px é o título do preview. O catálogo para em 28/20/15,
+como já parou antes do `--text-meta`, do `--text-column` e do `--text-metric`. As telas ganham.
+
+O mockup desenha 9 arquivos em 5 pastas; o seed grava 3 arquivos planos em `notas/`. Vale o
+derivado, e o teste que prova cada número está em `domain/notes/notesScreen.seed.test.ts`.
+
+| Onde | Mockup | Derivado |
+| --- | --- | --- |
+| Árvore | 9 `.md` · 5 pastas | **3 `.md` · nenhuma pasta** — a árvore fica plana até alguém criar uma |
+| Filtrar por projeto | Todos 9 · Migração 3 · Portal 2 · Sem projeto 4 | **Todos 3 · Migração do gateway 2 · Portal do parceiro 1** |
+| Sem projeto | presente | **fora** — toda nota do seed está vinculada, mesma regra das tags da TodoList |
+| Rodapé da barra lateral | `~/Documentos/plano/notas` | **a pasta de dados** — o `SidebarFooter` é das nove telas |
+| Preview de `decisao-provedor.md` | tabela, bloco de código e callout | **o conteúdo real do arquivo** — o mockup embute um documento fictício |
+| `tipo:: / data:: / projeto::` no corpo | convenção do mockup | **fora** — tipo, data e projeto saem da tabela `note` |
+
+**Quem manda na árvore é o disco, não a tabela.** O `.md` existe na pasta mesmo sem linha em
+`note`, e é a linha que acrescenta o vínculo com projeto e com evento. Um arquivo sem linha
+aparece como nota pessoal; uma linha sem arquivo é o que o "Verificar arquivos" das Configurações
+já sabe acusar.
+
+**O tipo do selo é derivado do vínculo.** Nota ligada a evento é do tipo daquele evento
+("decisão"), ligada só a projeto é "nota de projeto", e sem vínculo é "nota pessoal". Não existe
+coluna de tipo.
+
+**A `note_search` não tem gatilho**, ao contrário da `project_event_search`. Quem a mantém em dia
+é a gravação da nota, no mesmo `executeBatch` da linha. Conteúdo e vínculo entram por caminhos
+separados de propósito: gravar o texto não pode apagar o projeto já ligado.
+
+**O arquivo vai ao disco antes da linha ao banco.** O disco é a fonte de verdade da nota; um
+índice atrasado é recuperável, um texto perdido não.
+
+**A gravação é automática.** O design não desenha botão de salvar nem cita ⌘S no rodapé — desenha
+um indicador de estado. O texto vai ao disco 800ms depois da última tecla, no blur do editor e ao
+sair da tela; trocar de arquivo com edição pendente cobra a gravação antes de o próximo entrar.
+
+**O "+" da árvore é nova pasta, não nova nota.** O botão primário do cabeçalho já cria nota com
+⌘N, e sem o "+" não haveria como montar a árvore que o mockup desenha. **A lupa ficou de fora**,
+pelo critério do "Simular" da tela de Projeto: ela só focaria o campo de busca uma linha abaixo.
+
+**A nova nota pede título em modal.** O design não desenha nenhum, mas o nome do arquivo é a
+navegação inteira desta tela: criar `nota-nova.md` e deixar o usuário renomear por fora seria
+pior. O `toNoteSlug` transforma o título no nome, e o modal mostra o caminho antes de gravar.
+
+**Vincular evento entra no modal do "Vincular projeto".** O design desenha o callout "Nota
+vinculada" e nenhum controle que o crie. Escolhido o projeto, aparece a lista de eventos dele;
+trocar de projeto solta o evento, que pertence ao projeto e não à nota.
+
+**O link do preview não navega.** O markdown reconhece `[texto](destino)` e o pinta como link,
+mas ele é texto: a janela não tem navegador e abrir origem remota contraria a regra de rede zero.
+O destino fica no `title`.
+
+**O leitor de markdown é próprio e mora em `domain/notes/`.** O `parseInlineMarkdown` de
+`domain/format/` continua como está — o histórico do projeto mostra o evento numa linha só e
+reconhece apenas negrito de propósito; a nota é um documento, com título, lista, tabela, código
+cercado e callout `> [!rótulo]`. Nenhuma dependência nova.
+
+**O título grande do preview é o primeiro `#` do arquivo**, e ele sai do corpo para não ser
+impresso duas vezes. Sem `#` nenhum, quem dá nome ao documento é o nome do arquivo.
+
+**O ⌘P alterna editor e preview, nunca o dividido.** Voltar ao dividido pela tecla faria a mesma
+tecla ter três destinos; o modo dividido é escolha do controle segmentado.
+
+**O contador de Notas na navegação conta arquivo, não linha.** Contá-lo pela tabela `note`
+mostraria um número diferente do que a árvore imprime, porque um `.md` largado na pasta ainda não
+tem linha. Pasta ilegível não derruba os outros contadores — ela só não soma.
+
+**O vazio não está no design.** As nove telas não desenham a árvore sem nota, então o texto saiu
+no tom dos outros `EmptyState`. O texto de pasta vazia, esse, é o do mockup.
+
+**Três variações de aparência viraram prop nesta tela**, pela armadilha já registrada: `Input`
+ganhou o passo `dense` de 26px do campo de busca, `IconButton` ganhou o `compact` de 22px que o
+`ThemeCycleButton` já desenhava à mão, e `SidebarContextItem` passou a imprimir o quadradinho de
+cor que o filtro por projeto pede. O `PhaseStripe` nasceu em `primitives/` porque o traço de 3px
+já se repetia nas telas de Projeto e Capacidade.
+
+**O tom de cada tipo de evento virou `PROJECT_EVENT_TONES`**, em `ui/labels/`. Ele servia só ao
+cartão do histórico e agora serve também ao modal de vínculo; duas listas sairiam de sincronia na
+primeira cor nova.
