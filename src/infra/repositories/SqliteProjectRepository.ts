@@ -4,11 +4,15 @@ import {
   type ProjectBlock,
 } from '@/domain/projects/blockProjects'
 import type { NewProject } from '@/domain/projects/newProject'
+import type { ResumePostponement } from '@/domain/projects/postponeResume'
+import type { ProjectResume } from '@/domain/projects/resumeProjects'
+import type { ProjectUnblock } from '@/domain/projects/unblockProjects'
 import type {
   NewProjectTag,
   ProjectRepository,
 } from '@/domain/repositories/ProjectRepository'
 import type { EntityId, Priority } from '@/domain/schemas/primitives'
+import type { ProjectEvent } from '@/domain/schemas/projectEventSchema'
 import { projectSchema, type Project } from '@/domain/schemas/projectSchema'
 import { parseRows } from '@/infra/database/parseRow'
 import type { BatchStatement, SqlGateway } from '@/infra/database/SqlGateway'
@@ -37,7 +41,19 @@ const UPDATE_PRIORITY = 'UPDATE project SET priority = ? WHERE id = ?'
 
 const BLOCK_PROJECT = "UPDATE project SET status = 'blocked' WHERE id = ?"
 
+const ACTIVATE_PROJECT = "UPDATE project SET status = 'active' WHERE id = ?"
+
+const RESUME_PROJECT = "UPDATE project SET status = 'active', paused_at = NULL WHERE id = ?"
+
+const POSTPONE_RESUME = 'UPDATE project_event SET expected_resume_at = ? WHERE id = ?'
+
 const END_ALLOCATION = 'UPDATE allocation SET ended_at = ?, ended_reason = ? WHERE id = ?'
+
+const INSERT_ALLOCATION = `
+  INSERT INTO allocation (id, task_id, person_id, start_date, end_date, percentage,
+                          ended_at, ended_reason)
+  VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)
+`
 
 const INSERT_EVENT = `
   INSERT INTO project_event (id, project_id, type, event_date, title, body_md,
@@ -136,6 +152,40 @@ function toBlockStatements(block: ProjectBlock): BatchStatement[] {
   ]
 }
 
+function toEventStatement(event: ProjectEvent): BatchStatement {
+  return {
+    query: INSERT_EVENT,
+    values: [
+      event.id,
+      event.projectId,
+      event.type,
+      event.eventDate,
+      event.title,
+      event.bodyMarkdown,
+      event.expectedResumeAt,
+      event.createdAt,
+    ],
+  }
+}
+
+function toUnblockStatements(unblock: ProjectUnblock): BatchStatement[] {
+  return [
+    { query: ACTIVATE_PROJECT, values: [unblock.projectId] },
+    toEventStatement(unblock.event),
+    ...unblock.resumedAllocations.map((allocation) => ({
+      query: INSERT_ALLOCATION,
+      values: [
+        allocation.id,
+        allocation.taskId,
+        allocation.personId,
+        allocation.startDate,
+        allocation.endDate,
+        allocation.percentage,
+      ],
+    })),
+  ]
+}
+
 export class SqliteProjectRepository implements ProjectRepository {
   readonly #gateway: SqlGateway
 
@@ -161,5 +211,27 @@ export class SqliteProjectRepository implements ProjectRepository {
   // metade deixaria o projeto bloqueado sem registro de por quê.
   async blockMany(blocks: readonly ProjectBlock[]): Promise<void> {
     await this.#gateway.executeBatch(blocks.flatMap(toBlockStatements))
+  }
+
+  // O desbloqueio recria as alocações que o bloqueio encerrou no mesmo lote do evento: sem
+  // isso o projeto voltaria a andar com o time que o bloqueio tirou dele.
+  async unblock(unblock: ProjectUnblock): Promise<void> {
+    await this.#gateway.executeBatch(toUnblockStatements(unblock))
+  }
+
+  async resume(resume: ProjectResume): Promise<void> {
+    await this.#gateway.executeBatch([
+      { query: RESUME_PROJECT, values: [resume.projectId] },
+      toEventStatement(resume.event),
+    ])
+  }
+
+  async postponeResume(postponement: ResumePostponement): Promise<void> {
+    await this.#gateway.executeBatch([
+      {
+        query: POSTPONE_RESUME,
+        values: [postponement.expectedResumeAt, postponement.blockEventId],
+      },
+    ])
   }
 }

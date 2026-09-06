@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import type { ReallocationSimulation } from '@/domain/capacity/reallocationImpact'
 import { buildReallocation } from '@/domain/capacity/reallocationWrite'
+import { toIsoDateOf } from '@/domain/dates/isoDateMath'
+import { findOpenBlockEvent } from '@/domain/derived/calculateBlockedDays'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
 import {
   buildProjectBlock,
@@ -13,7 +15,17 @@ import {
   type NewProjectEventDraft,
 } from '@/domain/projects/newProjectEvent'
 import { buildNewTask, nextSortOrder, type NewTaskDraft } from '@/domain/projects/newTask'
+import {
+  buildResumePostponement,
+  type PostponeResumeDraft,
+} from '@/domain/projects/postponeResume'
 import type { ProjectsSnapshot } from '@/domain/projects/projectRow'
+import { buildProjectResume } from '@/domain/projects/resumeProjects'
+import {
+  buildProjectUnblock,
+  listAllocationsEndedByBlock,
+  type UnblockProjectDraft,
+} from '@/domain/projects/unblockProjects'
 import type { EntityId, Priority } from '@/domain/schemas/primitives'
 import type { SavedView } from '@/domain/schemas/savedViewSchema'
 import { toPlannedPeriod } from '@/domain/timeline/timelineProjectRows'
@@ -66,6 +78,9 @@ type ProjectsState = {
   registerEvent: (draft: NewProjectEventDraft) => Promise<void>
   setPriority: (projectIds: readonly EntityId[], priority: Priority) => Promise<void>
   blockProjects: (projectIds: readonly EntityId[], draft: BlockProjectsDraft) => Promise<void>
+  unblockProject: (projectId: EntityId, draft: UnblockProjectDraft) => Promise<void>
+  resumeProject: (projectId: EntityId) => Promise<void>
+  postponeResume: (draft: PostponeResumeDraft) => Promise<void>
   rescheduleTask: (
     taskId: EntityId,
     mode: ScheduleEditMode,
@@ -218,6 +233,69 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
     })
 
     await new SqliteProjectRepository(getSqlGateway()).blockMany(blocks)
+    await get().refresh()
+  },
+
+  unblockProject: async (projectId, draft) => {
+    const { tasks, allocations, events } = get().snapshot
+    const blockEvent = findOpenBlockEvent(events.filter((event) => event.projectId === projectId))
+
+    if (blockEvent === null) {
+      return
+    }
+
+    const projectTasks = tasks.filter((task) => task.projectId === projectId)
+    const endedByBlock = listAllocationsEndedByBlock({
+      blockEvent,
+      tasks: projectTasks,
+      allocations,
+    })
+
+    await new SqliteProjectRepository(getSqlGateway()).unblock(
+      buildProjectUnblock({
+        projectId,
+        blockEvent,
+        tasks: projectTasks,
+        allocations,
+        draft,
+        eventId: crypto.randomUUID(),
+        allocationIds: endedByBlock.map(() => crypto.randomUUID()),
+        today: todayIsoDate(),
+        now: new Date().toISOString(),
+      }),
+    )
+
+    await get().refresh()
+  },
+
+  resumeProject: async (projectId) => {
+    const project = get().snapshot.projects.find((candidate) => candidate.id === projectId)
+
+    if (project === undefined || project.pausedAt === null) {
+      return
+    }
+
+    await new SqliteProjectRepository(getSqlGateway()).resume(
+      buildProjectResume({
+        projectId,
+        pausedSince: toIsoDateOf(project.pausedAt),
+        eventId: crypto.randomUUID(),
+        today: todayIsoDate(),
+        now: new Date().toISOString(),
+      }),
+    )
+
+    await get().refresh()
+  },
+
+  postponeResume: async (draft) => {
+    const postponement = buildResumePostponement(draft)
+
+    if (postponement === null) {
+      return
+    }
+
+    await new SqliteProjectRepository(getSqlGateway()).postponeResume(postponement)
     await get().refresh()
   },
 

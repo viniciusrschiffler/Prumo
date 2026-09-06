@@ -299,3 +299,223 @@ describe('SqliteProjectRepository.blockMany', () => {
     expect(await gateway.select<unknown[]>('SELECT * FROM project_event')).toEqual([])
   })
 })
+
+describe('SqliteProjectRepository.unblock', () => {
+  const unblock = {
+    projectId: 'gateway',
+    event: {
+      id: 'ev-unblock',
+      projectId: 'gateway',
+      type: 'unblock' as const,
+      eventDate: '2026-07-30',
+      title: 'Ambiente liberado pela infra',
+      bodyMarkdown: '1 alocação recriada no desbloqueio.',
+      revertsEventId: null,
+      riskOpen: false,
+      expectedResumeAt: null,
+      createdAt: '2026-07-30T09:15:00Z',
+    },
+    resumedAllocations: [
+      {
+        id: 'al-nova',
+        taskId: 'gw-tes',
+        personId: 'ana',
+        startDate: '2026-07-30',
+        endDate: '2026-09-26',
+        percentage: 50,
+        endedAt: null,
+        endedReason: null,
+      },
+    ],
+  }
+
+  beforeEach(async () => {
+    await seedProject([
+      'gateway',
+      'Migração do gateway',
+      null,
+      'blocked',
+      'P1',
+      null,
+      null,
+      null,
+      '2026-02-20T09:00:00Z',
+      null,
+    ])
+
+    await gateway.executeBatch([
+      {
+        query: 'INSERT INTO person (id, name, initials) VALUES (?, ?, ?)',
+        values: ['ana', 'Ana Nogueira', 'AN'],
+      },
+      {
+        query: 'INSERT INTO task (id, project_id, phase_id, title, status) VALUES (?, ?, ?, ?, ?)',
+        values: ['gw-tes', 'gateway', 'development', 'Testes de carga', 'todo'],
+      },
+      {
+        query: `
+          INSERT INTO allocation (id, task_id, person_id, start_date, end_date, percentage,
+                                  ended_at, ended_reason)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        values: [
+          'al-antiga',
+          'gw-tes',
+          'ana',
+          '2026-05-18',
+          '2026-07-22',
+          50,
+          '2026-07-22T16:40:00Z',
+          'projeto bloqueado',
+        ],
+      },
+    ])
+  })
+
+  it('Should move the project back to active', async () => {
+    await repository.unblock(unblock)
+
+    expect((await repository.listAll())[0]?.status).toBe('active')
+  })
+
+  it('Should record the unblock event', async () => {
+    await repository.unblock(unblock)
+
+    expect(
+      await gateway.select<{ type: string; title: string }[]>(
+        'SELECT type, title FROM project_event',
+      ),
+    ).toEqual([{ type: 'unblock', title: 'Ambiente liberado pela infra' }])
+  })
+
+  it('Should insert the resumed allocation and keep the ended one in the history', async () => {
+    await repository.unblock(unblock)
+
+    expect(
+      await gateway.select<{ id: string; ended_reason: string | null }[]>(
+        'SELECT id, ended_reason FROM allocation ORDER BY id',
+      ),
+    ).toEqual([
+      { id: 'al-antiga', ended_reason: 'projeto bloqueado' },
+      { id: 'al-nova', ended_reason: null },
+    ])
+  })
+
+  it('Should leave the project blocked when the batch cannot be written', async () => {
+    const broken = { ...unblock, event: { ...unblock.event, projectId: 'inexistente' } }
+
+    await expect(repository.unblock(broken)).rejects.toThrow()
+
+    expect((await repository.listAll())[0]?.status).toBe('blocked')
+    expect(await gateway.select<unknown[]>('SELECT * FROM project_event')).toEqual([])
+  })
+})
+
+describe('SqliteProjectRepository.resume', () => {
+  const resume = {
+    projectId: 'campo',
+    event: {
+      id: 'ev-resume',
+      projectId: 'campo',
+      type: 'decision' as const,
+      eventDate: '2026-09-03',
+      title: 'Projeto retomado',
+      bodyMarkdown: 'Pausado desde 28/08/2026, volta a andar hoje.',
+      revertsEventId: null,
+      riskOpen: false,
+      expectedResumeAt: null,
+      createdAt: '2026-09-03T11:00:00Z',
+    },
+  }
+
+  beforeEach(async () => {
+    await gateway.executeBatch([
+      {
+        query: `
+          INSERT INTO project (id, name, description, status, priority, owner_person_id,
+                               planned_start, planned_end, created_at, archived_at, paused_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+        values: [
+          'campo',
+          'App de campo v2',
+          null,
+          'paused',
+          'P2',
+          null,
+          null,
+          null,
+          '2026-06-01T09:00:00Z',
+          null,
+          '2026-08-28T16:00:00Z',
+        ],
+      },
+    ])
+  })
+
+  it('Should clear the pause and move the project back to active', async () => {
+    await repository.resume(resume)
+
+    expect((await repository.listAll())[0]).toMatchObject({ status: 'active', pausedAt: null })
+  })
+
+  it('Should record the resume in the history', async () => {
+    await repository.resume(resume)
+
+    expect(
+      await gateway.select<{ type: string; title: string }[]>(
+        'SELECT type, title FROM project_event',
+      ),
+    ).toEqual([{ type: 'decision', title: 'Projeto retomado' }])
+  })
+})
+
+describe('SqliteProjectRepository.postponeResume', () => {
+  beforeEach(async () => {
+    await seedProject([
+      'parceiro',
+      'Portal do parceiro',
+      null,
+      'blocked',
+      'P0',
+      null,
+      null,
+      null,
+      '2026-01-15T09:00:00Z',
+      null,
+    ])
+
+    await gateway.executeBatch([
+      {
+        query: `
+          INSERT INTO project_event (id, project_id, type, event_date, title, body_md,
+                                     reverts_event_id, risk_open, expected_resume_at, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, NULL, 0, ?, ?)
+        `,
+        values: [
+          'ev-pp-block',
+          'parceiro',
+          'block',
+          '2026-08-11',
+          'Aguardando validação jurídica do contrato',
+          null,
+          '2026-08-26',
+          '2026-08-11T10:05:00Z',
+        ],
+      },
+    ])
+  })
+
+  it('Should move the expected resume date of the block event', async () => {
+    await repository.postponeResume({
+      blockEventId: 'ev-pp-block',
+      expectedResumeAt: '2026-09-20',
+    })
+
+    expect(
+      await gateway.select<{ expected_resume_at: string }[]>(
+        'SELECT expected_resume_at FROM project_event',
+      ),
+    ).toEqual([{ expected_resume_at: '2026-09-20' }])
+  })
+})
