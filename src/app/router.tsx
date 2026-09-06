@@ -8,7 +8,7 @@ import { ProjectScreen } from '@/ui/screens/project/ProjectScreen'
 import { ProjectsScreen } from '@/ui/screens/projects/ProjectsScreen'
 import { SettingsScreen } from '@/ui/screens/SettingsScreen'
 import { TimelineScreen } from '@/ui/screens/timeline/TimelineScreen'
-import { TodayScreen } from '@/ui/screens/TodayScreen'
+import { TodayScreen } from '@/ui/screens/today/TodayScreen'
 import { TodoListScreen } from '@/ui/screens/todos/TodoListScreen'
 
 export const DEV_PRIMITIVES_PATH = '/dev/primitivos'

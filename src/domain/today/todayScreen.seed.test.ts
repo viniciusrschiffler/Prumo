@@ -104,7 +104,7 @@ describe('Tarefas de hoje sobre o seed', () => {
   it('Should leave the cutover without anybody allocated, as the alert says', () => {
     const cutover = agenda.starting.find((row) => row.task.id === 'ob-cut')
 
-    expect(cutover?.people).toEqual([])
+    expect(cutover?.assignments).toEqual([])
     expect(cutover?.hasOnlyEndedAllocations).toBe(false)
   })
 

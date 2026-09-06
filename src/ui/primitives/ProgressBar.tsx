@@ -14,12 +14,13 @@ const TONE_CLASSES: Record<ProgressTone, string> = {
 }
 
 // A tabela densa desenha a barra em 5px; o cartão de progresso do sistema de design, em 6px.
-export type ProgressSize = 'default' | 'dense' | 'wide'
+export type ProgressSize = 'default' | 'dense' | 'wide' | 'thick'
 
 const SIZE_CLASSES: Record<ProgressSize, string> = {
   default: 'h-1.5',
   dense: 'h-[5px]',
   wide: 'h-2.5',
+  thick: 'h-3',
 }
 
 const TRACK_CLASSES: Record<ProgressTrack, string> = {

@@ -7,7 +7,14 @@ import {
 function buildSignature(items: readonly SidebarContextItem[]): string {
   return items
     .map((item) =>
-      [item.id, item.label, item.meta ?? '', item.metaTone ?? '', item.subdued ?? ''].join(':'),
+      [
+        item.id,
+        item.label,
+        item.meta ?? '',
+        item.metaTone ?? '',
+        item.metaDot ?? '',
+        item.subdued ?? '',
+      ].join(':'),
     )
     .join('|')
 }

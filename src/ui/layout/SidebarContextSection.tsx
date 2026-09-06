@@ -16,6 +16,7 @@ type SidebarContextItemProps = {
   label: string
   meta: string | undefined
   metaTone?: SidebarContextMetaTone
+  metaDot?: SidebarContextMetaTone
   subdued?: boolean
   color?: string
   isActive: boolean
@@ -25,6 +26,11 @@ type SidebarContextItemProps = {
 const META_TONE_CLASSES: Record<SidebarContextMetaTone, string> = {
   default: 'text-text3',
   danger: 'text-danger',
+}
+
+const DOT_TONE_CLASSES: Record<SidebarContextMetaTone, string> = {
+  default: 'bg-text3',
+  danger: 'bg-danger',
 }
 
 function toRowToneClasses(isActive: boolean, subdued: boolean): string {
@@ -39,6 +45,7 @@ function ContextRow({
   label,
   meta,
   metaTone = 'default',
+  metaDot,
   subdued = false,
   isActive,
   onSelect,
@@ -59,6 +66,16 @@ function ContextRow({
         <span className={classNames('ml-auto font-mono text-micro', META_TONE_CLASSES[metaTone])}>
           {meta}
         </span>
+      )}
+      {metaDot !== undefined && (
+        <span
+          aria-hidden
+          className={classNames(
+            'h-1.5 w-1.5 flex-none rounded-full',
+            meta === undefined ? 'ml-auto' : '',
+            DOT_TONE_CLASSES[metaDot],
+          )}
+        />
       )}
     </button>
   )
@@ -127,6 +144,7 @@ export function SidebarContextSection({ label, variant = 'list' }: SidebarContex
               label: item.label,
               meta: item.meta,
               metaTone: item.metaTone,
+              metaDot: item.metaDot,
               subdued: item.subdued,
               color: item.color,
               isActive: item.id === activeId,

@@ -17,11 +17,16 @@ export type DueTodoRow = {
 
 export type TodayTaskKind = 'start' | 'end' | 'late'
 
+export type TaskAssignment = {
+  person: Person
+  percentage: number
+}
+
 export type TodayTaskRow = {
   task: Task
   project: Project
   phase: Phase | null
-  people: readonly Person[]
+  assignments: readonly TaskAssignment[]
   hasOnlyEndedAllocations: boolean
   kind: TodayTaskKind
 }
@@ -156,6 +161,28 @@ function toDueTodoRow(todo: Todo, index: RowIndex): DueTodoRow {
   }
 }
 
+// A coluna de pessoas fala da linha: o percentual é o que aquela alocação consome nesta
+// tarefa, não a soma de tudo que a pessoa faz.
+function listAssignments(task: Task, input: TodayAgendaInput): TaskAssignment[] {
+  const percentageByPerson = new Map<EntityId, number>()
+
+  for (const allocation of input.allocations) {
+    if (allocation.taskId !== task.id || allocation.endedAt !== null) {
+      continue
+    }
+
+    percentageByPerson.set(
+      allocation.personId,
+      (percentageByPerson.get(allocation.personId) ?? 0) + allocation.percentage,
+    )
+  }
+
+  return input.people
+    .filter((person) => percentageByPerson.has(person.id))
+    .map((person) => ({ person, percentage: percentageByPerson.get(person.id) ?? 0 }))
+    .toSorted((first, second) => first.person.name.localeCompare(second.person.name, 'pt-BR'))
+}
+
 function toTaskRow(
   task: Task,
   kind: TodayTaskKind,
@@ -174,7 +201,7 @@ function toTaskRow(
     task,
     project,
     phase: index.phasesById.get(task.phaseId) ?? null,
-    people: summary.people,
+    assignments: listAssignments(task, input),
     hasOnlyEndedAllocations: summary.hasOnlyEndedAllocations,
     kind,
   }

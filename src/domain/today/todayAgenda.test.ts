@@ -152,7 +152,9 @@ describe('Agenda de hoje', () => {
       }),
     )
 
-    expect(agenda.starting[0]?.people.map((person) => person.name)).toEqual(['Marcos Teles'])
+    expect(
+      agenda.starting[0]?.assignments.map((entry) => [entry.person.name, entry.percentage]),
+    ).toEqual([['Marcos Teles', 30]])
     expect(agenda.starting[0]?.hasOnlyEndedAllocations).toBe(false)
   })
 

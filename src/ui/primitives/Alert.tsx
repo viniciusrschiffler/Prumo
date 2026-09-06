@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
+import { AlertIcon, type AlertLevel } from './AlertIcon'
 import { classNames } from './classNames'
 
-export type AlertLevel = 'danger' | 'warn' | 'ok' | 'info'
+export type { AlertLevel }
 
 // O painel lateral da Capacidade desenha o mesmo aviso sobre o painel branco, com a borda
 // neutra: a cor do nível fica só no ícone. É variação de aparência, então é prop.
@@ -16,25 +17,11 @@ const CONTAINER_CLASSES: Record<AlertLevel, string> = {
 
 const PLAIN_CONTAINER_CLASSES = 'border-border bg-panel'
 
-const ICON_CLASSES: Record<AlertLevel, string> = {
-  danger: 'rounded-full bg-danger text-accent-fg',
-  warn: 'rounded-[3px] bg-warn text-accent-fg',
-  ok: 'rounded-full bg-ok text-accent-fg',
-  info: 'rounded-full border border-border-strong text-text2',
-}
-
 const TITLE_CLASSES: Record<AlertLevel, string> = {
   danger: 'text-danger',
   warn: 'text-warn',
   ok: 'text-text',
   info: 'text-text',
-}
-
-const ICON_GLYPH: Record<AlertLevel, string> = {
-  danger: '!',
-  warn: '△',
-  ok: '✓',
-  info: 'i',
 }
 
 type AlertProps = {
@@ -63,15 +50,7 @@ export function Alert({
         className,
       )}
     >
-      <span
-        aria-hidden="true"
-        className={classNames(
-          'mt-px inline-flex h-4 w-4 flex-none items-center justify-center text-label font-bold',
-          ICON_CLASSES[level],
-        )}
-      >
-        {ICON_GLYPH[level]}
-      </span>
+      <AlertIcon level={level} className="mt-px" />
       <div>
         <div className={classNames('text-body font-semibold', TITLE_CLASSES[level])}>{title}</div>
         {children !== undefined && <div className="text-support text-text2">{children}</div>}

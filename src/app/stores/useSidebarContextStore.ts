@@ -7,6 +7,9 @@ export type SidebarContextItem = {
   label: string
   meta?: string
   metaTone?: SidebarContextMetaTone
+  // O ponto colorido do design é sinal sem número: risco em aberto no projeto, onde o desvio
+  // não tem o que dizer.
+  metaDot?: SidebarContextMetaTone
   subdued?: boolean
   color?: string
 }
