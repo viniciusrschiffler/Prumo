@@ -51,3 +51,100 @@ describe('SqliteNoteRepository', () => {
     ])
   })
 })
+
+describe('SqliteNoteRepository.saveContent', () => {
+  it('Should create the row and index the content on the first save', async () => {
+    await repository.saveContent({
+      path: 'notas/nova.md',
+      content: '# Nova\n\nconciliação automática',
+      updatedAt: '2026-09-03T10:00:00Z',
+    })
+
+    expect((await repository.listAll())[0]).toEqual({
+      path: 'notas/nova.md',
+      projectId: null,
+      projectEventId: null,
+      updatedAt: '2026-09-03T10:00:00Z',
+    })
+    expect(await repository.searchPaths('"conciliação"')).toEqual(['notas/nova.md'])
+  })
+
+  // Gravar o texto não pode apagar o projeto que já estava ligado.
+  it('Should keep the links a later save does not touch', async () => {
+    await gateway.executeBatch([
+      {
+        query: INSERT_NOTE,
+        values: ['notas/nova.md', 'gateway', null, '2026-09-03T09:00:00Z'],
+      },
+    ])
+
+    await repository.saveContent({
+      path: 'notas/nova.md',
+      content: 'outro texto',
+      updatedAt: '2026-09-03T10:00:00Z',
+    })
+
+    expect((await repository.listAll())[0]?.projectId).toBe('gateway')
+  })
+
+  it('Should not leave the previous text in the index', async () => {
+    await repository.saveContent({
+      path: 'notas/nova.md',
+      content: 'jurídico',
+      updatedAt: '2026-09-03T10:00:00Z',
+    })
+    await repository.saveContent({
+      path: 'notas/nova.md',
+      content: 'financeiro',
+      updatedAt: '2026-09-03T11:00:00Z',
+    })
+
+    expect(await repository.searchPaths('"jurídico"')).toEqual([])
+    expect(await repository.searchPaths('"financeiro"')).toEqual(['notas/nova.md'])
+  })
+})
+
+describe('SqliteNoteRepository.setLinks', () => {
+  it('Should link a file that had no row yet', async () => {
+    await repository.setLinks({
+      path: 'notas/solta.md',
+      projectId: 'gateway',
+      projectEventId: null,
+      updatedAt: '2026-09-03T10:00:00Z',
+    })
+
+    expect((await repository.listAll())[0]?.projectId).toBe('gateway')
+  })
+
+  it('Should undo a link by writing null over it', async () => {
+    await repository.setLinks({
+      path: 'notas/solta.md',
+      projectId: 'gateway',
+      projectEventId: null,
+      updatedAt: '2026-09-03T10:00:00Z',
+    })
+    await repository.setLinks({
+      path: 'notas/solta.md',
+      projectId: null,
+      projectEventId: null,
+      updatedAt: '2026-09-03T11:00:00Z',
+    })
+
+    expect((await repository.listAll())[0]?.projectId).toBeNull()
+  })
+})
+
+describe('SqliteNoteRepository.remove', () => {
+  it('Should take the note out of the table and out of the index', async () => {
+    await repository.saveContent({
+      path: 'notas/nova.md',
+      content: 'conciliação',
+      updatedAt: '2026-09-03T10:00:00Z',
+    })
+
+    await repository.remove('notas/nova.md')
+
+    expect(await repository.listAll()).toEqual([])
+    expect(await repository.searchPaths('"conciliação"')).toEqual([])
+  })
+})

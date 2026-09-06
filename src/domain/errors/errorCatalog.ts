@@ -11,6 +11,9 @@ export const ERROR_CATALOG = {
   PHASE_HAS_TASKS:
     'Esta fase tem tarefas. Mova as tarefas para outra fase antes de excluí-la.',
   DATA_FOLDER_UNREADABLE: 'Não foi possível ler a pasta de dados.',
+  NOTES_FOLDER_UNREADABLE: 'Não foi possível ler a pasta de notas.',
+  NOTE_READ_FAILED: 'Não foi possível abrir o arquivo da nota.',
+  NOTE_WRITE_FAILED: 'Não foi possível gravar a nota na pasta de dados.',
   EXPORT_FAILED: 'Não foi possível gravar a exportação na pasta de dados.',
   SHORTCUT_CONFLICT: 'Dois comandos disputam o mesmo atalho.',
   RECORD_NOT_FOUND: 'O registro não foi encontrado.',
