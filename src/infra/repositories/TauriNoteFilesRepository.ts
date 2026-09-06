@@ -58,6 +58,14 @@ export class TauriNoteFilesRepository implements NoteFilesRepository {
     }
   }
 
+  async createFolder(folderPath: string): Promise<void> {
+    try {
+      await mkdir(this.#toSystem(folderPath), { recursive: true })
+    } catch (cause) {
+      throw new PrumoError('NOTE_WRITE_FAILED', `falha ao criar ${folderPath}`, { cause })
+    }
+  }
+
   #toSystem(notePath: string): string {
     return toSystemPath(this.#dataFolderPath, notePath)
   }

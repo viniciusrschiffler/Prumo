@@ -49,6 +49,20 @@
   --text-entity-title--font-weight: 600;
   --text-entity-title--letter-spacing: -0.01em;
 
+  /* A tela de Notas é a única cujo cabeçalho pertence ao documento aberto, e não à tela: o
+     h1 é o nome do arquivo, num passo menor que o das outras oito. O título do preview é o
+     maior, porque ali o documento é a página inteira. Nenhum dos dois está no catálogo, que
+     também não cobre --text-meta, --text-column nem --text-metric. As telas ganham. */
+  --text-doc-title: 17px;
+  --text-doc-title--line-height: 1.3;
+  --text-doc-title--font-weight: 600;
+  --text-doc-title--letter-spacing: -0.01em;
+
+  --text-article-title: 22px;
+  --text-article-title--line-height: 1.25;
+  --text-article-title--font-weight: 600;
+  --text-article-title--letter-spacing: -0.01em;
+
   --text-section-title: 15px;
   --text-section-title--line-height: 1.35;
   --text-section-title--font-weight: 600;

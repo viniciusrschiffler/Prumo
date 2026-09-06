@@ -14,6 +14,7 @@ function buildSignature(items: readonly SidebarContextItem[]): string {
         item.metaTone ?? '',
         item.metaDot ?? '',
         item.subdued ?? '',
+        item.color ?? '',
       ].join(':'),
     )
     .join('|')

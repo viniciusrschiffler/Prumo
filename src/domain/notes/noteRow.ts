@@ -129,6 +129,22 @@ export function selectPathsForFilter(
   return new Set(matching.map((row) => row.entry.path))
 }
 
+export type LinkableProject = {
+  project: Project
+  phase: Phase | null
+}
+
+// O arquivado sai da lista de vínculo pelo mesmo critério da TodoList: não se liga trabalho
+// novo a projeto encerrado. Uma nota já ligada a ele mantém o vínculo, que é histórico.
+export function listLinkableProjects(snapshot: NotesSnapshot): LinkableProject[] {
+  const phasesByProject = buildPhasesByProject(snapshot)
+
+  return snapshot.projects
+    .filter((project) => project.archivedAt === null)
+    .map((project) => ({ project, phase: phasesByProject.get(project.id) ?? null }))
+    .toSorted((first, second) => first.project.name.localeCompare(second.project.name, 'pt-BR'))
+}
+
 export function findNoteRow(rows: readonly NoteRow[], path: string | null): NoteRow | null {
   return rows.find((row) => row.entry.path === path) ?? null
 }

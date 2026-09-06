@@ -2,11 +2,13 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { classNames } from './classNames'
 import { FOCUS_RING } from './focusRing'
 
-export type IconButtonSize = 'default' | 'small'
+export type IconButtonSize = 'default' | 'compact' | 'small'
 
 const SIZE_CLASSES: Record<IconButtonSize, string> = {
   default:
     'h-7 w-7 rounded-button border border-border-strong bg-panel text-body text-text2 hover:bg-sunken hover:text-text',
+  compact:
+    'h-[22px] w-[22px] rounded-[5px] border border-border bg-panel text-support text-text2 hover:border-border-strong hover:text-text',
   small:
     'h-4 w-4 rounded-[3px] border border-transparent bg-transparent text-label font-semibold leading-none text-text2 hover:bg-neutral-soft hover:text-text',
 }

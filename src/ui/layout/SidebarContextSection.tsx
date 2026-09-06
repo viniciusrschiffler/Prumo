@@ -4,6 +4,7 @@ import {
 } from '@/app/stores/useSidebarContextStore'
 import { classNames } from '@/ui/primitives/classNames'
 import { FOCUS_RING } from '@/ui/primitives/focusRing'
+import { PhaseStripe } from '@/ui/primitives/PhaseStripe'
 import { phaseColorStyle } from '@/ui/primitives/phaseColorStyle'
 import type { SidebarContextVariant } from './screenMeta'
 
@@ -47,6 +48,7 @@ function ContextRow({
   metaTone = 'default',
   metaDot,
   subdued = false,
+  color,
   isActive,
   onSelect,
 }: SidebarContextItemProps) {
@@ -61,6 +63,7 @@ function ContextRow({
         FOCUS_RING,
       )}
     >
+      {color !== undefined && <PhaseStripe color={color} />}
       <span className="truncate text-support">{label}</span>
       {meta !== undefined && (
         <span className={classNames('ml-auto font-mono text-micro', META_TONE_CLASSES[metaTone])}>

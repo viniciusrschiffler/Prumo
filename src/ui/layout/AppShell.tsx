@@ -71,7 +71,12 @@ export function AppShell() {
   const sidebarCounts: Partial<Record<Screen, number>> =
     counts === null
       ? {}
-      : { today: counts.today, projects: counts.projects, todos: counts.todos }
+      : {
+          today: counts.today,
+          projects: counts.projects,
+          todos: counts.todos,
+          notes: counts.notes,
+        }
 
   return (
     <ThemeProvider>

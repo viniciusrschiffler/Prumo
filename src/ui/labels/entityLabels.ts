@@ -1,4 +1,5 @@
 import type { EventFilter } from '@/domain/projects/eventFilters'
+import type { BadgeTone } from '@/ui/primitives/Badge'
 import type { Priority } from '@/domain/schemas/primitives'
 import type { DueGroupBucket, TodoGroupMode } from '@/domain/todos/todoGrouping'
 import type { RecurrenceWeekday } from '@/domain/todos/todoRecurrence'
@@ -40,6 +41,19 @@ export const PROJECT_EVENT_LABELS: Record<ProjectEventType, string> = {
   reallocation: 'Realocação',
   risk: 'Risco',
   note: 'Nota',
+}
+
+// O tom de cada tipo de evento serve ao cartão do histórico e ao gráfico de eventos dos
+// Painéis. Duas listas sairiam de sincronia na primeira cor nova.
+export const PROJECT_EVENT_TONES: Record<ProjectEventType, BadgeTone> = {
+  decision: 'neutral',
+  scope_change: 'scope',
+  replan: 'accent',
+  block: 'danger',
+  unblock: 'ok',
+  reallocation: 'accent',
+  risk: 'warn',
+  note: 'info',
 }
 
 export const EVENT_FILTER_LABELS: Record<EventFilter, string> = {

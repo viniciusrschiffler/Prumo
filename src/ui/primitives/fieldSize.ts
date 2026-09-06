@@ -1,10 +1,13 @@
 // Altura e tamanho de fonte são props, nunca className: entre duas utilidades da mesma
 // propriedade quem decide é a ordem na folha de estilo, não a ordem na string de classes.
-export type FieldSize = 'small' | 'default' | 'medium' | 'large'
+// O campo de busca da árvore de Notas fica entre dois passos do catálogo, em 26px, como o
+// botão do card de decisão de Hoje ficou entre os dele.
+export type FieldSize = 'small' | 'dense' | 'default' | 'medium' | 'large'
 export type FieldTextSize = 'label' | 'support' | 'body'
 
 export const FIELD_SIZE_CLASSES: Record<FieldSize, string> = {
   small: 'h-6',
+  dense: 'h-[26px]',
   default: 'h-7',
   medium: 'h-[30px]',
   large: 'h-8',

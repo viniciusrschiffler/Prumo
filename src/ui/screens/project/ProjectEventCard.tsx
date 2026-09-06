@@ -1,35 +1,13 @@
 import type { EventFeedEntry } from '@/domain/projects/eventFeed'
 import { formatIsoDate } from '@/domain/format/displayDate'
-import type { ProjectEventType } from '@/domain/schemas/projectEventSchema'
-import { AccentCard, type AccentCardTone } from '@/ui/primitives/AccentCard'
-import { Badge, type BadgeTone } from '@/ui/primitives/Badge'
+import { AccentCard } from '@/ui/primitives/AccentCard'
+import { Badge } from '@/ui/primitives/Badge'
 import { classNames } from '@/ui/primitives/classNames'
 import { MarkdownText } from '@/ui/primitives/MarkdownText'
 import { phaseColorStyle } from '@/ui/primitives/phaseColorStyle'
 import { ProgressBar } from '@/ui/primitives/ProgressBar'
-import { PROJECT_EVENT_LABELS } from '@/ui/labels/entityLabels'
+import { PROJECT_EVENT_LABELS, PROJECT_EVENT_TONES } from '@/ui/labels/entityLabels'
 
-const TONE_BY_TYPE: Record<ProjectEventType, AccentCardTone> = {
-  decision: 'neutral',
-  scope_change: 'scope',
-  replan: 'accent',
-  block: 'danger',
-  unblock: 'ok',
-  reallocation: 'accent',
-  risk: 'warn',
-  note: 'info',
-}
-
-const BADGE_TONE_BY_TYPE: Record<ProjectEventType, BadgeTone> = {
-  decision: 'neutral',
-  scope_change: 'scope',
-  replan: 'accent',
-  block: 'danger',
-  unblock: 'ok',
-  reallocation: 'accent',
-  risk: 'warn',
-  note: 'info',
-}
 
 function Relation({ label, value }: { label: string; value: string }) {
   return (
@@ -51,9 +29,9 @@ export function ProjectEventCard({ entry, phaseColorByTaskId }: ProjectEventCard
   const { event, frozenBaseline } = entry
 
   return (
-    <AccentCard tone={TONE_BY_TYPE[event.type]}>
+    <AccentCard tone={PROJECT_EVENT_TONES[event.type]}>
       <div className="flex items-center gap-[7px]">
-        <Badge tone={BADGE_TONE_BY_TYPE[event.type]} size="small" uppercase>
+        <Badge tone={PROJECT_EVENT_TONES[event.type]} size="small" uppercase>
           {PROJECT_EVENT_LABELS[event.type]}
         </Badge>
         {event.riskOpen && (
