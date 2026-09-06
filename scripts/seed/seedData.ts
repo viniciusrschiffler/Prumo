@@ -45,6 +45,7 @@ export function buildSeedData(shift: DateShifter): TableSeed[] {
         'planned_end',
         'created_at',
         'archived_at',
+        'paused_at',
       ],
       rows: [
         [
@@ -58,6 +59,7 @@ export function buildSeedData(shift: DateShifter): TableSeed[] {
           date('2026-09-29'),
           at('2026-02-20', '09:00:00'),
           null,
+          null,
         ],
         [
           'parceiro',
@@ -69,6 +71,7 @@ export function buildSeedData(shift: DateShifter): TableSeed[] {
           date('2026-02-02'),
           null,
           at('2026-01-15', '09:00:00'),
+          null,
           null,
         ],
         [
@@ -82,6 +85,7 @@ export function buildSeedData(shift: DateShifter): TableSeed[] {
           date('2026-10-02'),
           at('2026-06-01', '09:00:00'),
           null,
+          at('2026-08-28', '16:00:00'),
         ],
         [
           'observabilidade',
@@ -93,6 +97,7 @@ export function buildSeedData(shift: DateShifter): TableSeed[] {
           date('2026-06-01'),
           date('2026-09-11'),
           at('2026-05-10', '09:00:00'),
+          null,
           null,
         ],
         [
@@ -106,6 +111,7 @@ export function buildSeedData(shift: DateShifter): TableSeed[] {
           date('2026-03-31'),
           at('2026-01-05', '09:00:00'),
           at('2026-04-30', '18:00:00'),
+          null,
         ],
       ],
     },

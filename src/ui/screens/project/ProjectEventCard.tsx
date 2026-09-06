@@ -12,6 +12,7 @@ import { PROJECT_EVENT_LABELS } from '@/ui/labels/entityLabels'
 const TONE_BY_TYPE: Record<ProjectEventType, AccentCardTone> = {
   decision: 'neutral',
   scope_change: 'scope',
+  replan: 'accent',
   block: 'danger',
   unblock: 'ok',
   reallocation: 'accent',
@@ -22,6 +23,7 @@ const TONE_BY_TYPE: Record<ProjectEventType, AccentCardTone> = {
 const BADGE_TONE_BY_TYPE: Record<ProjectEventType, BadgeTone> = {
   decision: 'neutral',
   scope_change: 'scope',
+  replan: 'accent',
   block: 'danger',
   unblock: 'ok',
   reallocation: 'accent',

@@ -34,6 +34,7 @@ export const PROJECT_SORT_LABELS: Record<ProjectSortKey, string> = {
 export const PROJECT_EVENT_LABELS: Record<ProjectEventType, string> = {
   decision: 'Decisão',
   scope_change: 'Mudança de escopo',
+  replan: 'Replanejamento',
   block: 'Bloqueio',
   unblock: 'Desbloqueio',
   reallocation: 'Realocação',

@@ -79,6 +79,7 @@ export function buildNewProject(
       plannedEnd: draft.plannedEnd,
       createdAt: now,
       archivedAt: null,
+      pausedAt: null,
     },
     baseline: {
       id: ids.baselineId,

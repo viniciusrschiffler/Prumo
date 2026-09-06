@@ -30,6 +30,7 @@ export const projectSchema = z
     plannedEnd: isoDateSchema.nullable(),
     createdAt: isoDateTimeSchema,
     archivedAt: isoDateTimeSchema.nullable(),
+    pausedAt: isoDateTimeSchema.nullable(),
   })
   .refine((project) => isOrderedPeriod(project.plannedStart, project.plannedEnd), {
     message: 'O fim previsto não pode ser anterior ao início previsto.',

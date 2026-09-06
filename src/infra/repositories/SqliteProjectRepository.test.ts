@@ -5,8 +5,8 @@ import { SqliteProjectRepository } from './SqliteProjectRepository'
 
 const INSERT_PROJECT = `
   INSERT INTO project (id, name, description, status, priority, owner_person_id,
-                       planned_start, planned_end, created_at, archived_at)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                       planned_start, planned_end, created_at, archived_at, paused_at)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
 `
 
 let gateway: SqlGateway
@@ -52,6 +52,7 @@ describe('SqliteProjectRepository', () => {
         plannedEnd: '2026-09-29',
         createdAt: '2026-02-20T09:00:00Z',
         archivedAt: null,
+        pausedAt: null,
       },
     ])
   })
@@ -114,6 +115,7 @@ describe('SqliteProjectRepository.create', () => {
       plannedEnd: '2026-12-18',
       createdAt: '2026-09-05T12:00:00Z',
       archivedAt: null,
+      pausedAt: null,
     },
     baseline: {
       id: 'bl-portal',

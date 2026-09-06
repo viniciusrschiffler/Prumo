@@ -120,6 +120,7 @@ describe('countEventsByType', () => {
     expect(countEventsByType(events, QUARTER)).toEqual({
       decision: 2,
       scope_change: 0,
+      replan: 0,
       block: 0,
       unblock: 0,
       reallocation: 0,

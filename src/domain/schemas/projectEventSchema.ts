@@ -4,6 +4,7 @@ import { entityIdSchema, isoDateSchema, isoDateTimeSchema } from './primitives'
 export const PROJECT_EVENT_TYPES = [
   'decision',
   'scope_change',
+  'replan',
   'block',
   'unblock',
   'reallocation',

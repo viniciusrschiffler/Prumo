@@ -13,6 +13,7 @@ export function buildProject(overrides: Partial<Project> = {}): Project {
     plannedEnd: '2026-09-29',
     createdAt: '2026-02-20T09:00:00Z',
     archivedAt: null,
+    pausedAt: null,
     ...overrides,
   }
 }

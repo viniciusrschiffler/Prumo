@@ -15,15 +15,15 @@ import type { BatchStatement, SqlGateway } from '@/infra/database/SqlGateway'
 
 const SELECT_ALL = `
   SELECT id, name, description, status, priority, owner_person_id,
-         planned_start, planned_end, created_at, archived_at
+         planned_start, planned_end, created_at, archived_at, paused_at
   FROM project
   ORDER BY name
 `
 
 const INSERT_PROJECT = `
   INSERT INTO project (id, name, description, status, priority, owner_person_id,
-                       planned_start, planned_end, created_at, archived_at)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+                       planned_start, planned_end, created_at, archived_at, paused_at)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL)
 `
 
 const INSERT_BASELINE = `
@@ -62,6 +62,7 @@ const projectRowSchema = z
     planned_end: z.string().nullable(),
     created_at: z.string(),
     archived_at: z.string().nullable(),
+    paused_at: z.string().nullable(),
   })
   .transform((row) => ({
     id: row.id,
@@ -74,6 +75,7 @@ const projectRowSchema = z
     plannedEnd: row.planned_end,
     createdAt: row.created_at,
     archivedAt: row.archived_at,
+    pausedAt: row.paused_at,
   }))
   .pipe(projectSchema)
 

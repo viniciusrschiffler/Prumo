@@ -16,6 +16,7 @@ const BASE_PROJECT = {
   plannedEnd: '2026-09-29',
   createdAt: '2026-03-01T12:00:00Z',
   archivedAt: null,
+  pausedAt: null,
 }
 
 const BASE_ALLOCATION = {

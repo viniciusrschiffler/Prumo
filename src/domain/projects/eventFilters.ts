@@ -15,7 +15,8 @@ export type EventFilter = (typeof EVENT_FILTERS)[number]
 export type EventFilterCounts = Record<EventFilter, number>
 
 // Bloqueio e desbloqueio andam juntos num chip só: separá-los mostraria metade de uma
-// história cuja outra metade é o número de dias parados. Nota não tem chip: só aparece em Tudo.
+// história cuja outra metade é o número de dias parados. Nota e replanejamento não têm chip:
+// ambos só aparecem em Tudo.
 const TYPES_BY_FILTER: Record<EventFilter, readonly ProjectEventType[] | null> = {
   all: null,
   decisions: ['decision'],

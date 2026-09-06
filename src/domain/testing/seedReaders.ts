@@ -171,6 +171,7 @@ type ProjectRow = {
   planned_end: string | null
   created_at: string
   archived_at: string | null
+  paused_at: string | null
 }
 
 type BaselineRow = {
@@ -229,6 +230,7 @@ export function readProjectsSnapshot(database: DatabaseSync): ProjectsSnapshot {
       plannedEnd: row.planned_end,
       createdAt: row.created_at,
       archivedAt: row.archived_at,
+      pausedAt: row.paused_at,
     })),
     tasks: selectRows<TaskRow>(database, 'SELECT * FROM task ORDER BY project_id, sort_order').map(
       (row) => ({
