@@ -30,7 +30,10 @@ export function Sidebar({
       </div>
 
       <SidebarNav counts={counts} showShortcutHints={showShortcutHints} />
-      <SidebarContextSection label={SCREEN_META[currentScreen].contextLabel} />
+      <SidebarContextSection
+        label={SCREEN_META[currentScreen].contextLabel}
+        variant={SCREEN_META[currentScreen].contextVariant}
+      />
       <SidebarFooter dataFolderPath={dataFolderPath} />
     </aside>
   )

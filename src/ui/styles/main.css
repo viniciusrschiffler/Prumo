@@ -53,6 +53,12 @@
   --text-section-title--line-height: 1.35;
   --text-section-title--font-weight: 600;
 
+  /* Número grande do cartão de indicador. O catálogo tipográfico para em 15px, mas as telas
+     de Hoje, Capacidade e TodoList imprimem 18px no mesmo cartão de borda e fundo de painel. */
+  --text-metric: 18px;
+  --text-metric--line-height: 1.2;
+  --text-metric--font-weight: 600;
+
   --text-body: 13px;
   --text-body--line-height: 1.45;
 

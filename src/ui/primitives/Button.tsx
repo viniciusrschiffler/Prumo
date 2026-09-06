@@ -18,12 +18,20 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
   small: 'h-6 px-2 text-label',
 }
 
+const PRESSED_CLASSES: Record<ButtonVariant, string> = {
+  primary: 'border-transparent bg-accent-hover text-accent-fg',
+  secondary: 'border-border-strong bg-accent-soft text-accent',
+  ghost: 'border-transparent bg-neutral-soft text-text',
+  danger: 'border-danger bg-danger-soft text-danger',
+}
+
 const DISABLED_CLASSES =
   'disabled:cursor-not-allowed disabled:border-border disabled:bg-sunken disabled:text-text3 disabled:hover:bg-sunken disabled:hover:text-text3'
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant
   size?: ButtonSize
+  pressed?: boolean
   keys?: string
   children: ReactNode
 }
@@ -31,6 +39,7 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 export function Button({
   variant = 'secondary',
   size = 'default',
+  pressed,
   keys,
   children,
   className,
@@ -41,9 +50,10 @@ export function Button({
     <button
       {...buttonProps}
       type={type}
+      aria-pressed={pressed}
       className={classNames(
         'inline-flex items-center gap-1.5 rounded-button border font-medium',
-        VARIANT_CLASSES[variant],
+        pressed === true ? PRESSED_CLASSES[variant] : VARIANT_CLASSES[variant],
         SIZE_CLASSES[size],
         DISABLED_CLASSES,
         FOCUS_RING,

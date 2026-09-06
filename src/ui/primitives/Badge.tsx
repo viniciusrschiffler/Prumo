@@ -15,6 +15,16 @@ const SOFT_CLASSES: Record<BadgeTone, string> = {
   scope: 'bg-event-scope-soft text-event-scope',
 }
 
+const SOFT_SUBDUED_CLASSES: Record<BadgeTone, string> = {
+  neutral: 'bg-neutral-soft text-text3',
+  ok: 'bg-ok-soft text-text3',
+  warn: 'bg-warn-soft text-text3',
+  danger: 'bg-danger-soft text-text3',
+  info: 'bg-info-soft text-text3',
+  accent: 'bg-accent-soft text-text3',
+  scope: 'bg-event-scope-soft text-text3',
+}
+
 const SOLID_CLASSES: Record<BadgeTone, string> = {
   neutral: 'bg-text3 text-accent-fg',
   ok: 'bg-ok text-accent-fg',
@@ -70,11 +80,14 @@ type BadgeProps = {
   uppercase?: boolean
   // A pílula de tag do design não tem peso: é texto de apoio dentro de uma borda, não rótulo.
   weight?: 'semibold' | 'normal'
+  subdued?: boolean
   children: ReactNode
   className?: string
 }
 
-function toSurfaceClasses(tone: BadgeTone, variant: BadgeVariant): string {
+// A cor do texto sai de um lugar só: duas utilidades de cor na mesma string dependeriam da
+// ordem na folha de estilo para decidir quem vence.
+function toSurfaceClasses(tone: BadgeTone, variant: BadgeVariant, subdued: boolean): string {
   if (variant === 'cancelled') {
     return 'border border-dashed border-border-strong bg-transparent text-text3 line-through'
   }
@@ -83,7 +96,11 @@ function toSurfaceClasses(tone: BadgeTone, variant: BadgeVariant): string {
     return classNames('bg-transparent', BORDER_CLASSES[tone], OUTLINE_TEXT_CLASSES[tone])
   }
 
-  return variant === 'solid' ? SOLID_CLASSES[tone] : SOFT_CLASSES[tone]
+  if (variant === 'solid') {
+    return SOLID_CLASSES[tone]
+  }
+
+  return subdued ? SOFT_SUBDUED_CLASSES[tone] : SOFT_CLASSES[tone]
 }
 
 export function Badge({
@@ -95,6 +112,7 @@ export function Badge({
   dashed = false,
   uppercase = false,
   weight = 'semibold',
+  subdued = false,
   children,
   className,
 }: BadgeProps) {
@@ -106,7 +124,7 @@ export function Badge({
         'inline-flex items-center gap-1.5 rounded-badge',
         weight === 'semibold' ? 'font-semibold' : 'font-normal tracking-normal',
         SIZE_CLASSES[size],
-        toSurfaceClasses(tone, variant),
+        toSurfaceClasses(tone, variant, subdued),
         bordered && variant !== 'outline' && !isCancelled ? BORDER_CLASSES[tone] : '',
         dashed && !isCancelled ? 'border-dashed' : '',
         uppercase ? 'uppercase tracking-[0.02em]' : '',
