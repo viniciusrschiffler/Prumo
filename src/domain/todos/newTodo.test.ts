@@ -24,14 +24,14 @@ function buildDraft(overrides: Partial<NewTodoDraft> = {}): NewTodoDraft {
 }
 
 describe('validateNewTodo', () => {
-  it('exige título', () => {
+  it('Should require a title', () => {
     expect(validateNewTodo(buildDraft({ title: '   ' })).title).toBeDefined()
     expect(validateNewTodo(buildDraft())).toEqual({})
   })
 })
 
 describe('buildNewTodo', () => {
-  it('apara os textos e transforma descrição vazia em nulo', () => {
+  it('Should trim the texts and turn an empty description into null', () => {
     const todo = buildNewTodo(
       buildDraft({ title: '  Fechar escopo  ', description: '   ' }),
       { todoId: 'td-1', tagIds: [] },
@@ -41,7 +41,7 @@ describe('buildNewTodo', () => {
     expect(todo.description).toBeNull()
   })
 
-  it('remove tag repetida e vazia antes de gerar identificador', () => {
+  it('Should drop a repeated or empty tag before handing out identifiers', () => {
     const todo = buildNewTodo(
       buildDraft({ tagNames: ['infra', ' infra ', '', 'pagamentos'] }),
       { todoId: 'td-1', tagIds: ['tag-1', 'tag-2'] },
@@ -55,7 +55,7 @@ describe('buildNewTodo', () => {
 })
 
 describe('previewTodoGroup', () => {
-  it('usa a data limite no agrupamento por vencimento', () => {
+  it('Should use the due date when grouping by due date', () => {
     expect(
       previewTodoGroup(buildDraft({ dueDate: '2026-08-30' }), 'due', CONTEXT, PROJECTS),
     ).toEqual({ kind: 'due', bucket: 'late' })
@@ -66,7 +66,7 @@ describe('previewTodoGroup', () => {
     })
   })
 
-  it('usa o projeto vinculado e a prioridade nos outros agrupamentos', () => {
+  it('Should use the linked project and the priority in the other groupings', () => {
     expect(
       previewTodoGroup(buildDraft({ projectId: 'gateway' }), 'project', CONTEXT, PROJECTS),
     ).toEqual({ kind: 'project', project: PROJECTS[0] })

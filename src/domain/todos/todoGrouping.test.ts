@@ -17,17 +17,17 @@ const PROJECTS: ProjectWithPhase[] = [
 ]
 
 describe('endOfCurrentWeek', () => {
-  it('vai até o domingo da semana corrente, como o "até 06/09" do design', () => {
+  it('Should reach the Sunday of the current week, the "até 06/09" of the design', () => {
     expect(endOfCurrentWeek(CONTEXT)).toBe('2026-09-06')
   })
 
-  it('acompanha a preferência de início de semana', () => {
+  it('Should follow the first weekday preference', () => {
     expect(endOfCurrentWeek({ today: '2026-09-03', weekStart: 'sunday' })).toBe('2026-09-05')
   })
 })
 
 describe('classifyDue', () => {
-  it('separa atrasado, hoje, esta semana, depois e sem data', () => {
+  it('Should split late, today, this week, later and without a date', () => {
     expect(classifyDue('2026-08-30', CONTEXT)).toBe('late')
     expect(classifyDue('2026-09-03', CONTEXT)).toBe('today')
     expect(classifyDue('2026-09-06', CONTEXT)).toBe('week')
@@ -36,8 +36,8 @@ describe('classifyDue', () => {
   })
 })
 
-describe('groupTodos por vencimento', () => {
-  it('ordena os grupos e omite os vazios', () => {
+describe('groupTodos by due date', () => {
+  it('Should order the groups and leave out the empty ones', () => {
     const groups = groupTodos(
       [
         buildTodoRow({ id: 'a', dueDate: '2026-09-20' }),
@@ -52,7 +52,7 @@ describe('groupTodos por vencimento', () => {
     expect(groups.map((group) => group.id)).toEqual(['due-late', 'due-today', 'due-later'])
   })
 
-  it('separa o concluído de hoje do concluído em outro dia', () => {
+  it('Should split what was completed today from what was completed before', () => {
     const groups = groupTodos(
       [
         buildTodoRow({
@@ -74,7 +74,7 @@ describe('groupTodos por vencimento', () => {
     expect(groups.map((group) => group.id)).toEqual(['due-doneToday', 'due-doneBefore'])
   })
 
-  it('ordena por data, depois por prioridade e por título', () => {
+  it('Should order by date, then by priority and by title', () => {
     const groups = groupTodos(
       [
         buildTodoRow({ id: 'p2', dueDate: '2026-09-03', priority: 'P2', title: 'Bravo' }),
@@ -89,7 +89,7 @@ describe('groupTodos por vencimento', () => {
     expect(groups[0]?.items.map((row) => row.todo.id)).toEqual(['p0', 'outro', 'p2'])
   })
 
-  it('joga o sem data para o fim da ordenação dentro do grupo', () => {
+  it('Should push what has no date to the end of the group', () => {
     const groups = groupTodos(
       [buildTodoRow({ id: 'sem', dueDate: null }), buildTodoRow({ id: 'com', dueDate: null })],
       'due',
@@ -102,8 +102,8 @@ describe('groupTodos por vencimento', () => {
   })
 })
 
-describe('groupTodos por projeto', () => {
-  it('segue a ordem dos projetos e fecha com Sem projeto', () => {
+describe('groupTodos by project', () => {
+  it('Should follow the project order and close with the group without a project', () => {
     const groups = groupTodos(
       [
         buildTodoRow({ id: 'a', projectId: 'parceiro' }),
@@ -122,7 +122,7 @@ describe('groupTodos por projeto', () => {
     ])
   })
 
-  it('recolhe em Sem projeto o todo preso a projeto arquivado', () => {
+  it('Should gather a todo of an archived project in the group without a project', () => {
     const groups = groupTodos(
       [buildTodoRow({ id: 'a', projectId: 'erp' })],
       'project',
@@ -135,8 +135,8 @@ describe('groupTodos por projeto', () => {
   })
 })
 
-describe('groupTodos por prioridade', () => {
-  it('vai de P0 a P3 e omite as prioridades sem item', () => {
+describe('groupTodos by priority', () => {
+  it('Should go from P0 to P3 and leave out the priorities without any item', () => {
     const groups = groupTodos(
       [
         buildTodoRow({ id: 'a', priority: 'P3' }),

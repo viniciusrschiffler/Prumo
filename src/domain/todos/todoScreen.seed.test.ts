@@ -23,8 +23,8 @@ beforeAll(() => {
   snapshot = readTodosSnapshot(database)
 })
 
-describe('a tela de TodoList sobre o seed', () => {
-  it('resume o cabeçalho e o painel lateral', () => {
+describe('the TodoList screen over the seed', () => {
+  it('Should summarize the header and the side panel', () => {
     expect(summarizeTodos(buildTodoRows(snapshot), CONTEXT)).toEqual({
       open: 7,
       late: 1,
@@ -34,7 +34,7 @@ describe('a tela de TodoList sobre o seed', () => {
     })
   })
 
-  it('agrupa por vencimento sem revelar os concluídos', () => {
+  it('Should group by due date without revealing the completed ones', () => {
     const rows = buildTodoRows(snapshot).filter((row) => row.todo.status === 'open')
     const groups = groupTodos(rows, 'due', CONTEXT, listProjectsWithPhase(snapshot))
 
@@ -45,7 +45,7 @@ describe('a tela de TodoList sobre o seed', () => {
     ])
   })
 
-  it('manda o concluído de 01/09 para o grupo dos concluídos antes de hoje', () => {
+  it('Should send the todo completed on 01/09 to the group completed before today', () => {
     const groups = groupTodos(
       buildTodoRows(snapshot),
       'due',
@@ -57,7 +57,7 @@ describe('a tela de TodoList sobre o seed', () => {
     expect(groups.find((group) => group.id === 'due-doneBefore')?.items).toHaveLength(1)
   })
 
-  it('conta os abertos por projeto, com o cancelado arquivado fora da lista', () => {
+  it('Should count the open ones by project, with the archived cancelled one out of the list', () => {
     const counts = countOpenTodosByProject(
       buildTodoRows(snapshot),
       listProjectsWithPhase(snapshot),
@@ -72,7 +72,7 @@ describe('a tela de TodoList sobre o seed', () => {
     ])
   })
 
-  it('lê a única recorrente ativa do seed', () => {
+  it('Should read the only active recurrence of the seed', () => {
     const recurrences = listTodoRecurrences(snapshot)
 
     expect(recurrences).toHaveLength(1)
@@ -82,7 +82,7 @@ describe('a tela de TodoList sobre o seed', () => {
     expect(parseRecurrenceRule(recurrences[0]?.rule ?? '')?.weekday).toBe('monday')
   })
 
-  it('herda a cor da fase corrente do projeto em cada linha', () => {
+  it('Should inherit the current phase of the project in each row', () => {
     const row = buildTodoRows(snapshot).find((current) => current.todo.id === 'td-escopo')
 
     expect(row?.project?.name).toBe('Migração do gateway')

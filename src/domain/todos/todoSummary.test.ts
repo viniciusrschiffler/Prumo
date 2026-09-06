@@ -33,7 +33,7 @@ const PROJECTS: ProjectWithPhase[] = [
 ]
 
 describe('summarizeTodos', () => {
-  it('conta apenas o que está em aberto, menos os concluídos', () => {
+  it('Should count only what is open, apart from the completed ones', () => {
     expect(summarizeTodos(ROWS, CONTEXT)).toEqual({
       open: 4,
       late: 1,
@@ -43,13 +43,13 @@ describe('summarizeTodos', () => {
     })
   })
 
-  it('limita os concluídos à semana corrente, como o título da seção promete', () => {
+  it('Should limit the completed ones to the current week, as the section title promises', () => {
     expect(summarizeTodos(ROWS, { today: '2026-08-27', weekStart: 'monday' }).doneThisWeek).toBe(1)
   })
 })
 
 describe('countOpenTodosByProject', () => {
-  it('ordena por carga e mantém Sem projeto no fim', () => {
+  it('Should order by load and keep the group without a project last', () => {
     expect(
       countOpenTodosByProject(ROWS, PROJECTS).map((entry) => [
         entry.project?.name ?? 'Sem projeto',

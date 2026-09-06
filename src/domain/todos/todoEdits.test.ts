@@ -5,29 +5,29 @@ import { buildTodoCompletion, snoozeDueDate } from './todoEdits'
 const TODAY = '2026-09-03'
 
 describe('snoozeDueDate', () => {
-  it('leva para amanhã o que não tem data', () => {
+  it('Should move what has no date to tomorrow', () => {
     expect(snoozeDueDate(null, TODAY)).toBe('2026-09-04')
   })
 
-  it('leva para amanhã o que venceu, sem parar no passado', () => {
+  it('Should move what is late to tomorrow instead of landing in the past', () => {
     expect(snoozeDueDate('2026-08-20', TODAY)).toBe('2026-09-04')
     expect(snoozeDueDate(TODAY, TODAY)).toBe('2026-09-04')
   })
 
-  it('empurra um dia o que ainda tem prazo', () => {
+  it('Should push what still has time by one day', () => {
     expect(snoozeDueDate('2026-09-10', TODAY)).toBe('2026-09-11')
   })
 })
 
 describe('buildTodoCompletion', () => {
-  it('conclui carimbando a hora', () => {
+  it('Should complete stamping the time', () => {
     expect(buildTodoCompletion(buildTodo(), '2026-09-03T12:00:00Z')).toEqual({
       status: 'done',
       completedAt: '2026-09-03T12:00:00Z',
     })
   })
 
-  it('reabre limpando a hora, porque a tabela recusa concluído sem data', () => {
+  it('Should reopen clearing the time, because the table refuses a completed todo without one', () => {
     const done = buildTodo({ status: 'done', completedAt: '2026-09-01T17:30:00Z' })
 
     expect(buildTodoCompletion(done, '2026-09-03T12:00:00Z')).toEqual({
