@@ -227,6 +227,10 @@ o que o `ScreenShell` faz.
   que seriam o conteúdo natural do menu, já têm atalho de teclado na linha.
 - **Recorrente não gera todo.** A tabela `todo_recurrence` é lida e o painel lateral mostra a
   cadência e o último disparo, mas nada agenda a geração — o design não desenha esse gatilho.
+- **Pausar projeto não existe como ação.** A coluna `project.paused_at` entrou com a Timeline,
+  que hachura a partir dela, mas nenhuma tela grava nela ainda: quem preenche é o seed.
+- **O "Abrir simulador" do rodapé da Timeline ficou de fora**, pelo mesmo critério do "Simular"
+  da tela de Projeto.
 
 ## A tela de Projeto contra o mockup
 
@@ -291,3 +295,75 @@ distingue.
 alterna sem `preventDefault` e o Tab alcança toda linha sem tabindex móvel. As setas, o `S`
 de adiar e o `@` de vincular projeto saem do `onKeyDown` da linha, que recebe o evento por
 propagação.
+
+## A tela de Timeline contra o mockup
+
+O `support.js` embutido no `Timeline.dc.html` decifra a geometria e ela bate dia a dia com o
+seed: `span` de 245 dias a partir de 01/03/2026, barra em `left = dif(inícioDaJanela, início)`
+e `width = dif(início, fim)`. Os offsets 11→26, 29→75, 78→117 e 184→212 são exatamente as
+quatro tarefas da Migração do gateway, e 75.92% é o 03/09. O `timelineGeometry.test.ts`
+reproduz essas porcentagens casa decimal por casa decimal.
+
+O que o mockup diz e o seed desmente está em `domain/timeline/timelineScreen.seed.test.ts`.
+Vale o derivado.
+
+| Onde | Mockup | Derivado |
+| --- | --- | --- |
+| Janela | 01/03 → 31/10 · 8 meses | **01/02/2026 → 31/10/2026 · 9 meses** — `pp-jur` começa em 02/02 e o mockup a corta |
+| Rodapé · Projeto | 4 projetos · 4 tarefas visíveis | **4 projetos · 10 tarefas visíveis** — o ERP tem `archived_at` |
+| Rodapé · Pessoa | 3 pessoas · 7 alocações | **3 pessoas ativas · 12 alocações** — a Júlia é inativa |
+| Rodapé · Fase | 4 fases · 9 barras | **4 fases · 8 barras** |
+| Desenvolvimento | 3 tar · 280h | **4 tar · 320h** |
+| Homolog. interna | 2 tar · 176h | **2 tar · 140h** |
+| Produção | 2 tar · 160h | **2 tar · 96h** |
+| Conflitos | 1 | **2** — Rafael 150% em junho e Ana 150% em março, contra o Portal |
+| Botão | "Baseline v2" | **"Baseline"** — a baseline é por projeto, não existe uma v2 da tela |
+| Portal do parceiro | barra cobrindo a janela toda | **02/02 → 16/03**, com a hachura de bloqueio separada |
+| Abrir simulador | botão no rodapé | **fora** — mesmo critério do "Simular" da tela de Projeto |
+
+Seis leituras que o mockup deixou ambíguas:
+
+- **A hachura de bloqueio tem o comprimento do número que o selo mostra.** Bloqueio fechado vai
+  do `block` ao `unblock` — os 22/07 → 30/07 da Migração, idênticos ao mockup; bloqueio aberto
+  para em hoje, que é o que dá os 23 dias do Portal. Levá-la até o fim da janela pintaria dias
+  que ainda não foram perdidos.
+- **O selo conta o presente, a hachura conta o passado.** Um bloqueio já desfeito continua
+  desenhado na barra mas sai do selo, senão a Migração mostraria "bloq. 8d" onde o mockup
+  mostra o desvio de +11d.
+- **O bloqueio do projeto só hachura a linha de fase cujo trabalho ele parou.** A linha de
+  projeto responde pela vida inteira dele; a de fase, só por aquele trabalho. Sem o recorte, o
+  bloqueio de julho apareceria solto sobre a barra de setembro da Produção.
+- **A barra e o fantasma não são centralizados na linha, e é de propósito.** A faixa de baixo
+  fica reservada ao fantasma em toda linha, para a barra não pular quando o `B` liga e desliga.
+- **Arrastar reescreve o plano, então a borda que a realidade fixou não se move.**
+  `canResizeStart` cai com `actual_start` e `canResizeEnd` com `actual_end`; tarefa concluída
+  não é arrastável e nem para o Tab. O que vai ao banco é o deslocamento aplicado sobre
+  `planned_start`/`planned_end`, nunca a barra desenhada, que pode nascer da data real.
+- **Os projetos entram na ordem em que começam**, não em ordem alfabética nem na do mockup, que
+  não segue nenhuma das duas.
+
+**O zoom escolhe a granularidade do tick e a largura mínima dele.** Semana usa 56px por tick e
+passa da largura da janela, então a grade rola e a coluna de rótulos gruda na esquerda; mês e
+trimestre cabem, e as colunas ficam proporcionais aos dias reais como no mockup. Trimestre não
+é mais estreito que mês: ele desenha menos linhas de grade, que é o que zoom para fora faz aqui.
+
+**A janela sempre inclui hoje**, mesmo que nenhum projeto passe por perto, senão o "Ir para
+hoje" levaria a um ponto fora da grade desenhada.
+
+**O vazio não está no design.** As nove telas não desenham a Timeline sem dado, então o texto
+("Nenhuma tarefa com data") foi escrito no mesmo tom dos outros `EmptyState`.
+
+**As fases na barra lateral são legenda, não filtro.** O design desenha a lista com o quadrado
+colorido e não diz o que o clique faria, então o `screenMeta` ganhou o `contextVariant: 'legend'`,
+que renderiza a linha sem botão — mesmo critério do "Simular".
+
+**`--hatch-neutral` nasceu aqui.** É a hachura da barra pausada, que só o `Timeline.dc.html`
+desenha; o valor entrou nos tokens exatamente como o design o escreve, `--text2` com alfa.
+
+**Replanejamento é tipo de evento próprio, `replan`.** Arrastar grava as datas novas e o evento
+no mesmo `executeBatch`, com a tarefa ligada em `project_event_task`. A migração 003 abriu o
+`CHECK` reconstruindo `project_event` junto com as duas tabelas que a referenciam, porque o
+caminho oficial exige desligar a chave estrangeira e o `PRAGMA` é ignorado dentro da transação.
+
+**`project.paused_at` também nasceu aqui**, porque a hachura de pausa precisa saber desde quando.
+A ação de pausar ainda não existe em tela nenhuma: quem preenche a coluna hoje é o seed.
