@@ -220,15 +220,19 @@ o que o `ScreenShell` faz.
 - **Simular e ⋯ não existem na tela de Projeto.** O design desenha o botão "Simular" no alerta
   de conflito e um "⋯" no canto do cabeçalho, sem definir o que qualquer um dos dois faz.
   Ficaram de fora: botão que não faz nada é pior que botão ausente.
-- **A paleta de comandos não existe.** O botão "Comandos ⌘K" aparece em Hoje, Painéis e
-  TodoList sem que o design diga o que ele abre, então ficou de fora pelo mesmo critério do
-  "Simular". Entra junto com a tela de Hoje, que é a próxima a pedir ele.
+- **A paleta de comandos existe desde a tela de Hoje**, e o que ela lista é o próprio
+  `shortcutRegistry`: os atalhos globais da navegação mais os da tela em foco. O design não a
+  desenha em lugar nenhum, então a forma saiu do Sistema de Design; o conteúdo não é
+  inventado, e não existe segunda lista de comandos para sair de sincronia com a primeira. O
+  botão "Comandos ⌘K" de Painéis e TodoList ainda não foi ligado nela.
 - **O ⋯ da linha de todo também ficou de fora**, pela mesma razão. Adiar e vincular projeto,
   que seriam o conteúdo natural do menu, já têm atalho de teclado na linha.
 - **Recorrente não gera todo.** A tabela `todo_recurrence` é lida e o painel lateral mostra a
   cadência e o último disparo, mas nada agenda a geração — o design não desenha esse gatilho.
-- **Pausar projeto não existe como ação.** A coluna `project.paused_at` entrou com a Timeline,
-  que hachura a partir dela, mas nenhuma tela grava nela ainda: quem preenche é o seed.
+- **Pausar projeto não existe como ação, mas retomar existe.** O card de decisão da tela de
+  Hoje limpa `project.paused_at` e volta o status para `active`; quem preenche a coluna
+  continua sendo só o seed. Desbloquear também nasceu ali, com o par bloquear já na tela de
+  Projetos.
 - **O "Abrir simulador" do rodapé da Timeline ficou de fora**, pelo mesmo critério do "Simular"
   da tela de Projeto.
 - **O ponto vermelho de sobrecarga na navegação não existe.** Os nove mockups o desenham ao
@@ -453,3 +457,79 @@ folha de estilo para decidir quem vence.
 **O ponto vermelho da navegação ficou de fora.** Os nove mockups desenham um ponto ao lado de
 "Capacidade" como sinal global de que há gente estourada, mas ele mora na Sidebar e depende de
 uma leitura que o `useNavigationCountsStore` ainda não faz. Sobre o seed ele ficaria apagado.
+
+## A tela de Hoje contra o mockup
+
+Três blocos batem exatamente com o seed — "Esperando sua decisão" inteiro, a tarefa sem
+responsável e os 18 dias sem atualização da Observabilidade. O resto diverge, e vale o
+derivado. O teste que prova cada linha está em `domain/today/todayScreen.seed.test.ts`.
+
+| Onde | Mockup | Derivado |
+| --- | --- | --- |
+| Vencem hoje | 4 | **5** — os 4 de hoje mais o `td-contrato`, vencido em 30/08 |
+| Item concluído às 14:02 | presente | **fora** — nenhum todo do seed foi concluído hoje |
+| Tarefas de hoje | 5 · 3 começam · 2 terminam | **7 · 2 começam · 5 terminam** |
+| Começam | Rewrite do roteador, Roteiro, Cutover | **Roteiro (60h, não 40h) e Cutover (16h, não 8h)** — o Rewrite começou em 30/03 |
+| Terminam | 1 fim + 1 atraso | **5, todas em atraso** — nenhuma tarefa do seed termina hoje |
+| Alertas de consistência | 3 | **2** — a sobrecarga do Rafael é de S23–S26, já passada |
+| Capacidade usada | 94% | **45%** — 49h de 110h |
+| Dias bloqueados | 5 | **3** — o Portal, de 31/08 até hoje |
+| Eventos registrados | 7 | **1** |
+| Todos concluídos | 12 | **1** |
+| Contador "Hoje" na navegação | 9 | **12** |
+
+**"Terminam" guarda o que termina hoje e o que já deveria ter terminado.** O mockup põe a
+aprovação jurídica, vencida em março, nesse grupo com o selo de atraso: o que passou do fim
+previsto pede decisão hoje tanto quanto o que fecha hoje. O selo é `fim` quando o fim previsto
+é hoje e `atraso` quando já passou. "Começam" fica exato em hoje — o que deveria ter começado e
+não começou já aparece pelo atraso do fim.
+
+**"Vencem hoje" inclui o vencido e o concluído hoje.** Sem o concluído, marcar a caixa faria a
+linha sumir debaixo do cursor, e é justamente uma linha marcada que o mockup desenha.
+
+**A sobrecarga só alerta se alcança hoje ou o futuro.** Os outros dois alertas do design falam
+do agora, e um vermelho sobre um mês que já passou não tem ação possível. A varredura é o
+mesmo `findPersonOverloads` da Timeline, filtrado por `period.end >= hoje`.
+
+**O bloqueio aberto para em hoje na contagem de dias da semana.** Contar até o domingo pintaria
+de vermelho dias que ainda não foram perdidos — é a mesma leitura da hachura da Timeline. A
+capacidade do time conta só pessoa ativa, como na tela de Capacidade.
+
+**A segunda linha do card pausado sai das alocações vivas.** "Marcos Teles segue 30% alocado" é
+derivado; a prosa do evento que pausou o projeto ("decidir se realoca na próxima semana") era
+editorial e ficou de fora.
+
+**O placeholder da captura rápida não é o do design.** O mockup promete "vira todo, tarefa ou
+nota" e o `parseQuickCapture` só cria todo. Prometer o que o campo não faz é pior que o texto
+divergir.
+
+**Desbloquear e Adiar abrem modal; Retomar não.** O desbloqueio precisa de um motivo — o evento
+`unblock` tem título obrigatório, e o par bloquear já pergunta o dele. O adiamento precisa da
+data nova, que o design não diz qual é. Retomar não precisa de nenhum dado, então age direto.
+
+**Retomar registra um evento `decision`.** O design não pede o registro, e essa foi a única
+decisão tomada sem o mockup: num app cujo produto é o histórico, trocar de status sem rastro é
+pior que o evento a mais. Pausar é a decisão contrária e o seed a grava como `decision`.
+
+**O desbloqueio recria as alocações que o bloqueio encerrou**, no mesmo `executeBatch` do evento
+e do status, começando no dia do desbloqueio e indo até o fim atual da tarefa — quando esse fim
+já passou não há a que voltar e a alocação nova não nasce, a mesma regra do `buildResumedAllocation`
+da realocação. Só volta o que *aquele* bloqueio encerrou: alocação encerrada antes dele o foi por
+outro motivo, e ressuscitá-la desfaria uma decisão que ninguém pediu para desfazer.
+
+**"Realocar", "Abrir capacidade" e "Simular remoção" navegam para a Capacidade**, sem
+preseleção de pessoa: o `CapacityScreen` não recebe estado por rota, e abrir esse canal é
+escopo de outra tela.
+
+**Quatro variações de aparência viraram prop nesta tela**, pela armadilha já registrada:
+`AccentCard` ganhou `spacing`, `Button` ganhou o passo de 26px e a variante `outline` de borda
+neutra, e `ProgressBar` ganhou a barra de 12px do bloqueio. O ícone do `Alert` virou o primitivo
+`AlertIcon` porque a linha de alerta de Hoje tem forma própria — selo na linha do título e botões
+embaixo — e brigaria com o padding do aviso do catálogo.
+
+**O `SectionHeading` e o `QuickCaptureField` nasceram em `primitives/`** porque servem também a
+TodoList. O `rule` do primeiro decide o fio *e* o respiro: a coluna principal imprime os dois
+juntos, a contextual, nenhum dos dois.
+
+**O ponto do `SidebarContextItem` é sinal sem número.** O `metaDot` desenha o ponto vermelho que
+os mockups põem ao lado do projeto com risco em aberto, onde o desvio não tem o que dizer.
