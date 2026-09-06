@@ -4,6 +4,7 @@ import type { ReallocationSimulation } from '@/domain/capacity/reallocationImpac
 import { buildReallocation } from '@/domain/capacity/reallocationWrite'
 import { toIsoDateOf } from '@/domain/dates/isoDateMath'
 import { findOpenBlockEvent } from '@/domain/derived/calculateBlockedDays'
+import { toPlannedPeriod } from '@/domain/derived/taskPeriods'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
 import {
   buildProjectBlock,
@@ -29,7 +30,6 @@ import {
 } from '@/domain/projects/unblockProjects'
 import type { EntityId, Priority } from '@/domain/schemas/primitives'
 import type { SavedView } from '@/domain/schemas/savedViewSchema'
-import { toPlannedPeriod } from '@/domain/timeline/timelineProjectRows'
 import {
   applyScheduleEdit,
   buildTaskReschedule,

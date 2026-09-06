@@ -5,7 +5,7 @@ import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
 import type { Task } from '@/domain/schemas/taskSchema'
 import type { DatePeriod } from '@/domain/types/DatePeriod'
 import { collectBlockedOverlays, findPausedOverlay } from './timelineOverlays'
-import { toTaskPeriod } from './timelineProjectRows'
+import { toTaskPeriod } from '@/domain/derived/taskPeriods'
 
 export type TimelinePhaseProjectRow = {
   id: string

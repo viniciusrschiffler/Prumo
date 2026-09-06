@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { classNames } from './classNames'
+import { TONE_BACKGROUND_CLASSES } from './toneClasses'
 
 export type BadgeTone = 'neutral' | 'ok' | 'warn' | 'danger' | 'info' | 'accent' | 'scope'
 export type BadgeVariant = 'soft' | 'solid' | 'outline' | 'cancelled'
@@ -55,15 +56,7 @@ const OUTLINE_TEXT_CLASSES: Record<BadgeTone, string> = {
   scope: 'text-event-scope',
 }
 
-const DOT_CLASSES: Record<BadgeTone, string> = {
-  neutral: 'bg-text3',
-  ok: 'bg-ok',
-  warn: 'bg-warn',
-  danger: 'bg-danger',
-  info: 'bg-info',
-  accent: 'bg-accent',
-  scope: 'bg-event-scope',
-}
+const DOT_CLASSES = TONE_BACKGROUND_CLASSES
 
 const SIZE_CLASSES: Record<BadgeSize, string> = {
   default: 'px-[7px] py-px text-label',

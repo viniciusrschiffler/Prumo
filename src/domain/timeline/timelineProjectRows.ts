@@ -2,6 +2,7 @@ import { groupBy } from '@/domain/collections/groupBy'
 import { calculateBlockedDays } from '@/domain/derived/calculateBlockedDays'
 import { deriveBaselinePeriod } from '@/domain/derived/deriveProjectPeriod'
 import { selectCurrentBaseline } from '@/domain/derived/selectCurrentBaseline'
+import { toPlannedPeriod, toTaskPeriod } from '@/domain/derived/taskPeriods'
 import { buildProjectRows, type ProjectsSnapshot } from '@/domain/projects/projectRow'
 import type { BaselineTask } from '@/domain/schemas/baselineSchema'
 import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
@@ -37,29 +38,6 @@ export type TimelineProjectRow = {
   deviationInDays: number | null
   itemCount: number
   tasks: readonly TimelineTaskRow[]
-}
-
-export function toTaskPeriod(task: Task): DatePeriod | null {
-  const start = task.actualStart ?? task.plannedStart
-  const end = task.actualEnd ?? task.plannedEnd
-
-  if (start === null || end === null || end < start) {
-    return null
-  }
-
-  return { start, end }
-}
-
-export function toPlannedPeriod(task: Task): DatePeriod | null {
-  if (
-    task.plannedStart === null ||
-    task.plannedEnd === null ||
-    task.plannedEnd < task.plannedStart
-  ) {
-    return null
-  }
-
-  return { start: task.plannedStart, end: task.plannedEnd }
 }
 
 function toBaselinePeriod(baselineTask: BaselineTask | undefined): DatePeriod | null {
