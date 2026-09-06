@@ -11,7 +11,7 @@ function buildSignature(items: readonly SidebarContextItem[]): string {
 export function useSidebarContext(
   items: readonly SidebarContextItem[],
   activeId: string | null,
-  onSelect: (id: string) => void,
+  onSelect: ((id: string) => void) | null = null,
 ): void {
   const publish = useSidebarContextStore((state) => state.publish)
   const clear = useSidebarContextStore((state) => state.clear)
@@ -23,7 +23,11 @@ export function useSidebarContext(
   })
 
   useEffect(() => {
-    publish(latest.current.items, activeId, (id) => latest.current.onSelect(id))
+    publish(
+      latest.current.items,
+      activeId,
+      latest.current.onSelect === null ? null : (id) => latest.current.onSelect?.(id),
+    )
 
     return clear
   }, [signature, activeId, publish, clear])

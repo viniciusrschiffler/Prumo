@@ -43,11 +43,12 @@ describe('Agrupamento por projeto', () => {
     ])
   })
 
-  it('Should count every task of every expanded project as a visible one', () => {
-    const expanded = new Set(rows.project.map((row) => row.id))
+  it('Should count every task of every open project as a visible one', () => {
+    const allCollapsed = new Set(rows.project.map((row) => row.id))
 
-    expect(countVisibleItems(rows.project, expanded)).toBe(10)
-    expect(countVisibleItems(rows.project, new Set())).toBe(0)
+    expect(countVisibleItems(rows.project, new Set())).toBe(10)
+    expect(countVisibleItems(rows.project, new Set(['gateway']))).toBe(6)
+    expect(countVisibleItems(rows.project, allCollapsed)).toBe(0)
   })
 
   it('Should put the gateway eleven days past its current baseline', () => {
@@ -166,6 +167,23 @@ describe('Agrupamento por fase', () => {
 
   it('Should draw eight bars across the four phases', () => {
     expect(rows.phase.reduce((total, row) => total + row.itemCount, 0)).toBe(8)
+  })
+
+  it('Should hatch a block only on the phase whose work it really stopped', () => {
+    const blockedByPhase = rows.phase.map((row) => [
+      row.id,
+      row.projects.filter((entry) => entry.blockedPeriods.length > 0).map((entry) => entry.projectId),
+    ])
+
+    expect(blockedByPhase).toEqual([
+      ['development', []],
+      ['internal_homologation', []],
+      ['external_homologation', []],
+      ['production', []],
+    ])
+    expect(
+      rows.project.filter((row) => row.blockedPeriods.length > 0).map((row) => row.id),
+    ).toEqual(['parceiro', 'gateway'])
   })
 
   it('Should merge into one bar the tasks a project has inside the same phase', () => {

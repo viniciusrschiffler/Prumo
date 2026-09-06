@@ -13,6 +13,16 @@ export function formatIsoDate(date: IsoDate | null): string {
   return `${day}/${month}/${year}`
 }
 
+export function formatIsoDayMonth(date: IsoDate | null): string {
+  if (date === null) {
+    return EMPTY_MARK
+  }
+
+  const [, month, day] = date.split('-')
+
+  return `${day}/${month}`
+}
+
 // O Date aceita 30/02 e devolve 02/03, então a única prova de que a data existe é o ida e
 // volta: só é válida a entrada que sobrevive à normalização sem mudar de dia.
 export function parseDisplayDate(text: string): IsoDate | null {

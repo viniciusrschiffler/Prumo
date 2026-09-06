@@ -7,7 +7,7 @@ import { NotesScreen } from '@/ui/screens/NotesScreen'
 import { ProjectScreen } from '@/ui/screens/project/ProjectScreen'
 import { ProjectsScreen } from '@/ui/screens/projects/ProjectsScreen'
 import { SettingsScreen } from '@/ui/screens/SettingsScreen'
-import { TimelineScreen } from '@/ui/screens/TimelineScreen'
+import { TimelineScreen } from '@/ui/screens/timeline/TimelineScreen'
 import { TodayScreen } from '@/ui/screens/TodayScreen'
 import { TodoListScreen } from '@/ui/screens/todos/TodoListScreen'
 

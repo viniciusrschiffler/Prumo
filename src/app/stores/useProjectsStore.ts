@@ -12,8 +12,15 @@ import {
 } from '@/domain/projects/newProjectEvent'
 import { buildNewTask, nextSortOrder, type NewTaskDraft } from '@/domain/projects/newTask'
 import type { ProjectsSnapshot } from '@/domain/projects/projectRow'
-import type { SavedView } from '@/domain/schemas/savedViewSchema'
 import type { EntityId, Priority } from '@/domain/schemas/primitives'
+import type { SavedView } from '@/domain/schemas/savedViewSchema'
+import { toPlannedPeriod } from '@/domain/timeline/timelineProjectRows'
+import {
+  applyScheduleEdit,
+  buildTaskReschedule,
+  hasScheduleChanged,
+  type ScheduleEditMode,
+} from '@/domain/timeline/timelineSchedule'
 import { todayIsoDate } from '@/app/clock'
 import { getSqlGateway } from '@/infra/database/DatabaseConnection'
 import { SqliteAllocationRepository } from '@/infra/repositories/SqliteAllocationRepository'
@@ -57,6 +64,11 @@ type ProjectsState = {
   registerEvent: (draft: NewProjectEventDraft) => Promise<void>
   setPriority: (projectIds: readonly EntityId[], priority: Priority) => Promise<void>
   blockProjects: (projectIds: readonly EntityId[], draft: BlockProjectsDraft) => Promise<void>
+  rescheduleTask: (
+    taskId: EntityId,
+    mode: ScheduleEditMode,
+    offsetDays: number,
+  ) => Promise<void>
 }
 
 async function readEverything(): Promise<{
@@ -203,6 +215,37 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
     })
 
     await new SqliteProjectRepository(getSqlGateway()).blockMany(blocks)
+    await get().refresh()
+  },
+
+  // O arrasto e as setas mexem na barra desenhada, que pode nascer da data real; o que vai ao
+  // banco é sempre o deslocamento aplicado sobre o plano, a única parte que o replanejamento muda.
+  rescheduleTask: async (taskId, mode, offsetDays) => {
+    const task = get().snapshot.tasks.find((candidate) => candidate.id === taskId)
+    const before = task === undefined ? null : toPlannedPeriod(task)
+
+    if (task === undefined || before === null) {
+      return
+    }
+
+    const after = applyScheduleEdit(before, mode, offsetDays)
+
+    if (!hasScheduleChanged(before, after)) {
+      return
+    }
+
+    await new SqliteTaskRepository(getSqlGateway()).reschedule(
+      buildTaskReschedule({
+        taskId,
+        projectId: task.projectId,
+        taskTitle: task.title,
+        before,
+        after,
+        eventId: crypto.randomUUID(),
+        now: new Date().toISOString(),
+      }),
+    )
+
     await get().refresh()
   },
 

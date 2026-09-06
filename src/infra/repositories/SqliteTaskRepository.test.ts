@@ -244,3 +244,67 @@ describe('Dependência entre tarefas', () => {
     ])
   })
 })
+
+describe('Replanejamento pela Timeline', () => {
+  const reschedule = {
+    taskId: 'gw-cut',
+    period: { start: '2026-09-08', end: '2026-10-06' },
+    event: {
+      id: 'ev-replan',
+      projectId: 'gateway',
+      type: 'replan' as const,
+      eventDate: '2026-09-06',
+      title: 'Cutover em produção',
+      bodyMarkdown: 'Início 01/09 → 08/09 · Fim 29/09 → 06/10',
+      revertsEventId: null,
+      riskOpen: false,
+      expectedResumeAt: null,
+      createdAt: '2026-09-06T12:00:00Z',
+    },
+  }
+
+  beforeEach(async () => {
+    await insertTask('gw-cut', 'production', 'todo')
+  })
+
+  it('Should move only the plan, never the dates that already happened', async () => {
+    await taskRepository.reschedule(reschedule)
+
+    const task = (await taskRepository.listAll()).find((one) => one.id === 'gw-cut')
+
+    expect([task?.plannedStart, task?.plannedEnd]).toEqual(['2026-09-08', '2026-10-06'])
+    expect([task?.actualStart, task?.actualEnd]).toEqual([null, null])
+  })
+
+  it('Should record the replan event linked to the task, in the same write', async () => {
+    await taskRepository.reschedule(reschedule)
+
+    expect(
+      await gateway.select<{ type: string; body_md: string }[]>(
+        'SELECT type, body_md FROM project_event WHERE id = ?',
+        ['ev-replan'],
+      ),
+    ).toEqual([{ type: 'replan', body_md: 'Início 01/09 → 08/09 · Fim 29/09 → 06/10' }])
+
+    expect(
+      await gateway.select<unknown[]>('SELECT task_id FROM project_event_task WHERE project_event_id = ?', [
+        'ev-replan',
+      ]),
+    ).toEqual([{ task_id: 'gw-cut' }])
+  })
+
+  it('Should leave the plan untouched when the event cannot be written', async () => {
+    await taskRepository.reschedule(reschedule)
+
+    await expect(
+      taskRepository.reschedule({
+        ...reschedule,
+        period: { start: '2026-11-02', end: '2026-11-30' },
+      }),
+    ).rejects.toThrow()
+
+    const task = (await taskRepository.listAll()).find((one) => one.id === 'gw-cut')
+
+    expect([task?.plannedStart, task?.plannedEnd]).toEqual(['2026-09-08', '2026-10-06'])
+  })
+})

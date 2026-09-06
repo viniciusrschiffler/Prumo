@@ -1,5 +1,5 @@
 import { groupBy } from '@/domain/collections/groupBy'
-import { earliestDate, latestDate } from '@/domain/dates/isoDateMath'
+import { earliestDate, intersectPeriods, latestDate } from '@/domain/dates/isoDateMath'
 import type { ProjectsSnapshot } from '@/domain/projects/projectRow'
 import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
 import type { Task } from '@/domain/schemas/taskSchema'
@@ -14,6 +14,7 @@ export type TimelinePhaseProjectRow = {
   period: DatePeriod | null
   blockedPeriods: readonly DatePeriod[]
   pausedPeriod: DatePeriod | null
+  isBlocked: boolean
 }
 
 export type TimelinePhaseRow = {
@@ -40,6 +41,22 @@ function mergePeriods(tasks: readonly Task[]): DatePeriod | null {
             },
       null,
     )
+}
+
+// A linha do projeto responde pela vida inteira dele e mostra o bloqueio onde ele caiu; a linha
+// de fase responde só pelo trabalho daquela fase, então um bloqueio fora dela não tem o que
+// hachurar e apareceria solto, longe da barra.
+function clipToPeriod(
+  periods: readonly DatePeriod[],
+  period: DatePeriod | null,
+): DatePeriod[] {
+  if (period === null) {
+    return []
+  }
+
+  return periods
+    .map((candidate) => intersectPeriods(candidate, period))
+    .filter((clipped) => clipped !== null)
 }
 
 export function buildTimelinePhaseRows(
@@ -80,8 +97,12 @@ export function buildTimelinePhaseRows(
             projectId,
             name: project.name,
             period,
-            blockedPeriods: collectBlockedOverlays(eventsByProject.get(projectId) ?? [], today),
+            blockedPeriods: clipToPeriod(
+              collectBlockedOverlays(eventsByProject.get(projectId) ?? [], today),
+              period,
+            ),
             pausedPeriod: findPausedOverlay(project, period),
+            isBlocked: project.status === 'blocked',
           },
         ]
       })

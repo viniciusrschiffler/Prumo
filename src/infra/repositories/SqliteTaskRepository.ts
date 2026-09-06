@@ -7,6 +7,7 @@ import {
   type Task,
   type TaskDependency,
 } from '@/domain/schemas/taskSchema'
+import type { TaskReschedule } from '@/domain/timeline/timelineSchedule'
 import { parseRows } from '@/infra/database/parseRow'
 import type { BatchStatement, SqlGateway } from '@/infra/database/SqlGateway'
 
@@ -33,6 +34,17 @@ const INSERT_ALLOCATION = `
                           ended_at, ended_reason)
   VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)
 `
+
+const UPDATE_TASK_SCHEDULE = 'UPDATE task SET planned_start = ?, planned_end = ? WHERE id = ?'
+
+const INSERT_REPLAN_EVENT = `
+  INSERT INTO project_event (id, project_id, type, event_date, title, body_md,
+                             reverts_event_id, risk_open, expected_resume_at, created_at)
+  VALUES (?, ?, ?, ?, ?, ?, NULL, 0, NULL, ?)
+`
+
+const LINK_EVENT_TASK =
+  'INSERT INTO project_event_task (project_event_id, task_id) VALUES (?, ?)'
 
 const taskRowSchema = z
   .object({
@@ -129,5 +141,31 @@ export class SqliteTaskRepository implements TaskRepository {
   // atribuição sem nada na tela dizendo que faltou.
   async create(newTask: NewTask): Promise<void> {
     await this.#gateway.executeBatch(toCreateStatements(newTask))
+  }
+
+  // O replanejamento e o evento que o registra vão no mesmo lote: mover a barra sem deixar
+  // rastro apagaria do histórico a decisão que o desvio da baseline vai cobrar depois.
+  async reschedule(change: TaskReschedule): Promise<void> {
+    const { event } = change
+
+    await this.#gateway.executeBatch([
+      {
+        query: UPDATE_TASK_SCHEDULE,
+        values: [change.period.start, change.period.end, change.taskId],
+      },
+      {
+        query: INSERT_REPLAN_EVENT,
+        values: [
+          event.id,
+          event.projectId,
+          event.type,
+          event.eventDate,
+          event.title,
+          event.bodyMarkdown,
+          event.createdAt,
+        ],
+      },
+      { query: LINK_EVENT_TASK, values: [event.id, change.taskId] },
+    ])
   }
 }

@@ -4,6 +4,7 @@ export type SidebarContextItem = {
   id: string
   label: string
   meta?: string
+  color?: string
 }
 
 type SidebarContextState = {
@@ -13,7 +14,7 @@ type SidebarContextState = {
   publish: (
     items: readonly SidebarContextItem[],
     activeId: string | null,
-    onSelect: (id: string) => void,
+    onSelect: ((id: string) => void) | null,
   ) => void
   clear: () => void
 }

@@ -1,6 +1,6 @@
 import type { Screen } from '@/domain/schemas/savedViewSchema'
 
-export type SidebarContextVariant = 'list' | 'pills'
+export type SidebarContextVariant = 'list' | 'pills' | 'legend'
 
 export type ScreenMeta = {
   screen: Screen
@@ -41,7 +41,7 @@ export const SCREEN_META: Record<Screen, ScreenMeta> = {
     path: '/timeline',
     title: 'Timeline',
     contextLabel: 'Fases',
-    contextVariant: 'list',
+    contextVariant: 'legend',
     navigationKeys: 'g l',
   },
   capacity: {

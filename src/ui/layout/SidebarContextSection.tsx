@@ -1,6 +1,7 @@
 import { useSidebarContextStore } from '@/app/stores/useSidebarContextStore'
 import { classNames } from '@/ui/primitives/classNames'
 import { FOCUS_RING } from '@/ui/primitives/focusRing'
+import { phaseColorStyle } from '@/ui/primitives/phaseColorStyle'
 import type { SidebarContextVariant } from './screenMeta'
 
 type SidebarContextSectionProps = {
@@ -11,6 +12,7 @@ type SidebarContextSectionProps = {
 type SidebarContextItemProps = {
   label: string
   meta: string | undefined
+  color?: string
   isActive: boolean
   onSelect: () => void
 }
@@ -53,6 +55,24 @@ function ContextPill({ label, meta, isActive, onSelect }: SidebarContextItemProp
   )
 }
 
+// A Timeline lista as fases como legenda das cores das barras, não como filtro: o design não
+// diz o que o clique faria, e botão que não faz nada é pior que botão ausente.
+function LegendRow({ label, meta, color }: Omit<SidebarContextItemProps, 'isActive' | 'onSelect'>) {
+  return (
+    <div className="flex h-[22px] items-center gap-[7px] px-2 text-text2">
+      {color !== undefined && (
+        <span
+          className="phase-tinted h-2 w-2 flex-none rounded-[2px] bg-[var(--phase-tone)]"
+          style={phaseColorStyle(color)}
+          aria-hidden
+        />
+      )}
+      <span className="truncate text-support">{label}</span>
+      {meta !== undefined && <span className="ml-auto font-mono text-micro text-text3">{meta}</span>}
+    </div>
+  )
+}
+
 export function SidebarContextSection({ label, variant = 'list' }: SidebarContextSectionProps) {
   const items = useSidebarContextStore((state) => state.items)
   const activeId = useSidebarContextStore((state) => state.activeId)
@@ -77,8 +97,13 @@ export function SidebarContextSection({ label, variant = 'list' }: SidebarContex
             const itemProps = {
               label: item.label,
               meta: item.meta,
+              color: item.color,
               isActive: item.id === activeId,
               onSelect: () => onSelect?.(item.id),
+            }
+
+            if (variant === 'legend') {
+              return <LegendRow key={item.id} {...itemProps} />
             }
 
             return isPills ? (

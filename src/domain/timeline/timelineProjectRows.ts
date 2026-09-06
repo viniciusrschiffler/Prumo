@@ -15,6 +15,7 @@ export type TimelineTaskRow = {
   title: string
   phaseColor: string | null
   period: DatePeriod | null
+  plannedPeriod: DatePeriod | null
   baselinePeriod: DatePeriod | null
   deviationInDays: number | null
   hasAssignee: boolean
@@ -31,6 +32,7 @@ export type TimelineProjectRow = {
   baselinePeriod: DatePeriod | null
   blockedPeriods: readonly DatePeriod[]
   pausedPeriod: DatePeriod | null
+  isBlocked: boolean
   blockedDays: number
   deviationInDays: number | null
   itemCount: number
@@ -46,6 +48,18 @@ export function toTaskPeriod(task: Task): DatePeriod | null {
   }
 
   return { start, end }
+}
+
+export function toPlannedPeriod(task: Task): DatePeriod | null {
+  if (
+    task.plannedStart === null ||
+    task.plannedEnd === null ||
+    task.plannedEnd < task.plannedStart
+  ) {
+    return null
+  }
+
+  return { start: task.plannedStart, end: task.plannedEnd }
 }
 
 function toBaselinePeriod(baselineTask: BaselineTask | undefined): DatePeriod | null {
@@ -69,18 +83,22 @@ function toTaskRow(
   hasAssignee: boolean,
   baselineTask: BaselineTask | undefined,
 ): TimelineTaskRow {
+  const plannedPeriod = toPlannedPeriod(task)
+  const isPlanned = plannedPeriod !== null
+
   return {
     id: task.id,
     projectId: task.projectId,
     title: task.title,
     phaseColor,
     period: toTaskPeriod(task),
+    plannedPeriod,
     baselinePeriod: toBaselinePeriod(baselineTask),
     deviationInDays,
     hasAssignee,
-    canMove: task.actualStart === null && task.actualEnd === null,
-    canResizeStart: task.actualStart === null,
-    canResizeEnd: task.actualEnd === null,
+    canMove: isPlanned && task.actualStart === null && task.actualEnd === null,
+    canResizeStart: isPlanned && task.actualStart === null,
+    canResizeEnd: isPlanned && task.actualEnd === null,
   }
 }
 
@@ -130,6 +148,7 @@ export function buildTimelineProjectRows(
         baselinePeriod: deriveBaselinePeriod(baselineTasks),
         blockedPeriods: collectBlockedOverlays(events, today),
         pausedPeriod: findPausedOverlay(row.project, row.period),
+        isBlocked: row.project.status === 'blocked',
         blockedDays: calculateBlockedDays(events, { start: row.project.createdAt.slice(0, 10), end: today }),
         deviationInDays: row.deviationInDays,
         itemCount: tasks.length,

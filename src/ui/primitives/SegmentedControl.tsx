@@ -6,11 +6,15 @@ export type SegmentedOption<TValue extends string> = {
   label: string
 }
 
-export type SegmentedControlSize = 'default' | 'wide'
+// O passo de texto anda junto com o de padding, então os dois moram na mesma entrada: o
+// agrupamento da Timeline é 12px e o zoom dela, 11px mais estreito que o padrão das outras telas.
+export type SegmentedControlSize = 'default' | 'wide' | 'compact' | 'comfortable'
 
 const SIZE_CLASSES: Record<SegmentedControlSize, string> = {
-  default: 'px-2.5 py-1',
-  wide: 'px-3 py-[5px]',
+  default: 'px-2.5 py-1 text-label tracking-normal',
+  wide: 'px-3 py-[5px] text-label tracking-normal',
+  compact: 'px-[9px] py-[3px] text-label tracking-normal',
+  comfortable: 'px-[11px] py-1 text-support',
 }
 
 type SegmentedControlProps<TValue extends string> = {
@@ -50,7 +54,7 @@ export function SegmentedControl<TValue extends string>({
             aria-checked={isSelected}
             onClick={() => onChange(option.value)}
             className={classNames(
-              'rounded-badge text-label font-medium tracking-normal',
+              'rounded-badge font-medium',
               SIZE_CLASSES[size],
               isSelected ? 'bg-panel text-text' : 'bg-transparent text-text2 hover:text-text',
               FOCUS_RING,

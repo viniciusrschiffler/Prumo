@@ -39,11 +39,13 @@ export function countOverloads(rows: TimelineRows): number {
   return rows.person.reduce((total, row) => total + row.overloads.length, 0)
 }
 
+// O grupo nasce aberto, então o que a tela guarda é quem foi fechado: uma lista de expandidos
+// precisaria ser semeada a cada recarga e perderia o grupo que acabou de nascer.
 export function countVisibleItems(
   rows: readonly TimelineGroupRow[],
-  expandedIds: ReadonlySet<EntityId>,
+  collapsedIds: ReadonlySet<EntityId>,
 ): number {
   return rows
-    .filter((row) => expandedIds.has(row.id))
+    .filter((row) => !collapsedIds.has(row.id))
     .reduce((total, row) => total + row.itemCount, 0)
 }
