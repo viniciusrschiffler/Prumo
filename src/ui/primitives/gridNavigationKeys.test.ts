@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isGridMoveKey, resolveRowMove } from './gridNavigationKeys'
+import { isGridMoveKey, resolveCellMove, resolveRowMove } from './gridNavigationKeys'
 
 const ROWS = ['gateway', 'parceiro', 'campo']
 
@@ -51,5 +51,57 @@ describe('resolveRowMove', () => {
 
   it('Should enter by the first row when the active row left the list', () => {
     expect(resolveRowMove(ROWS, 'saiu-do-filtro', 'ArrowDown')).toBe('gateway')
+  })
+})
+
+describe('resolveCellMove', () => {
+  const bounds = { rowCount: 4, columnCount: 12 }
+
+  it('Should walk in all four directions', () => {
+    expect(resolveCellMove({ row: 1, column: 1 }, bounds, 'ArrowDown')).toEqual({
+      row: 2,
+      column: 1,
+    })
+    expect(resolveCellMove({ row: 1, column: 1 }, bounds, 'ArrowUp')).toEqual({
+      row: 0,
+      column: 1,
+    })
+    expect(resolveCellMove({ row: 1, column: 1 }, bounds, 'ArrowRight')).toEqual({
+      row: 1,
+      column: 2,
+    })
+    expect(resolveCellMove({ row: 1, column: 1 }, bounds, 'ArrowLeft')).toEqual({
+      row: 1,
+      column: 0,
+    })
+  })
+
+  it('Should stay put at the edges instead of wrapping around', () => {
+    expect(resolveCellMove({ row: 0, column: 0 }, bounds, 'ArrowUp')).toBeNull()
+    expect(resolveCellMove({ row: 0, column: 0 }, bounds, 'ArrowLeft')).toBeNull()
+    expect(resolveCellMove({ row: 3, column: 11 }, bounds, 'ArrowDown')).toBeNull()
+    expect(resolveCellMove({ row: 3, column: 11 }, bounds, 'ArrowRight')).toBeNull()
+  })
+
+  it('Should send Home and End to the ends of the row', () => {
+    expect(resolveCellMove({ row: 2, column: 5 }, bounds, 'Home')).toEqual({ row: 2, column: 0 })
+    expect(resolveCellMove({ row: 2, column: 5 }, bounds, 'End')).toEqual({ row: 2, column: 11 })
+  })
+
+  it('Should send Home and End to the ends of the matrix with the modifier', () => {
+    expect(resolveCellMove({ row: 2, column: 5 }, bounds, 'Home', true)).toEqual({
+      row: 0,
+      column: 0,
+    })
+    expect(resolveCellMove({ row: 2, column: 5 }, bounds, 'End', true)).toEqual({
+      row: 3,
+      column: 11,
+    })
+  })
+
+  it('Should refuse to move inside an empty matrix', () => {
+    expect(
+      resolveCellMove({ row: 0, column: 0 }, { rowCount: 0, columnCount: 0 }, 'ArrowDown'),
+    ).toBeNull()
   })
 })

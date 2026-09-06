@@ -122,3 +122,19 @@
     --phase-tone-soft: oklch(from var(--phase-color) 0.31 0.05 h);
   }
 }
+
+/* O mapa de calor da Capacidade é um verde só com três opacidades, como o design o escreve.
+   A cor relativa mantém o token único e deixa o tema trocar o verde por baixo. */
+@layer components {
+  .heat-light {
+    background: oklch(from var(--heat-base) l c h / 0.3);
+  }
+
+  .heat-medium {
+    background: oklch(from var(--heat-base) l c h / 0.55);
+  }
+
+  .heat-heavy {
+    background: oklch(from var(--heat-base) l c h / 0.8);
+  }
+}

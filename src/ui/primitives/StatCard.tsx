@@ -14,11 +14,12 @@ const TONE_CLASSES: Record<StatCardTone, string> = {
 type StatCardProps = {
   label: string
   tone?: StatCardTone
+  hint?: ReactNode
   children: ReactNode
   className?: string
 }
 
-export function StatCard({ label, tone = 'default', children, className }: StatCardProps) {
+export function StatCard({ label, tone = 'default', hint, children, className }: StatCardProps) {
   return (
     <div
       className={classNames(
@@ -30,6 +31,9 @@ export function StatCard({ label, tone = 'default', children, className }: StatC
       <span className={classNames('font-mono text-metric tabular-nums', TONE_CLASSES[tone])}>
         {children}
       </span>
+      {hint !== undefined && (
+        <span className="text-label font-normal tracking-normal text-text3">{hint}</span>
+      )}
     </div>
   )
 }

@@ -1,9 +1,13 @@
 import { create } from 'zustand'
 
+export type SidebarContextMetaTone = 'default' | 'danger'
+
 export type SidebarContextItem = {
   id: string
   label: string
   meta?: string
+  metaTone?: SidebarContextMetaTone
+  subdued?: boolean
   color?: string
 }
 

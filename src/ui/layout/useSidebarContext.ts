@@ -5,7 +5,11 @@ import {
 } from '@/app/stores/useSidebarContextStore'
 
 function buildSignature(items: readonly SidebarContextItem[]): string {
-  return items.map((item) => `${item.id}:${item.label}:${item.meta ?? ''}`).join('|')
+  return items
+    .map((item) =>
+      [item.id, item.label, item.meta ?? '', item.metaTone ?? '', item.subdued ?? ''].join(':'),
+    )
+    .join('|')
 }
 
 export function useSidebarContext(

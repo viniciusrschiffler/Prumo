@@ -1,4 +1,7 @@
-import { useSidebarContextStore } from '@/app/stores/useSidebarContextStore'
+import {
+  useSidebarContextStore,
+  type SidebarContextMetaTone,
+} from '@/app/stores/useSidebarContextStore'
 import { classNames } from '@/ui/primitives/classNames'
 import { FOCUS_RING } from '@/ui/primitives/focusRing'
 import { phaseColorStyle } from '@/ui/primitives/phaseColorStyle'
@@ -12,12 +15,34 @@ type SidebarContextSectionProps = {
 type SidebarContextItemProps = {
   label: string
   meta: string | undefined
+  metaTone?: SidebarContextMetaTone
+  subdued?: boolean
   color?: string
   isActive: boolean
   onSelect: () => void
 }
 
-function ContextRow({ label, meta, isActive, onSelect }: SidebarContextItemProps) {
+const META_TONE_CLASSES: Record<SidebarContextMetaTone, string> = {
+  default: 'text-text3',
+  danger: 'text-danger',
+}
+
+function toRowToneClasses(isActive: boolean, subdued: boolean): string {
+  if (isActive) {
+    return 'bg-neutral-soft font-medium text-text'
+  }
+
+  return subdued ? 'text-text3' : 'text-text2'
+}
+
+function ContextRow({
+  label,
+  meta,
+  metaTone = 'default',
+  subdued = false,
+  isActive,
+  onSelect,
+}: SidebarContextItemProps) {
   return (
     <button
       type="button"
@@ -25,12 +50,16 @@ function ContextRow({ label, meta, isActive, onSelect }: SidebarContextItemProps
       onClick={onSelect}
       className={classNames(
         'flex h-[26px] items-center gap-[7px] rounded-button px-2 text-left hover:bg-neutral-soft',
-        isActive ? 'bg-neutral-soft font-medium text-text' : 'text-text2',
+        toRowToneClasses(isActive, subdued),
         FOCUS_RING,
       )}
     >
       <span className="truncate text-support">{label}</span>
-      {meta !== undefined && <span className="ml-auto font-mono text-micro text-text3">{meta}</span>}
+      {meta !== undefined && (
+        <span className={classNames('ml-auto font-mono text-micro', META_TONE_CLASSES[metaTone])}>
+          {meta}
+        </span>
+      )}
     </button>
   )
 }
@@ -97,6 +126,8 @@ export function SidebarContextSection({ label, variant = 'list' }: SidebarContex
             const itemProps = {
               label: item.label,
               meta: item.meta,
+              metaTone: item.metaTone,
+              subdued: item.subdued,
               color: item.color,
               isActive: item.id === activeId,
               onSelect: () => onSelect?.(item.id),

@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import type { ReallocationSimulation } from '@/domain/capacity/reallocationImpact'
+import { buildReallocation } from '@/domain/capacity/reallocationWrite'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
 import {
   buildProjectBlock,
@@ -69,6 +71,7 @@ type ProjectsState = {
     mode: ScheduleEditMode,
     offsetDays: number,
   ) => Promise<void>
+  applyReallocation: (simulation: ReallocationSimulation) => Promise<void>
 }
 
 async function readEverything(): Promise<{
@@ -242,6 +245,26 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
         before,
         after,
         eventId: crypto.randomUUID(),
+        now: new Date().toISOString(),
+      }),
+    )
+
+    await get().refresh()
+  },
+
+  applyReallocation: async (simulation) => {
+    const { tasks, baselines } = get().snapshot
+
+    await new SqliteAllocationRepository(getSqlGateway()).applyReallocation(
+      buildReallocation({
+        simulation,
+        tasks,
+        baselines,
+        ids: {
+          eventId: crypto.randomUUID(),
+          baselineId: crypto.randomUUID(),
+          resumedAllocationId: crypto.randomUUID(),
+        },
         now: new Date().toISOString(),
       }),
     )

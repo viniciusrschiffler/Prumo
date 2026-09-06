@@ -19,41 +19,47 @@ const DOT_CLASSES: Record<BadgeTone, string> = {
   scope: 'bg-event-scope',
 }
 
-export type ModalSize = 'default' | 'medium' | 'wide'
+export type ModalSize = 'default' | 'medium' | 'large' | 'wide'
 
 const OVERLAY_CLASSES: Record<ModalSize, string> = {
   default: 'items-center justify-center p-7',
   medium: 'items-center justify-center p-7',
+  large: 'items-center justify-center p-7',
   wide: 'items-start justify-center px-6 py-12',
 }
 
 const PANEL_CLASSES: Record<ModalSize, string> = {
   default: 'max-w-[520px]',
   medium: 'max-w-[560px]',
+  large: 'max-w-[640px]',
   wide: 'max-h-full max-w-[680px]',
 }
 
 const HEADER_CLASSES: Record<ModalSize, string> = {
   default: 'px-3.5 py-3',
   medium: 'px-3.5 py-3',
+  large: 'px-3.5 py-3',
   wide: 'bg-sunken px-4 py-[13px]',
 }
 
 const TITLE_CLASSES: Record<ModalSize, string> = {
   default: 'text-[14px] font-semibold',
   medium: 'text-[14px] font-semibold',
+  large: 'text-[14px] font-semibold',
   wide: 'text-body font-semibold',
 }
 
 const BODY_CLASSES: Record<ModalSize, string> = {
   default: 'gap-2.5 p-3.5',
   medium: 'gap-[11px] p-3.5',
+  large: 'gap-3 p-3.5',
   wide: 'gap-3.5 overflow-auto p-4',
 }
 
 const FOOTER_CLASSES: Record<ModalSize, string> = {
   default: 'px-3.5 py-3',
   medium: 'px-3.5 py-3',
+  large: 'px-3.5 py-3',
   wide: 'px-4 py-3',
 }
 
@@ -64,6 +70,7 @@ type ModalProps = {
   note?: string
   size?: ModalSize
   hint?: ReactNode
+  cancelLabel?: string
   submitLabel?: string
   submitVariant?: ButtonVariant
   submitDisabled?: boolean
@@ -79,6 +86,7 @@ export function Modal({
   note,
   size = 'default',
   hint,
+  cancelLabel = 'Cancelar',
   submitLabel,
   submitVariant = 'primary',
   submitDisabled = false,
@@ -183,7 +191,7 @@ export function Modal({
         >
           <span className="text-label font-normal tracking-normal text-text3">{hint}</span>
           <div className="flex gap-2">
-            <Button onClick={onClose}>Cancelar</Button>
+            <Button onClick={onClose}>{cancelLabel}</Button>
             {submitLabel !== undefined && onSubmit !== undefined && (
               <Button
                 variant={submitVariant}

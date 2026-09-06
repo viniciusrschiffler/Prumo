@@ -40,3 +40,79 @@ export function resolveRowMove(
 
   return rowIds[nextIndex] ?? null
 }
+
+export const MATRIX_MOVE_KEYS = [
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'Home',
+  'End',
+] as const
+
+export type MatrixMoveKey = (typeof MATRIX_MOVE_KEYS)[number]
+
+export type MatrixPosition = {
+  row: number
+  column: number
+}
+
+export type MatrixBounds = {
+  rowCount: number
+  columnCount: number
+}
+
+export function isMatrixMoveKey(key: string): key is MatrixMoveKey {
+  return (MATRIX_MOVE_KEYS as readonly string[]).includes(key)
+}
+
+function clamp(value: number, limit: number): number {
+  return Math.max(0, Math.min(limit - 1, value))
+}
+
+// Home e End andam na linha; com o modificador, saltam para a primeira e a última célula da
+// matriz inteira, que é o que a navegação de grade da ARIA descreve.
+function resolveEdge(
+  position: MatrixPosition,
+  bounds: MatrixBounds,
+  key: 'Home' | 'End',
+  wholeMatrix: boolean,
+): MatrixPosition {
+  const column = key === 'Home' ? 0 : bounds.columnCount - 1
+
+  if (!wholeMatrix) {
+    return { row: position.row, column }
+  }
+
+  return { row: key === 'Home' ? 0 : bounds.rowCount - 1, column }
+}
+
+const STEPS: Record<'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight', MatrixPosition> = {
+  ArrowUp: { row: -1, column: 0 },
+  ArrowDown: { row: 1, column: 0 },
+  ArrowLeft: { row: 0, column: -1 },
+  ArrowRight: { row: 0, column: 1 },
+}
+
+export function resolveCellMove(
+  position: MatrixPosition,
+  bounds: MatrixBounds,
+  key: MatrixMoveKey,
+  wholeMatrix = false,
+): MatrixPosition | null {
+  if (bounds.rowCount === 0 || bounds.columnCount === 0) {
+    return null
+  }
+
+  const next =
+    key === 'Home' || key === 'End'
+      ? resolveEdge(position, bounds, key, wholeMatrix)
+      : {
+          row: position.row + STEPS[key].row,
+          column: position.column + STEPS[key].column,
+        }
+
+  const clamped = { row: clamp(next.row, bounds.rowCount), column: clamp(next.column, bounds.columnCount) }
+
+  return clamped.row === position.row && clamped.column === position.column ? null : clamped
+}
