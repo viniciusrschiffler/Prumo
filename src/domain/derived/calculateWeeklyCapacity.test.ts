@@ -67,6 +67,32 @@ describe('calculateWeeklyCapacity', () => {
     expect(calculateWeeklyCapacity(person, allocations, WEEK).percentage).toBe(100)
   })
 
+  it('Should not count a handover twice in the week it happens', () => {
+    const person = buildPerson({ weeklyCapacityHours: 40 })
+    const allocations = [
+      buildAllocation({
+        id: 'antiga',
+        percentage: 100,
+        startDate: '2026-05-01',
+        endDate: '2026-06-03',
+        endedAt: '2026-06-03T11:20:00Z',
+        endedReason: 'realocação',
+      }),
+      buildAllocation({
+        id: 'nova',
+        percentage: 50,
+        startDate: '2026-06-03',
+        endDate: '2026-06-30',
+      }),
+    ]
+
+    expect(calculateWeeklyCapacity(person, allocations, WEEK).percentage).toBe(100)
+    expect(
+      calculateWeeklyCapacity(person, allocations, { start: '2026-06-04', end: '2026-06-10' })
+        .percentage,
+    ).toBe(50)
+  })
+
   it('Should ignore the allocations of other people', () => {
     const person = buildPerson({ id: 'person-1' })
     const allocations = [buildAllocation({ personId: 'person-2', percentage: 100 })]

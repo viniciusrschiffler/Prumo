@@ -1,4 +1,5 @@
-import { addDays, isoWeekNumber, startOfWeek } from '@/domain/dates/isoDateMath'
+import { isoWeekNumber, startOfWeek } from '@/domain/dates/isoDateMath'
+import { effectiveEndOf } from '@/domain/derived/calculateWeeklyCapacity'
 import type { Allocation } from '@/domain/schemas/allocationSchema'
 import type { Phase } from '@/domain/schemas/phaseSchema'
 import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
@@ -6,6 +7,8 @@ import type { Project } from '@/domain/schemas/projectSchema'
 import type { WeekStart } from '@/domain/settings/appSettings'
 import type { Task } from '@/domain/schemas/taskSchema'
 import type { DatePeriod } from '@/domain/types/DatePeriod'
+
+export { effectiveEndOf }
 
 export type AllocationDetail = {
   allocation: Allocation
@@ -42,18 +45,6 @@ export function buildAllocationIndex(input: AllocationIndexInput): AllocationInd
 
 function weekNumberOf(date: IsoDate, weekStart: WeekStart): number {
   return isoWeekNumber(startOfWeek(date, weekStart))
-}
-
-// Uma alocação encerrada parou de consumir capacidade no dia do encerramento, e é esse dia
-// que o rótulo de período precisa mostrar — não o fim que o plano previa e não aconteceu.
-export function effectiveEndOf(allocation: Allocation): IsoDate {
-  if (allocation.endedAt === null) {
-    return allocation.endDate
-  }
-
-  const endedOn = addDays(allocation.endedAt.slice(0, 10), -1)
-
-  return endedOn < allocation.endDate ? endedOn : allocation.endDate
 }
 
 export function toAllocationDetail(

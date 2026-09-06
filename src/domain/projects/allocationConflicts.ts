@@ -1,4 +1,5 @@
 import { addDays } from '@/domain/dates/isoDateMath'
+import { effectiveEndOf } from '@/domain/derived/calculateWeeklyCapacity'
 import type { Allocation } from '@/domain/schemas/allocationSchema'
 import type { Person } from '@/domain/schemas/personSchema'
 import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
@@ -34,21 +35,8 @@ type Segment = {
   allocations: readonly Allocation[]
 }
 
-// Encerrar uma alocação num dia é substituí-la nesse dia, não somar as duas: a realocação do
-// seed abre a nova alocação na mesma data em que fecha a antiga, e contar o dia duas vezes
-// inventaria um conflito de 24 horas que nunca existiu.
-function effectiveEnd(allocation: Allocation): IsoDate {
-  if (allocation.endedAt === null) {
-    return allocation.endDate
-  }
-
-  const endedOn = addDays(allocation.endedAt.slice(0, 10), -1)
-
-  return endedOn < allocation.endDate ? endedOn : allocation.endDate
-}
-
 function isLiveOn(allocation: Allocation, date: IsoDate): boolean {
-  return allocation.startDate <= date && date <= effectiveEnd(allocation)
+  return allocation.startDate <= date && date <= effectiveEndOf(allocation)
 }
 
 function collectBoundaries(allocations: readonly Allocation[]): IsoDate[] {
@@ -56,7 +44,7 @@ function collectBoundaries(allocations: readonly Allocation[]): IsoDate[] {
 
   for (const allocation of allocations) {
     boundaries.add(allocation.startDate)
-    boundaries.add(addDays(effectiveEnd(allocation), 1))
+    boundaries.add(addDays(effectiveEndOf(allocation), 1))
   }
 
   return [...boundaries].toSorted()
@@ -154,7 +142,7 @@ export function findPersonOverloads(
     .flatMap((person) => {
       const own = allocations.filter(
         (allocation) =>
-          allocation.personId === person.id && allocation.startDate <= effectiveEnd(allocation),
+          allocation.personId === person.id && allocation.startDate <= effectiveEndOf(allocation),
       )
 
       return mergeAdjacent(collectOverloadedSegments(own)).map((segment) => ({

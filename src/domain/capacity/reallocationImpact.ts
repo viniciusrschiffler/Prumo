@@ -169,16 +169,16 @@ function toProjectEndRow(
   }
 }
 
-function buildOtherWorkRows(
-  detail: AllocationDetail,
-  input: SimulationInput,
-): ImpactRow[] {
-  return input.allocations
-    .filter((allocation) => allocation.personId === input.person.id)
-    .filter((allocation) => allocation.id !== detail.allocation.id)
-    .filter((allocation) => allocation.endedAt === null)
-    .map((allocation) => toAllocationDetail(allocation, input.index))
-    .filter((other) => other !== null)
+// A tabela existe para mostrar o que o afastamento move e o que ele não move, então só o
+// trabalho que ainda corre entra: alocação já cumprida não tem plano a deslocar.
+function buildOtherWorkRows(detail: AllocationDetail, input: SimulationInput): ImpactRow[] {
+  return listRemovableAllocations(
+    input.person.id,
+    input.allocations,
+    input.index,
+    input.today,
+  )
+    .filter((other) => other.allocation.id !== detail.allocation.id)
     .map((other) => toTaskEndRow(other, 0))
 }
 

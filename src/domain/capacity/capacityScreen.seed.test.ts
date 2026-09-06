@@ -69,13 +69,13 @@ describe('Matriz sobre o seed', () => {
     ])
   })
 
-  // O piloto em campo acaba em 31/08 e o roteiro começa em 03/09: as duas alocações tocam a
-  // mesma semana, e é isso que põe Marcos em 60% só em S36.
-  it('Should put Marcos at 60% in S36, where two allocations of his meet', () => {
+  // O piloto em campo acaba em 31/08 e o roteiro começa em 03/09: as duas tocam a mesma
+  // semana, mas nunca o mesmo dia, então a semana vale o pico de 30% e não a soma.
+  it('Should keep Marcos at 30% in S36, where two allocations of his meet without sharing a day', () => {
     const marcos = matrix.rows.find((row) => row.person.id === 'marcos')
 
     expect(marcos?.cells.map((cell) => cell.percentage)).toEqual([
-      60, 30, 30, 30, 30, 0, 0, 0, 0, 0, 0, 0,
+      30, 30, 30, 30, 30, 0, 0, 0, 0, 0, 0, 0,
     ])
   })
 
@@ -92,8 +92,8 @@ describe('Matriz sobre o seed', () => {
   })
 
   it('Should report the free hours of the team, against the empty card of the mockup', () => {
-    expect(matrix.teamUsedHours).toBe(214)
-    expect(matrix.freeHours).toBe(1106)
+    expect(matrix.teamUsedHours).toBe(205)
+    expect(matrix.freeHours).toBe(1115)
     expect(Math.round(matrix.freePercentage)).toBe(84)
   })
 

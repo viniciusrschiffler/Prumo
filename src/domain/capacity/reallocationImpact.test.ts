@@ -143,6 +143,32 @@ describe('simulateReallocation', () => {
     expect(simulate(3)?.removalPeriod).toEqual({ start: TODAY, end: '2026-09-23' })
   })
 
+  it('Should leave out work the person has already finished', () => {
+    const past = buildAllocation({
+      id: 'al-antiga',
+      personId: 'rafael',
+      taskId: 'gw-tes',
+      startDate: '2026-06-01',
+      endDate: '2026-06-26',
+      percentage: 100,
+    })
+
+    const rows =
+      simulateReallocation({
+        person: RAFAEL,
+        allocationId: 'al-ob-1',
+        weeksRemoved: 3,
+        allocations: [ON_COLLECT, past],
+        tasks: [COLLECT_TASK, LOAD_TASK],
+        people: [RAFAEL, ANA],
+        index: INDEX,
+        today: TODAY,
+        weeks: WEEKS,
+      })?.rows ?? []
+
+    expect(rows.map((row) => row.id)).toEqual(['task-ob-inst', 'project-observabilidade'])
+  })
+
   it('Should leave the other work of the person where it is', () => {
     const rows = simulate(3)?.rows ?? []
 
