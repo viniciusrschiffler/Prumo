@@ -13,7 +13,11 @@ import {
   type TodoGroupMode,
 } from '@/domain/todos/todoGrouping'
 import { buildTodoRows, listProjectsWithPhase, listTodoRecurrences } from '@/domain/todos/todoRow'
-import { countOpenTodosByProject, summarizeTodos } from '@/domain/todos/todoSummary'
+import {
+  countOpenTodosByProject,
+  listTagsInUse,
+  summarizeTodos,
+} from '@/domain/todos/todoSummary'
 import { TODO_GROUP_MODE_LABELS } from '@/ui/labels/entityLabels'
 import { useSidebarContext } from '@/ui/layout/useSidebarContext'
 import { Button } from '@/ui/primitives/Button'
@@ -101,11 +105,8 @@ export function TodoListScreen() {
   const rowFocus = useTodoRowFocus(orderedIds)
 
   const sidebarItems = useMemo<SidebarContextItem[]>(
-    () =>
-      snapshot.tags
-        .filter((tag) => allRows.some((row) => row.tags.some((rowTag) => rowTag.id === tag.id)))
-        .map((tag) => ({ id: tag.id, label: tag.name })),
-    [snapshot.tags, allRows],
+    () => listTagsInUse(allRows, snapshot.tags).map((tag) => ({ id: tag.id, label: tag.name })),
+    [allRows, snapshot.tags],
   )
 
   useSidebarContext(sidebarItems, activeTagId, (id) =>

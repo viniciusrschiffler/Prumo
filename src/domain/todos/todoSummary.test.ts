@@ -3,7 +3,7 @@ import { buildProject } from '@/domain/testing/projectRowBuilders'
 import { buildTodoRow } from '@/domain/testing/todoBuilders'
 import type { TodoGroupingContext } from './todoGrouping'
 import type { ProjectWithPhase } from './todoRow'
-import { countOpenTodosByProject, summarizeTodos } from './todoSummary'
+import { countOpenTodosByProject, listTagsInUse, summarizeTodos } from './todoSummary'
 
 const CONTEXT: TodoGroupingContext = { today: '2026-09-03', weekStart: 'monday' }
 
@@ -61,5 +61,26 @@ describe('countOpenTodosByProject', () => {
       ['App de campo v2', 0],
       ['Sem projeto', 1],
     ])
+  })
+})
+
+describe('listTagsInUse', () => {
+  const tags = [
+    { id: 'infra', name: 'infra' },
+    { id: 'pagamentos', name: 'pagamentos' },
+    { id: 'mobile', name: 'mobile' },
+  ]
+
+  it('Should leave out the tag no todo carries', () => {
+    const rows = [
+      buildTodoRow({ id: 'a' }, { tags: [tags[1]!] }),
+      buildTodoRow({ id: 'b' }, { tags: [tags[0]!, tags[1]!] }),
+    ]
+
+    expect(listTagsInUse(rows, tags)).toEqual([tags[0], tags[1]])
+  })
+
+  it('Should return nothing when no todo has a tag', () => {
+    expect(listTagsInUse([buildTodoRow()], tags)).toEqual([])
   })
 })

@@ -11,7 +11,7 @@ import {
   type TodosSnapshot,
 } from './todoRow'
 import { parseRecurrenceRule } from './todoRecurrence'
-import { countOpenTodosByProject, summarizeTodos } from './todoSummary'
+import { countOpenTodosByProject, listTagsInUse, summarizeTodos } from './todoSummary'
 
 const CONTEXT: TodoGroupingContext = { today: DESIGN_TODAY, weekStart: 'monday' }
 
@@ -70,6 +70,12 @@ describe('the TodoList screen over the seed', () => {
       ['Observabilidade', 0],
       ['Sem projeto', 2],
     ])
+  })
+
+  it('Should offer as a filter only the tags some todo carries', () => {
+    expect(
+      listTagsInUse(buildTodoRows(snapshot), snapshot.tags).map((tag) => tag.name),
+    ).toEqual(['observabilidade', 'pagamentos', 'parceiro'])
   })
 
   it('Should read the only active recurrence of the seed', () => {

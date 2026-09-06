@@ -1,6 +1,7 @@
 import { toIsoDateOf, weekPeriod } from '@/domain/dates/isoDateMath'
 import type { Phase } from '@/domain/schemas/phaseSchema'
 import type { Project } from '@/domain/schemas/projectSchema'
+import type { Tag } from '@/domain/schemas/tagSchema'
 import { classifyDue, isDone, type TodoGroupingContext } from './todoGrouping'
 import type { ProjectWithPhase, TodoRow } from './todoRow'
 
@@ -82,4 +83,12 @@ export function countOpenTodosByProject(
       ).length,
     },
   ]
+}
+
+// Tag sem nenhum todo viraria um filtro que só sabe esvaziar a tela. A tabela `tag` é
+// compartilhada com projeto, então nem toda tag cadastrada aparece aqui.
+export function listTagsInUse(rows: readonly TodoRow[], tags: readonly Tag[]): Tag[] {
+  const usedIds = new Set(rows.flatMap((row) => row.tags.map((tag) => tag.id)))
+
+  return tags.filter((tag) => usedIds.has(tag.id))
 }

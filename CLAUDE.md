@@ -268,7 +268,7 @@ número está em `domain/todos/todoScreen.seed.test.ts`.
 | Atrasados · Em aberto · Sem projeto | 2 · 11 · 5 | **1 · 7 · 2** |
 | Por projeto | 4 projetos | **4 não arquivados + Sem projeto** — o ERP cancelado tem `archived_at` |
 | Recorrentes | 2 cartões fictícios | **1** — "Revisão semanal de capacidade", `semanal-seg` |
-| Tags da sidebar | 1:1, contratação, arquitetura, pessoal, reunião | **as 5 da tabela `tag`** |
+| Tags da sidebar | 1:1, contratação, arquitetura, pessoal, reunião | **3** — só as que algum todo carrega |
 
 Quatro leituras que o mockup deixou ambíguas:
 
