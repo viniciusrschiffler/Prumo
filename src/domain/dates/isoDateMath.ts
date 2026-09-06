@@ -2,6 +2,7 @@ import type { IsoDate, IsoDateTime } from '@/domain/schemas/primitives'
 import type { DatePeriod } from '@/domain/types/DatePeriod'
 
 const MILLISECONDS_PER_DAY = 86_400_000
+const MONTHS_PER_QUARTER = 3
 
 function toUtcTimestamp(date: IsoDate): number {
   const [year, month, day] = date.split('-').map(Number)
@@ -33,6 +34,28 @@ export function weekPeriod(date: IsoDate, firstWeekday: 'monday' | 'sunday'): Da
   const start = startOfWeek(date, firstWeekday)
 
   return { start, end: addDays(start, 6) }
+}
+
+export function startOfMonth(date: IsoDate): IsoDate {
+  return `${date.slice(0, 7)}-01`
+}
+
+// O dia é preservado quando o mês de destino o comporta, e encurtado quando não: 31/01 mais
+// um mês é 28/02, não 03/03 como o Date faz sozinho.
+export function addMonths(date: IsoDate, months: number): IsoDate {
+  const [year, month, day] = date.split('-').map(Number)
+  const monthsFromYearZero = (year ?? 0) * 12 + (month ?? 1) - 1 + months
+  const targetYear = Math.floor(monthsFromYearZero / 12)
+  const targetMonth = monthsFromYearZero - targetYear * 12
+  const lastDayOfTarget = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate()
+
+  return toIsoDate(Date.UTC(targetYear, targetMonth, Math.min(day ?? 1, lastDayOfTarget)))
+}
+
+export function startOfQuarter(date: IsoDate): IsoDate {
+  const month = Number(date.slice(5, 7))
+
+  return addMonths(startOfMonth(date), -((month - 1) % MONTHS_PER_QUARTER))
 }
 
 export function earliestDate(first: IsoDate, second: IsoDate): IsoDate {

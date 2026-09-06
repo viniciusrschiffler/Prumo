@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  addMonths,
   differenceInDays,
   earliestDate,
   intersectPeriods,
   latestDate,
   periodsOverlap,
+  startOfMonth,
+  startOfQuarter,
 } from './isoDateMath'
 
 describe('differenceInDays', () => {
@@ -69,5 +72,38 @@ describe('intersectPeriods', () => {
     )
 
     expect(intersection).toBeNull()
+  })
+})
+
+describe('startOfMonth', () => {
+  it('Should walk back to the first day of the month', () => {
+    expect(startOfMonth('2026-09-29')).toBe('2026-09-01')
+    expect(startOfMonth('2026-09-01')).toBe('2026-09-01')
+  })
+})
+
+describe('addMonths', () => {
+  it('Should keep the day when the target month holds it', () => {
+    expect(addMonths('2026-03-12', 1)).toBe('2026-04-12')
+    expect(addMonths('2026-03-12', -1)).toBe('2026-02-12')
+  })
+
+  it('Should shorten the day instead of spilling into the next month', () => {
+    expect(addMonths('2026-01-31', 1)).toBe('2026-02-28')
+    expect(addMonths('2026-03-31', -1)).toBe('2026-02-28')
+  })
+
+  it('Should cross the year in both directions', () => {
+    expect(addMonths('2026-11-15', 3)).toBe('2027-02-15')
+    expect(addMonths('2026-02-15', -3)).toBe('2025-11-15')
+  })
+})
+
+describe('startOfQuarter', () => {
+  it('Should walk back to the first day of the quarter', () => {
+    expect(startOfQuarter('2026-02-14')).toBe('2026-01-01')
+    expect(startOfQuarter('2026-06-30')).toBe('2026-04-01')
+    expect(startOfQuarter('2026-09-03')).toBe('2026-07-01')
+    expect(startOfQuarter('2026-12-31')).toBe('2026-10-01')
   })
 })
