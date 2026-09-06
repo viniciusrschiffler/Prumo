@@ -3,6 +3,8 @@ import type { DatePeriod } from '@/domain/types/DatePeriod'
 
 const MILLISECONDS_PER_DAY = 86_400_000
 const MONTHS_PER_QUARTER = 3
+const DAYS_PER_WEEK = 7
+const DAYS_TO_MIDWEEK = 3
 
 function toUtcTimestamp(date: IsoDate): number {
   const [year, month, day] = date.split('-').map(Number)
@@ -34,6 +36,17 @@ export function weekPeriod(date: IsoDate, firstWeekday: 'monday' | 'sunday'): Da
   const start = startOfWeek(date, firstWeekday)
 
   return { start, end: addDays(start, 6) }
+}
+
+// A semana ISO é a que contém a quinta-feira, e o ano do rótulo é o dessa quinta. Numerar pelo
+// meio da semana acerta a quinta quando ela começa na segunda e continua caindo na semana de
+// maioria quando começa no domingo, que é o outro início que as Configurações oferecem.
+export function isoWeekNumber(weekStart: IsoDate): number {
+  const midweek = addDays(weekStart, DAYS_TO_MIDWEEK)
+  const thursday = addDays(midweek, DAYS_TO_MIDWEEK - ((weekdayIndex(midweek) + 6) % 7))
+  const firstDayOfYear = `${thursday.slice(0, 4)}-01-01`
+
+  return Math.ceil((differenceInDays(firstDayOfYear, thursday) + 1) / DAYS_PER_WEEK)
 }
 
 export function startOfMonth(date: IsoDate): IsoDate {
