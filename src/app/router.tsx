@@ -1,7 +1,7 @@
 import { createMemoryRouter, Navigate } from 'react-router'
 import { AppShell } from '@/ui/layout/AppShell'
 import { SCREEN_META } from '@/ui/layout/screenMeta'
-import { CapacityScreen } from '@/ui/screens/CapacityScreen'
+import { CapacityScreen } from '@/ui/screens/capacity/CapacityScreen'
 import { DashboardsScreen } from '@/ui/screens/DashboardsScreen'
 import { NotesScreen } from '@/ui/screens/NotesScreen'
 import { ProjectScreen } from '@/ui/screens/project/ProjectScreen'

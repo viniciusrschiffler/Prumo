@@ -113,8 +113,8 @@ export function CapacitySidePanel({
           <Alert
             key={alert.person.id}
             level="warn"
+            surface="plain"
             title={`${alert.person.name} inativa com alocação futura`}
-            className="bg-panel"
           >
             {`${formatPercentage(
               alert.allocations[0]?.allocation.percentage ?? 0,
@@ -126,8 +126,8 @@ export function CapacitySidePanel({
 
         <Alert
           level="info"
+          surface="plain"
           title={`Time em ${formatPercentage(matrix.teamAveragePercentage)} de uso médio`}
-          className="border-border bg-panel"
         >
           {firstFreeWeekNumber === null
             ? 'A janela inteira tem trabalho alocado.'
