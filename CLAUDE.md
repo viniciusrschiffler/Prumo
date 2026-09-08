@@ -224,7 +224,7 @@ o que o `ScreenShell` faz.
   `shortcutRegistry`: os atalhos globais da navegação mais os da tela em foco. O design não a
   desenha em lugar nenhum, então a forma saiu do Sistema de Design; o conteúdo não é
   inventado, e não existe segunda lista de comandos para sair de sincronia com a primeira. O
-  botão "Comandos ⌘K" de Painéis e TodoList ainda não foi ligado nela.
+  botão "Comandos ⌘K" da TodoList ainda não foi ligado nela; o de Painéis já foi.
 - **O ⋯ da linha de todo também ficou de fora**, pela mesma razão. Adiar e vincular projeto,
   que seriam o conteúdo natural do menu, já têm atalho de teclado na linha.
 - **Recorrente não gera todo.** A tabela `todo_recurrence` é lida e o painel lateral mostra a
@@ -620,3 +620,75 @@ já se repetia nas telas de Projeto e Capacidade.
 **O tom de cada tipo de evento virou `PROJECT_EVENT_TONES`**, em `ui/labels/`. Ele servia só ao
 cartão do histórico e agora serve também ao modal de vínculo; duas listas sairiam de sincronia na
 primeira cor nova.
+
+## A tela de Painéis contra o mockup
+
+A janela bate exatamente: 04/08/2026, 05/06/2026 e 03/09/2025 são as três datas que o
+subtítulo do design imprime, e são as que `buildDashboardPeriod` devolve. Os números dentro
+dela não batem, e o teste que prova cada linha está em
+`domain/dashboards/dashboardsScreen.seed.test.ts`. Vale o derivado.
+
+| Onde | Mockup (90d) | Derivado (90d) |
+| --- | --- | --- |
+| Projetos entregues | 2 | **0** — e 0 nos três períodos: nenhum projeto do seed tem todas as tarefas contadas concluídas |
+| Atraso médio | +9d | **+8d** — média dos quatro projetos, não o +11d da Migração sozinha |
+| Esforço planejado | 1.008h | **396h** — 236h em 30d e 604h em 12m |
+| Uso de capacidade | 76% | **73%** — 66% em 30d e 36% em 12m |
+| Dias bloqueado | 31d | **31d** — bate |
+| Pessoas por projeto | Migração 200% · Observ. 150% | **Migração 150% · Observ. 100% · Portal 100% · App 30%** |
+| Projetos por fase | 4 · 3 · 2 · 3 | **3 · 0 · 1 · 0** — cada projeto conta uma fase só, a atual |
+| Tempo médio | 38 · 24 · 129 · 16 | **43 · 34 · — · 18**; em 12m, **36,75 · 34 · 42 · 18** |
+| Gargalo | Homolog. externa · 1,1× o desenvolvimento | **Desenvolvimento · 2,4× o tempo de produção** |
+| Bloqueio por mês | jun 0 · jul 8 · ago 20 · set 3 | **jun 0 · jul 8 · ago 21 · set 2** |
+| Bloqueio por projeto | Portal 23d · Migração 8d | **igual** — bate |
+| Distribuição de carga | Ana 74 · Rafael 121 · Marcos 30 | **Rafael 96 · Ana 89 · Marcos 21** — ninguém estoura no trimestre |
+| Alerta de sobrecarga na carga | Rafael em vermelho | **fora** — o vermelho só entra acima de 100% |
+| Eventos | 7 tipos · 30 eventos | **8 tipos · 12 eventos** — o `replan` nasceu na migração 003, depois do desenho |
+| Bloqueio em 12 meses | 6 colunas escolhidas a dedo | **13 colunas** — todo mês da janela, como o próprio mockup faz com o "jun" zerado dos 90 dias |
+
+Seis leituras que o mockup deixou ambíguas:
+
+- **"N alocações ativas" conta alocação, não pessoa.** O mockup soma o número de pessoas sob um
+  rótulo que diz alocações; vale o que o rótulo promete.
+- **A barra do projeto mede o pico simultâneo, não a soma da janela.** Somar tudo que passou pelo
+  projeto contaria três vezes a mesma pessoa que trocou de alocação duas vezes. É a mesma leitura
+  por dia de `calculateWeeklyCapacity` e da varredura de conflito, e é o que faz a Observabilidade
+  cair a 0% em 30 dias — o caso "encerradas" que o mockup previu e não produz.
+- **O gargalo compara com a fase mais rápida, não com a primeira da lista.** Fase é configurável e
+  a primeira pode ser a mais lenta, o que daria "X é 1,0× o tempo de X". Sobre o seed é o próprio
+  desenvolvimento que é o gargalo no trimestre.
+- **O tom do atraso médio e o dos dias bloqueado são derivados.** O mockup os pinta de vermelho sem
+  condição; time adiantado, ou janela sem bloqueio nenhum, não tem o que alarmar.
+- **O KPI de bloqueio imprime o número puro** e o cabeçalho do gráfico imprime "31d no período",
+  exatamente como o mockup escreve os dois.
+- **O bloqueio que atravessa a virada do mês é repartido pela fronteira**, não duplicado nela: a
+  soma das colunas devolve o mesmo total que `calculateBlockedDays` mede sobre a janela inteira.
+
+**O cartão de gráfico não é o `SectionCard`.** Ali o cabeçalho é uma faixa com fio embaixo; aqui
+ele divide o mesmo respiro de 11px do conteúdo, sem separador, dentro de um padding de 13px. O
+`ChartCard` mora na pasta da tela porque só ela o usa.
+
+**Painéis é a única das nove telas que imprime o número do indicador em 20px.** Hoje, Capacidade e
+TodoList usam os 18px do `--text-metric`. O passo de 20px já existe como `--text-entity-title`, com
+o mesmo peso e o mesmo espacejamento que o design escreve, então o `StatCard` ganhou `size` em vez
+de um token novo.
+
+**O seletor de período usa o passo padrão de 10px.** O `Paineis.dc.html` escreve `padding:4px 11px`
+e é o único dos oito a fazê-lo: Capacidade, Notas, Projetos e TodoList escrevem 4px 10px, que é o
+`size` default do `SegmentedControl`.
+
+**As fases da barra lateral são legenda, não filtro** — o `contextVariant: 'legend'` da Timeline,
+pelo mesmo critério: o design desenha a lista com o quadrado colorido e não diz o que o clique faria.
+
+**A exportação sai em um arquivo só, em formato longo** (`secao,item,valor,unidade`), na pasta
+`export/` ao lado do dump JSON. O design desenha o botão e não desenha o formato. Uma coluna por
+gráfico daria uma tabela esburacada, porque os seis não compartilham eixo; o formato longo carrega
+os dois números de um mesmo item em duas linhas, distinguidas pela unidade. O separador é a vírgula
+e o decimal é o ponto, como o RFC 4180 os define: trocar por ponto e vírgula agradaria a uma
+configuração de planilha e quebraria todas as outras.
+
+**`buildDashboardCsv` recebe os rótulos de tipo de evento de fora.** Nome em português de valor de
+enum é da camada de UI, e `domain/` não importa `ui/`.
+
+**O vazio não está no design.** Os nove mockups não desenham os Painéis sem projeto com atividade,
+então o texto ("Nenhum projeto com atividade") saiu no tom dos outros `EmptyState`.
