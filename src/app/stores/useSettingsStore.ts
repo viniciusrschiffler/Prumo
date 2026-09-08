@@ -129,6 +129,21 @@ async function readFolderSlice(folderPath: string | null): Promise<FolderSlice> 
   }
 }
 
+// Quem resolve a pasta de dados no boot é o `useDataFolderStore`. A cópia daqui só nasce no
+// `load`, e só a tela de Configurações o chama — exportar dos Painéis não passa por ela.
+async function resolveExportFolder(cached: string | null): Promise<string> {
+  const folderPath =
+    cached ??
+    useDataFolderStore.getState().path ??
+    (await useDataFolderStore.getState().resolve())
+
+  if (folderPath === null) {
+    throw new PrumoError('EXPORT_FAILED', 'exportação pedida sem pasta de dados definida')
+  }
+
+  return folderPath
+}
+
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   status: 'idle',
   errorMessage: null,
@@ -240,12 +255,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 
   exportAll: async () => {
-    const folderPath = get().dataFolderPath
-
-    if (folderPath === null) {
-      throw new PrumoError('EXPORT_FAILED', 'exportação pedida sem pasta de dados definida')
-    }
-
+    const folderPath = await resolveExportFolder(get().dataFolderPath)
     const result = await exportAllTables(getSqlGateway(), folderPath)
 
     await get().refreshFolder()
@@ -253,19 +263,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     return result
   },
 
-  exportCsv: async (fileName, contents) => {
-    const folderPath = get().dataFolderPath
-
-    if (folderPath === null) {
-      throw new PrumoError('EXPORT_FAILED', 'exportação pedida sem pasta de dados definida')
-    }
-
-    const filePath = await writeExportFile(folderPath, fileName, contents)
-
-    await get().refreshFolder()
-
-    return filePath
-  },
+  // O card de arquivos não fica em tela quando o CSV sai dos Painéis, e um `refreshFolder`
+  // daqui listaria a pasta que a cópia local ainda não conhece, esvaziando o card.
+  exportCsv: async (fileName, contents) =>
+    writeExportFile(await resolveExportFolder(get().dataFolderPath), fileName, contents),
 
   eraseAll: async () => {
     await eraseAllData(getSqlGateway())
