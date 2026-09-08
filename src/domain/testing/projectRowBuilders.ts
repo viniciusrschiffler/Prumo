@@ -1,5 +1,6 @@
-import type { ProjectRow } from '@/domain/projects/projectRow'
+import type { ProjectRow, ProjectTaskRow } from '@/domain/projects/projectRow'
 import type { Project } from '@/domain/schemas/projectSchema'
+import type { Task } from '@/domain/schemas/taskSchema'
 
 export function buildProject(overrides: Partial<Project> = {}): Project {
   return {
@@ -37,6 +38,21 @@ export function buildProjectRow(
     isDelayed: false,
     hasOpenRisk: false,
     tasks: [],
+    ...overrides,
+  }
+}
+
+export function buildProjectTaskRow(
+  task: Task,
+  overrides: Partial<ProjectTaskRow> = {},
+): ProjectTaskRow {
+  return {
+    task,
+    phase: null,
+    people: [],
+    hasOnlyEndedAllocations: false,
+    deviationInDays: null,
+    isPlanned: true,
     ...overrides,
   }
 }
