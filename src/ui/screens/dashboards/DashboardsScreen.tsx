@@ -5,11 +5,15 @@ import { useDatabaseStore } from '@/app/stores/useDatabaseStore'
 import { useProjectsStore } from '@/app/stores/useProjectsStore'
 import { useSettingsStore } from '@/app/stores/useSettingsStore'
 import type { SidebarContextItem } from '@/app/stores/useSidebarContextStore'
+import { useToastStore } from '@/app/stores/useToastStore'
+import { buildDashboardCsv, buildDashboardCsvFileName } from '@/domain/dashboards/dashboardCsv'
 import {
   DASHBOARD_PERIOD_KEYS,
   DEFAULT_DASHBOARD_PERIOD,
   type DashboardPeriodKey,
 } from '@/domain/dashboards/dashboardPeriod'
+import { toPublicMessage } from '@/domain/errors/PrumoError'
+import { PROJECT_EVENT_LABELS } from '@/ui/labels/entityLabels'
 import { useSidebarContext } from '@/ui/layout/useSidebarContext'
 import { Alert } from '@/ui/primitives/Alert'
 import { Button } from '@/ui/primitives/Button'
@@ -40,7 +44,9 @@ export function DashboardsScreen() {
   const snapshot = useProjectsStore((state) => state.snapshot)
   const load = useProjectsStore((state) => state.load)
   const weekStart = useSettingsStore((state) => state.settings.weekStart)
+  const exportCsv = useSettingsStore((state) => state.exportCsv)
   const openCommandPalette = useCommandPaletteStore((state) => state.open)
+  const notify = useToastStore((state) => state.notify)
 
   const [periodKey, setPeriodKey] = useState<DashboardPeriodKey>(DEFAULT_DASHBOARD_PERIOD)
 
@@ -65,6 +71,21 @@ export function DashboardsScreen() {
   )
 
   useSidebarContext(sidebarItems, null)
+
+  function downloadCsv() {
+    const contents = buildDashboardCsv({
+      summary,
+      periodLabel: DASHBOARD_PERIOD_LABELS[periodKey],
+      eventTypeLabels: PROJECT_EVENT_LABELS,
+    })
+
+    exportCsv(buildDashboardCsvFileName(summary), contents)
+      .then((filePath) => notify(`Painéis exportados para ${filePath}.`))
+      .catch((cause: unknown) => {
+        console.error('Não foi possível exportar os painéis em CSV.', cause)
+        notify(toPublicMessage(cause), 'danger')
+      })
+  }
 
   if (status === 'error') {
     return (
@@ -105,9 +126,12 @@ export function DashboardsScreen() {
   )
 
   const actions = (
-    <Button keys="mod+k" onClick={openCommandPalette}>
-      Comandos
-    </Button>
+    <>
+      <Button onClick={downloadCsv}>Exportar CSV</Button>
+      <Button keys="mod+k" onClick={openCommandPalette}>
+        Comandos
+      </Button>
+    </>
   )
 
   if (summary.projectCount === 0) {

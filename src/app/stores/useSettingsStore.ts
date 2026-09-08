@@ -26,6 +26,7 @@ import { closeDatabase, getSqlGateway } from '@/infra/database/DatabaseConnectio
 import { eraseAllData } from '@/infra/database/eraseAllData'
 import { exportAllTables, type ExportResult } from '@/infra/database/exportAllTables'
 import { runIntegrityCheck } from '@/infra/database/runIntegrityCheck'
+import { writeExportFile } from '@/infra/files/writeExportFile'
 import { SqliteAllocationRepository } from '@/infra/repositories/SqliteAllocationRepository'
 import { SqlitePersonRepository } from '@/infra/repositories/SqlitePersonRepository'
 import { SqlitePhaseRepository } from '@/infra/repositories/SqlitePhaseRepository'
@@ -65,6 +66,7 @@ type SettingsState = FolderSlice & {
   integrityReport: IntegrityReport | null
   checkIntegrity: () => Promise<IntegrityReport>
   exportAll: () => Promise<ExportResult>
+  exportCsv: (fileName: string, contents: string) => Promise<string>
   eraseAll: () => Promise<void>
   chooseFolder: () => Promise<boolean>
   revealFolder: () => Promise<void>
@@ -249,6 +251,20 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     await get().refreshFolder()
 
     return result
+  },
+
+  exportCsv: async (fileName, contents) => {
+    const folderPath = get().dataFolderPath
+
+    if (folderPath === null) {
+      throw new PrumoError('EXPORT_FAILED', 'exportação pedida sem pasta de dados definida')
+    }
+
+    const filePath = await writeExportFile(folderPath, fileName, contents)
+
+    await get().refreshFolder()
+
+    return filePath
   },
 
   eraseAll: async () => {

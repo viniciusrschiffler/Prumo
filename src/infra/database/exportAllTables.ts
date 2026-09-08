@@ -1,15 +1,6 @@
-import { mkdir, writeTextFile } from '@tauri-apps/plugin-fs'
-import { PrumoError } from '@/domain/errors/PrumoError'
+import { writeExportFile } from '@/infra/files/writeExportFile'
 import { TABLES_IN_DEPENDENCY_ORDER } from './dataTables'
 import type { SqlGateway } from './SqlGateway'
-
-const EXPORT_FOLDER_NAME = 'export'
-
-function joinPath(folderPath: string, name: string): string {
-  const separator = folderPath.includes('\\') ? '\\' : '/'
-
-  return folderPath.endsWith(separator) ? `${folderPath}${name}` : `${folderPath}${separator}${name}`
-}
 
 function buildFileName(now: Date): string {
   const stamp = now.toISOString().slice(0, 19).replace(/[:T]/g, '-')
@@ -42,15 +33,11 @@ export async function exportAllTables(
     tables,
   }
 
-  const exportFolder = joinPath(folderPath, EXPORT_FOLDER_NAME)
-  const filePath = joinPath(exportFolder, buildFileName(new Date()))
-
-  try {
-    await mkdir(exportFolder, { recursive: true })
-    await writeTextFile(filePath, JSON.stringify(dump, null, 2))
-  } catch (cause) {
-    throw new PrumoError('EXPORT_FAILED', `falha ao gravar ${filePath}`, { cause })
-  }
+  const filePath = await writeExportFile(
+    folderPath,
+    buildFileName(new Date()),
+    JSON.stringify(dump, null, 2),
+  )
 
   return { filePath, rowCount }
 }
