@@ -1,4 +1,5 @@
 import type { Screen } from '@/domain/schemas/savedViewSchema'
+import { AppLogo } from '@/ui/primitives/AppLogo'
 import { ThemeCycleButton } from '@/ui/theme/ThemeCycleButton'
 import { SCREEN_META } from './screenMeta'
 import { SidebarContextSection } from './SidebarContextSection'
@@ -21,7 +22,7 @@ export function Sidebar({
   return (
     <aside className="flex flex-col overflow-hidden border-r border-border bg-sunken">
       <div className="flex items-center gap-2 px-3.5 pb-3 pt-3.5">
-        <div className="h-5 w-5 rounded-[5px] bg-text" />
+        <AppLogo className="h-5 w-5 flex-none" />
         <div className="grid">
           <span className="text-body font-semibold tracking-[-0.01em]">Prumo</span>
           <span className="font-mono text-micro text-text3">local · offline</span>
