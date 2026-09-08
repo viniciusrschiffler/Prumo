@@ -42,6 +42,7 @@ type TasksTabProps = {
   onFilterChange: (filter: TaskFilter) => void
   onSearchChange: (search: string) => void
   onNewTask: () => void
+  onEditTask: (taskId: EntityId) => void
 }
 
 export function TasksTab({
@@ -54,6 +55,7 @@ export function TasksTab({
   onFilterChange,
   onSearchChange,
   onNewTask,
+  onEditTask,
 }: TasksTabProps) {
   const counts = useMemo(() => countTasksByFilter(rows), [rows])
   const visibleRows = useMemo(
@@ -72,7 +74,7 @@ export function TasksTab({
   )
 
   const orderedIds = groups.flatMap((group) => group.tasks.map((row) => row.task.id))
-  const navigation = useGridNavigation({ rowIds: orderedIds })
+  const navigation = useGridNavigation({ rowIds: orderedIds, onActivate: onEditTask })
 
   function dependenciesOf(taskId: EntityId): string[] {
     return dependencies
@@ -162,6 +164,7 @@ export function TasksTab({
                     percentageByPerson={percentages.get(row.task.id) ?? new Map()}
                     dependsOn={dependenciesOf(row.task.id)}
                     rowProps={navigation.getRowProps(row.task.id)}
+                    onEdit={() => onEditTask(row.task.id)}
                   />
                 ))}
               </Fragment>

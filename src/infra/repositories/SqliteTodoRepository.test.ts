@@ -147,3 +147,72 @@ describe('SqliteTodoRepository', () => {
     ])
   })
 })
+
+describe('SqliteTodoRepository.update', () => {
+  const update = {
+    id: 'td-1',
+    title: 'Fechar escopo com o jurídico',
+    description: 'Prazo do contrato.',
+    projectId: null,
+    taskId: null,
+    dueDate: '2026-09-10',
+    priority: 'P0' as const,
+    tags: [],
+  }
+
+  beforeEach(async () => {
+    await repository.create(buildNewTodo())
+  })
+
+  it('Should store the fields the form asked about, leaving the completion alone', async () => {
+    await repository.setCompletion({
+      todoId: 'td-1',
+      status: 'done',
+      completedAt: '2026-09-05T18:00:00Z',
+    })
+
+    await repository.update(update)
+
+    expect((await repository.listAll())[0]).toEqual({
+      id: 'td-1',
+      title: 'Fechar escopo com o jurídico',
+      description: 'Prazo do contrato.',
+      dueDate: '2026-09-10',
+      priority: 'P0',
+      status: 'done',
+      projectId: null,
+      taskId: null,
+      completedAt: '2026-09-05T18:00:00Z',
+      recurrenceId: null,
+    })
+  })
+
+  it('Should rewrite the tag links instead of adding to them', async () => {
+    await repository.update({ ...update, tags: [{ id: 'tag-1', name: 'contrato' }] })
+    await repository.update({ ...update, tags: [{ id: 'tag-2', name: 'jurídico' }] })
+
+    const linked = await gateway.select<{ name: string }[]>(
+      'SELECT tag.name FROM todo_tag JOIN tag ON tag.id = todo_tag.tag_id',
+    )
+
+    expect(linked).toEqual([{ name: 'jurídico' }])
+  })
+
+  it('Should release the task when the update says the todo no longer has one', async () => {
+    await seedProject('gateway')
+    await gateway.executeBatch([
+      {
+        query: `
+          INSERT INTO task (id, project_id, phase_id, title, status, sort_order)
+          VALUES ('gw-cut', 'gateway', 'production', 'Cutover', 'todo', 1)
+        `,
+        values: [],
+      },
+      { query: 'UPDATE todo SET project_id = ?, task_id = ? WHERE id = ?', values: ['gateway', 'gw-cut', 'td-1'] },
+    ])
+
+    await repository.update({ ...update, projectId: 'gateway', taskId: null })
+
+    expect((await repository.listAll())[0]?.taskId).toBeNull()
+  })
+})

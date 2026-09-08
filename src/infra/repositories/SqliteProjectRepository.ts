@@ -3,6 +3,7 @@ import {
   BLOCKED_ALLOCATION_REASON,
   type ProjectBlock,
 } from '@/domain/projects/blockProjects'
+import type { ProjectUpdate } from '@/domain/projects/editProject'
 import type { NewProject } from '@/domain/projects/newProject'
 import type { ResumePostponement } from '@/domain/projects/postponeResume'
 import type { ProjectResume } from '@/domain/projects/resumeProjects'
@@ -34,6 +35,15 @@ const INSERT_BASELINE = `
   INSERT INTO baseline (id, project_id, version, created_at, reason)
   VALUES (?, ?, ?, ?, ?)
 `
+
+const UPDATE_PROJECT = `
+  UPDATE project
+  SET name = ?, description = ?, priority = ?, owner_person_id = ?,
+      planned_start = ?, planned_end = ?
+  WHERE id = ?
+`
+
+const UNLINK_TAGS = 'DELETE FROM project_tag WHERE project_id = ?'
 
 const INSERT_TAG = 'INSERT INTO tag (id, name) VALUES (?, ?) ON CONFLICT (name) DO NOTHING'
 
@@ -127,6 +137,35 @@ function toCreateStatements(
   ]
 }
 
+// O vínculo com tag é reescrito inteiro: o formulário devolve a lista final, e comparar
+// nome a nome para achar o que entrou e o que saiu daria o mesmo resultado por mais caminho.
+function toUpdateStatements(
+  update: ProjectUpdate,
+  tags: readonly NewProjectTag[],
+): BatchStatement[] {
+  const { project } = update
+
+  return [
+    {
+      query: UPDATE_PROJECT,
+      values: [
+        project.name,
+        project.description,
+        project.priority,
+        project.ownerPersonId,
+        project.plannedStart,
+        project.plannedEnd,
+        project.id,
+      ],
+    },
+    { query: UNLINK_TAGS, values: [project.id] },
+    ...tags.flatMap((tag) => [
+      { query: INSERT_TAG, values: [tag.id, tag.name] },
+      { query: LINK_TAG, values: [project.id, tag.name] },
+    ]),
+  ]
+}
+
 function toBlockStatements(block: ProjectBlock): BatchStatement[] {
   const { event } = block
 
@@ -199,6 +238,10 @@ export class SqliteProjectRepository implements ProjectRepository {
 
   async create(newProject: NewProject, tags: readonly NewProjectTag[]): Promise<void> {
     await this.#gateway.executeBatch(toCreateStatements(newProject, tags))
+  }
+
+  async update(update: ProjectUpdate, tags: readonly NewProjectTag[]): Promise<void> {
+    await this.#gateway.executeBatch(toUpdateStatements(update, tags))
   }
 
   async setPriority(projectIds: readonly EntityId[], priority: Priority): Promise<void> {

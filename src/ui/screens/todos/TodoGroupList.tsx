@@ -20,6 +20,7 @@ type TodoGroupListProps = {
   onRetry: () => void
   onClearFilters: () => void
   onToggle: (todoId: EntityId) => void
+  onEdit: (todoId: EntityId) => void
   onRowKeyDown: (event: KeyboardEvent<HTMLElement>, todoId: EntityId) => void
 }
 
@@ -33,6 +34,7 @@ export function TodoGroupList({
   onRetry,
   onClearFilters,
   onToggle,
+  onEdit,
   onRowKeyDown,
 }: TodoGroupListProps) {
   if (status === 'error') {
@@ -104,6 +106,7 @@ export function TodoGroupList({
                   context={context}
                   registerRef={rowFocus.registerRef}
                   onToggle={onToggle}
+                  onEdit={onEdit}
                   onKeyDown={onRowKeyDown}
                 />
               ))}

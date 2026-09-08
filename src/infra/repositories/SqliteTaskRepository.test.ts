@@ -308,3 +308,110 @@ describe('Replanejamento pela Timeline', () => {
     expect([task?.plannedStart, task?.plannedEnd]).toEqual(['2026-09-08', '2026-10-06'])
   })
 })
+
+describe('SqliteTaskRepository.update', () => {
+  const task = {
+    id: 'gw-cut',
+    projectId: 'gateway',
+    phaseId: 'production',
+    title: 'Cutover em produção',
+    status: 'todo' as const,
+    plannedStart: '2026-03-12',
+    plannedEnd: '2026-04-10',
+    actualStart: null,
+    actualEnd: null,
+    estimatedHours: 16,
+    sortOrder: 1,
+  }
+
+  const update = {
+    task,
+    endedAllocationIds: [],
+    endedAt: '2026-09-07T09:00:00Z',
+    endedReason: 'alocação alterada na edição da tarefa',
+    openedAllocations: [],
+    event: null,
+  }
+
+  beforeEach(async () => {
+    await insertTask('gw-cut', 'production', 'todo')
+  })
+
+  it('Should store the fields the form asked about, leaving the real dates alone', async () => {
+    await taskRepository.update(update)
+
+    expect((await taskRepository.listAll()).find((one) => one.id === 'gw-cut')).toEqual(task)
+  })
+
+  it('Should end the allocation instead of deleting it', async () => {
+    await gateway.executeBatch([
+      {
+        query: `
+          INSERT INTO allocation (id, task_id, person_id, start_date, end_date, percentage)
+          VALUES ('al-ana', 'gw-cut', 'ana', '2026-03-12', '2026-03-27', 50)
+        `,
+        values: [],
+      },
+    ])
+
+    await taskRepository.update({ ...update, endedAllocationIds: ['al-ana'] })
+
+    expect(await allocationRepository.listAll()).toEqual([
+      {
+        id: 'al-ana',
+        taskId: 'gw-cut',
+        personId: 'ana',
+        startDate: '2026-03-12',
+        endDate: '2026-03-27',
+        percentage: 50,
+        endedAt: '2026-09-07T09:00:00Z',
+        endedReason: 'alocação alterada na edição da tarefa',
+      },
+    ])
+  })
+
+  it('Should open the allocation of whoever came into the task', async () => {
+    await taskRepository.update({
+      ...update,
+      openedAllocations: [
+        {
+          id: 'al-nova',
+          taskId: 'gw-cut',
+          personId: 'ana',
+          startDate: '2026-03-12',
+          endDate: '2026-04-10',
+          percentage: 30,
+          endedAt: null,
+          endedReason: null,
+        },
+      ],
+    })
+
+    expect((await allocationRepository.listAll())[0]?.percentage).toBe(30)
+  })
+
+  it('Should record the replan event linked to the task, in the same write', async () => {
+    await taskRepository.update({
+      ...update,
+      event: {
+        id: 'ev-replan',
+        projectId: 'gateway',
+        type: 'replan',
+        eventDate: '2026-09-07',
+        title: 'Cutover em produção',
+        bodyMarkdown: 'Fim 27/03 → 10/04',
+        revertsEventId: null,
+        riskOpen: false,
+        expectedResumeAt: null,
+        createdAt: '2026-09-07T09:00:00Z',
+      },
+    })
+
+    expect(
+      await gateway.select<unknown[]>(
+        'SELECT task_id FROM project_event_task WHERE project_event_id = ?',
+        ['ev-replan'],
+      ),
+    ).toEqual([{ task_id: 'gw-cut' }])
+  })
+})

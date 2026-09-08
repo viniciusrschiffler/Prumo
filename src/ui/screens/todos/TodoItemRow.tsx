@@ -16,6 +16,7 @@ type TodoItemRowProps = {
   context: TodoGroupingContext
   registerRef: (id: EntityId, element: HTMLDivElement | null) => void
   onToggle: (id: EntityId) => void
+  onEdit: (id: EntityId) => void
   onKeyDown: (event: KeyboardEvent<HTMLElement>, id: EntityId) => void
 }
 
@@ -38,6 +39,7 @@ export function TodoItemRow({
   context,
   registerRef,
   onToggle,
+  onEdit,
   onKeyDown,
 }: TodoItemRowProps) {
   const { todo } = row
@@ -57,14 +59,20 @@ export function TodoItemRow({
         onChange={() => onToggle(todo.id)}
       />
 
-      <span
+      {/* O foco da linha mora na caixa de marcar, então o título não entra na ordem do Tab:
+          quem navega pelo teclado edita pelo E, que o onKeyDown da linha atende. */}
+      <button
+        type="button"
+        tabIndex={-1}
+        title={`Editar ${todo.title}`}
+        onClick={() => onEdit(todo.id)}
         className={classNames(
-          'truncate text-body',
+          'truncate text-left text-body hover:underline',
           isDone ? 'text-text3 line-through' : 'text-text',
         )}
       >
         {todo.title}
-      </span>
+      </button>
 
       <span className="flex gap-1">
         {row.tags.map((tag) => (

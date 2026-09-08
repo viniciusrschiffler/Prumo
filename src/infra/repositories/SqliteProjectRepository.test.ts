@@ -190,6 +190,66 @@ describe('SqliteProjectRepository.create', () => {
   })
 })
 
+describe('SqliteProjectRepository.update', () => {
+  const project = {
+    id: 'gateway',
+    name: 'Migração do gateway v2',
+    description: null,
+    status: 'blocked' as const,
+    priority: 'P0' as const,
+    ownerPersonId: null,
+    plannedStart: '2026-03-12',
+    plannedEnd: '2026-10-30',
+    createdAt: '2026-02-20T09:00:00Z',
+    archivedAt: null,
+    pausedAt: null,
+  }
+
+  beforeEach(async () => {
+    await seedProject([
+      'gateway',
+      'Migração do gateway',
+      'Troca do gateway.',
+      'blocked',
+      'P1',
+      null,
+      '2026-03-12',
+      '2026-09-29',
+      '2026-02-20T09:00:00Z',
+      null,
+    ])
+  })
+
+  it('Should store the fields the form asked about', async () => {
+    await repository.update({ project, tagNames: [] }, [])
+
+    expect(await repository.listAll()).toEqual([project])
+  })
+
+  it('Should rewrite the tag links instead of adding to them', async () => {
+    await repository.update({ project, tagNames: ['infra'] }, [{ id: 'tag-infra', name: 'infra' }])
+    await repository.update({ project, tagNames: ['web'] }, [{ id: 'tag-web', name: 'web' }])
+
+    const linked = await gateway.select<{ name: string }[]>(
+      'SELECT tag.name FROM project_tag JOIN tag ON tag.id = project_tag.tag_id',
+    )
+
+    expect(linked).toEqual([{ name: 'web' }])
+  })
+
+  it('Should reuse a tag that already exists instead of duplicating it', async () => {
+    await gateway.executeBatch([
+      { query: 'INSERT INTO tag (id, name) VALUES (?, ?)', values: ['infra', 'web'] },
+    ])
+
+    await repository.update({ project, tagNames: ['web'] }, [{ id: 'tag-web', name: 'web' }])
+
+    expect(await gateway.select<{ id: string }[]>('SELECT id FROM tag WHERE name = ?', ['web'])).toEqual(
+      [{ id: 'infra' }],
+    )
+  })
+})
+
 describe('SqliteProjectRepository.setPriority', () => {
   it('Should reprioritize every project it receives at once', async () => {
     await seedProject(['a', 'A', null, 'active', 'P3', null, null, null, '2026-02-20T09:00:00Z', null])

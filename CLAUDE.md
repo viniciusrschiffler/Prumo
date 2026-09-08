@@ -137,6 +137,24 @@ tela de Projeto. A pessoa pode estar num sem estar no outro, então `PersonAvata
 Tailwind v4 emite `font-weight: var(--tw-font-weight, 600)`, então `font-medium` e
 `tracking-normal` vencem o token sem depender de ordem. Verificado no bundle.
 
+**O preflight do Tailwind v4 não marca mais o botão como clicável.** A v3 punha
+`cursor: pointer` no `button`; a v4 tirou, e sem a regra de base em `main.css` a janela
+inteira responde com a seta de texto. A regra cobre `button`, `select`, caixa de marcar e
+`[role="button"]`, sempre com `:not(:disabled)` — o desabilitado tem a própria utilidade. O
+que é clicável sem ser nenhum dos quatro, como a linha de tarefa e a de projeto, leva
+`cursor-pointer` na própria className.
+
+**O Lightning CSS descarta seletor que o alvo do build não entende.** Um `label:has(...)`
+escrito na regra de cursor sumiu do bundle sem aviso — verificado em `dist`. Antes de
+confiar num seletor moderno em `main.css`, procure-o no CSS gerado.
+
+**Data é campo de texto com máscara, não `input[type=date]`.** O passo de dd/mm/aaaa em fonte
+mono é do design, e o campo nativo imprime no formato do locale do sistema. O `DateField`
+mantém o texto e põe o campo nativo transparente atrás do botão de calendário, só para chamar
+o `showPicker`: com `display: none` o Chromium recusa a chamada, porque o elemento precisa
+estar de fato renderizado. A máscara vive em `maskDisplayDate` e só insere a barra quando o
+grupo seguinte já tem dígito — inseri-la assim que o grupo fecha prenderia o backspace.
+
 **Testes têm projeto TypeScript próprio** (`tsconfig.test.json`), para que os tipos do Node
 não fiquem visíveis ao código do app, que roda no webview.
 
@@ -238,6 +256,60 @@ o que o `ScreenShell` faz.
 - **O ponto vermelho de sobrecarga na navegação não existe.** Os nove mockups o desenham ao
   lado de "Capacidade"; ele mora na Sidebar e pede uma leitura que os contadores da navegação
   ainda não fazem.
+- **Editar existe para projeto, tarefa e todo, e não para alocação nem evento.** O design não
+  desenha formulário de edição nenhum, então o formulário de edição é o de criação: o mesmo
+  componente, com `mode`. Alocação se mexe pelas ações que já têm evento próprio — bloquear,
+  desbloquear, realocar —, e evento registrado é histórico, que não se reescreve.
+
+## A edição de projeto, tarefa e todo
+
+O design desenha os três modais de criação e nenhum de edição. Criar e editar preenchem os
+mesmos campos, então são o mesmo componente — `ProjectFormModal`, `TaskFormModal` e
+`TodoFormModal`, com `mode` decidindo título, rótulo do botão e a dica que só a criação tem.
+Os testes estão em `domain/projects/editProject.test.ts`, `domain/projects/editTask.test.ts` e
+`domain/todos/editTodo.test.ts`.
+
+**O formulário só mexe no que ele pergunta.** Status, arquivamento e pausa do projeto, e
+status e datas reais da tarefa, ficam de fora: cada um tem ação própria com evento no
+histórico, e deixá-los cair num formulário apagaria esse rastro.
+
+**Editar tarefa nunca deleta alocação.** Tirar a pessoa preenche `ended_at` com
+`TASK_EDIT_ALLOCATION_REASON`; trocar o percentual encerra a de antes e abre outra sobre a
+janela da tarefa; quem ficou igual não é tocado.
+
+**Mudar só a janela da tarefa não mexe em alocação nenhuma.** É a mesma leitura do arrasto da
+Timeline, e ela preserva a janela que outra decisão fixou — a alocação que o desbloqueio
+recriou começa no dia do desbloqueio, não no início da tarefa, e reescrevê-la desfaria isso.
+
+**Editar tarefa registra o mesmo evento `replan` do arrasto**, pelo mesmo `buildTaskReschedule`,
+e no mesmo `executeBatch` da alocação. Título, fase e estimativa mudam sem evento: o histórico
+do projeto é sobre o plano, e o design não desenha evento para renomear tarefa.
+
+**A prévia de impacto troca a tarefa editada, não a soma de novo.** O `previewTaskImpact`
+recebe `replacedTaskId`; sem ele o "antes" perderia a tarefa e o "depois" contaria duas.
+
+**A prévia de conflito responde pelo formulário, não pelo que a gravação faria.** Ela varre o
+mundo sem a tarefa editada e com as pessoas do formulário sobre a janela do formulário. Para a
+alocação que a gravação preserva com outra janela — a do desbloqueio — as duas leituras
+divergem; o alerta de conflito da própria tela de Projeto continua sendo o que responde pelo
+mundo gravado.
+
+**Trocar o projeto de um todo solta a tarefa dele**, a mesma regra do "@" da linha: a tarefa
+pertence ao projeto de antes.
+
+**O vínculo com tag é reescrito inteiro**, no projeto e no todo. O formulário devolve a lista
+final; comparar nome a nome para achar o que entrou e o que saiu daria o mesmo por mais
+caminho. A tag continua sendo resolvida por nome dentro da mesma transação.
+
+**Onde se chega à edição.** No projeto, pelo botão "Editar" do cabeçalho e pelo `E`. Na tarefa,
+clicando a linha ou pelo Enter sobre ela. No todo, clicando o título ou pelo `E` sobre a linha —
+o título é um botão com `tabIndex={-1}`, porque o foco da linha mora na caixa de marcar e um
+segundo destino de Tab por linha desfaria isso.
+
+**A barra lateral alterna claro e escuro; "Sistema" mora nas Configurações.** Um botão de três
+estados mostra o tema em vigor e esconde de onde ele veio. O clique grava a preferência pelo
+`writeSetting` — antes ele mexia só no store, e a escolha se perdia no próximo boot além de
+divergir do controle segmentado das Configurações.
 
 ## A tela de Projeto contra o mockup
 

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { parseDisplayDate } from '@/domain/format/displayDate'
 import { validateBlockProjects, type BlockProjectsDraft } from '@/domain/projects/blockProjects'
+import { DateField } from '@/ui/primitives/DateField'
 import { FieldGroup } from '@/ui/primitives/FieldGroup'
-import { Input } from '@/ui/primitives/Input'
 import { Modal } from '@/ui/primitives/Modal'
 import { StaticField } from '@/ui/primitives/StaticField'
 import { Textarea } from '@/ui/primitives/Textarea'
@@ -72,13 +72,11 @@ export function BlockProjectsModal({
           htmlFor="block-resume"
           error={hasBrokenResume ? 'Data inválida.' : undefined}
         >
-          <Input
+          <DateField
             id="block-resume"
-            numeric
             value={resumeText}
-            placeholder="dd/mm/aaaa"
             invalid={hasBrokenResume}
-            onChange={(event) => setResumeText(event.target.value)}
+            onChange={setResumeText}
           />
         </FieldGroup>
 

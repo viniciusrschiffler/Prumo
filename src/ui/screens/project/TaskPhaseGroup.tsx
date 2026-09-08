@@ -69,9 +69,18 @@ type TaskLineProps = {
   percentageByPerson: ReadonlyMap<EntityId, number>
   dependsOn: readonly string[]
   rowProps: GridRowProps
+  onEdit: () => void
 }
 
-export function TaskLine({ row, percentageByPerson, dependsOn, rowProps }: TaskLineProps) {
+// A linha inteira abre a edição, no clique e no Enter. O selo de dependência é texto dentro
+// dela, não um segundo destino: a tarefa é o que a linha representa.
+export function TaskLine({
+  row,
+  percentageByPerson,
+  dependsOn,
+  rowProps,
+  onEdit,
+}: TaskLineProps) {
   const { task } = row
 
   return (
@@ -79,9 +88,11 @@ export function TaskLine({ row, percentageByPerson, dependsOn, rowProps }: TaskL
       {...rowProps}
       role="row"
       aria-label={task.title}
+      title={`Editar ${task.title}`}
+      onClick={onEdit}
       className={classNames(
         TASK_GRID_COLUMNS,
-        'items-center border-b border-border px-3 py-2 hover:bg-sunken',
+        'cursor-pointer items-center border-b border-border px-3 py-2 hover:bg-sunken',
         FOCUS_RING,
       )}
     >

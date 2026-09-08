@@ -10,7 +10,8 @@ import {
 import type { ProjectsSnapshot } from '@/domain/projects/projectRow'
 import { formatIsoDate, parseDisplayDate } from '@/domain/format/displayDate'
 import type { Phase } from '@/domain/schemas/phaseSchema'
-import type { EntityId } from '@/domain/schemas/primitives'
+import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
+import { DateField } from '@/ui/primitives/DateField'
 import { FieldGroup } from '@/ui/primitives/FieldGroup'
 import { Input } from '@/ui/primitives/Input'
 import { Modal } from '@/ui/primitives/Modal'
@@ -32,31 +33,59 @@ function parseHours(text: string): number | null {
   return Number.isFinite(parsed) ? parsed : null
 }
 
-type NewTaskModalProps = {
+export type TaskFormMode = 'create' | 'edit'
+
+const TITLE: Record<TaskFormMode, string> = {
+  create: 'Nova tarefa',
+  edit: 'Editar tarefa',
+}
+
+const SUBMIT_LABEL: Record<TaskFormMode, string> = {
+  create: 'Criar tarefa',
+  edit: 'Salvar alterações',
+}
+
+function toDateField(date: IsoDate | null): string {
+  return date === null ? '' : formatIsoDate(date)
+}
+
+function toHoursField(hours: number | null): string {
+  return hours === null ? '' : String(hours)
+}
+
+type TaskFormModalProps = {
+  mode: TaskFormMode
+  taskId: EntityId | null
   projectId: EntityId
   projectName: string
   baselineLabel: string
   phases: readonly Phase[]
   snapshot: ProjectsSnapshot
+  initialDraft: NewTaskDraft
   onClose: () => void
   onSubmit: (draft: NewTaskDraft) => void
 }
 
-export function NewTaskModal({
+// Criar e editar preenchem os mesmos campos. Na edição a prévia mede o mundo sem a tarefa
+// de antes: comparar a versão nova com ela mesma inventaria conflito e dobraria o esforço.
+export function TaskFormModal({
+  mode,
+  taskId,
   projectId,
   projectName,
   baselineLabel,
   phases,
   snapshot,
+  initialDraft,
   onClose,
   onSubmit,
-}: NewTaskModalProps) {
-  const [title, setTitle] = useState('')
-  const [phaseId, setPhaseId] = useState<EntityId | null>(phases[0]?.id ?? null)
-  const [startText, setStartText] = useState('')
-  const [endText, setEndText] = useState('')
-  const [hoursText, setHoursText] = useState('')
-  const [assignees, setAssignees] = useState<readonly TaskAssignee[]>([])
+}: TaskFormModalProps) {
+  const [title, setTitle] = useState(initialDraft.title)
+  const [phaseId, setPhaseId] = useState<EntityId | null>(initialDraft.phaseId)
+  const [startText, setStartText] = useState(toDateField(initialDraft.plannedStart))
+  const [endText, setEndText] = useState(toDateField(initialDraft.plannedEnd))
+  const [hoursText, setHoursText] = useState(toHoursField(initialDraft.estimatedHours))
+  const [assignees, setAssignees] = useState<readonly TaskAssignee[]>(initialDraft.assignees)
 
   const draft: NewTaskDraft = {
     projectId,
@@ -75,13 +104,17 @@ export function NewTaskModal({
   const isValid =
     Object.keys(errors).length === 0 && !hasBrokenStart && !hasBrokenEnd && !hasBrokenHours
 
+  const otherTasks = snapshot.tasks.filter((task) => task.id !== taskId)
+  const otherAllocations = snapshot.allocations.filter(
+    (allocation) => allocation.taskId !== taskId,
+  )
   const projectTasks = snapshot.tasks.filter((task) => task.projectId === projectId)
-  const impact = previewTaskImpact(projectTasks, draft)
+  const impact = previewTaskImpact(projectTasks, draft, taskId)
   const conflicts: readonly AllocationConflict[] = isValid
     ? previewAllocationConflicts({
         draft,
-        tasks: snapshot.tasks,
-        allocations: snapshot.allocations,
+        tasks: otherTasks,
+        allocations: otherAllocations,
         projects: snapshot.projects,
         people: snapshot.people,
       })
@@ -91,9 +124,9 @@ export function NewTaskModal({
     <Modal
       open
       size="wide"
-      title="Nova tarefa"
+      title={TITLE[mode]}
       note={`${projectName} · ${baselineLabel}`}
-      submitLabel="Criar tarefa"
+      submitLabel={SUBMIT_LABEL[mode]}
       submitDisabled={!isValid}
       onClose={onClose}
       onSubmit={() => onSubmit(draft)}
@@ -101,11 +134,11 @@ export function NewTaskModal({
       <FieldGroup
         variant="column"
         label="Título"
-        htmlFor="new-task-title"
+        htmlFor="task-form-title"
         error={title === '' ? undefined : errors.title}
       >
         <Input
-          id="new-task-title"
+          id="task-form-title"
           fieldSize="large"
           value={title}
           placeholder="Ex. Testes de carga do gateway"
@@ -142,46 +175,42 @@ export function NewTaskModal({
         <FieldGroup
           variant="column"
           label="Início"
-          htmlFor="new-task-start"
+          htmlFor="task-form-start"
           error={hasBrokenStart ? 'Data inválida.' : undefined}
         >
-          <Input
-            id="new-task-start"
-            numeric
+          <DateField
+            id="task-form-start"
             fieldSize="large"
             value={startText}
-            placeholder="dd/mm/aaaa"
             invalid={hasBrokenStart}
-            onChange={(event) => setStartText(event.target.value)}
+            onChange={setStartText}
           />
         </FieldGroup>
 
         <FieldGroup
           variant="column"
           label="Fim"
-          htmlFor="new-task-end"
+          htmlFor="task-form-end"
           error={hasBrokenEnd ? 'Data inválida.' : errors.plannedEnd}
         >
-          <Input
-            id="new-task-end"
-            numeric
+          <DateField
+            id="task-form-end"
             fieldSize="large"
             value={endText}
-            placeholder="dd/mm/aaaa"
             invalid={hasBrokenEnd || errors.plannedEnd !== undefined}
-            onChange={(event) => setEndText(event.target.value)}
+            onChange={setEndText}
           />
         </FieldGroup>
 
         <FieldGroup
           variant="column"
           label="Estimativa"
-          htmlFor="new-task-hours"
+          htmlFor="task-form-hours"
           error={hasBrokenHours ? 'Informe um número de horas.' : errors.estimatedHours}
         >
           <div className="relative grid">
             <Input
-              id="new-task-hours"
+              id="task-form-hours"
               numeric
               fieldSize="large"
               value={hoursText}

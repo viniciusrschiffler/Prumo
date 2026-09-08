@@ -3,7 +3,13 @@ import { buildPlannedWindow } from '@/domain/derived/buildPlannedWindow'
 import { formatIsoDate, parseDisplayDate } from '@/domain/format/displayDate'
 import { validateNewProject, type NewProjectDraft } from '@/domain/projects/newProject'
 import type { Person } from '@/domain/schemas/personSchema'
-import { PRIORITIES, type EntityId, type Priority } from '@/domain/schemas/primitives'
+import {
+  PRIORITIES,
+  type EntityId,
+  type IsoDate,
+  type Priority,
+} from '@/domain/schemas/primitives'
+import { DateField } from '@/ui/primitives/DateField'
 import { FieldGroup } from '@/ui/primitives/FieldGroup'
 import { Input } from '@/ui/primitives/Input'
 import { Modal } from '@/ui/primitives/Modal'
@@ -13,11 +19,28 @@ import { Textarea } from '@/ui/primitives/Textarea'
 
 const NO_OWNER = ''
 
-type NewProjectModalProps = {
+export type ProjectFormMode = 'create' | 'edit'
+
+const TITLE: Record<ProjectFormMode, string> = {
+  create: 'Novo projeto',
+  edit: 'Editar projeto',
+}
+
+const SUBMIT_LABEL: Record<ProjectFormMode, string> = {
+  create: 'Criar projeto',
+  edit: 'Salvar alterações',
+}
+
+type ProjectFormModalProps = {
+  mode: ProjectFormMode
   people: readonly Person[]
-  defaultPriority: Priority
+  initialDraft: NewProjectDraft
   onClose: () => void
   onSubmit: (draft: NewProjectDraft) => void
+}
+
+function toDateField(date: IsoDate | null): string {
+  return date === null ? '' : formatIsoDate(date)
 }
 
 function PreviewRow({ label, children }: { label: string; children: ReactNode }) {
@@ -31,19 +54,24 @@ function PreviewRow({ label, children }: { label: string; children: ReactNode })
   )
 }
 
-export function NewProjectModal({
+// Criar e editar preenchem os mesmos campos, então são o mesmo formulário. O que muda é o
+// rótulo, e a dica do status inicial, que só existe em quem ainda vai nascer em descoberta.
+export function ProjectFormModal({
+  mode,
   people,
-  defaultPriority,
+  initialDraft,
   onClose,
   onSubmit,
-}: NewProjectModalProps) {
-  const [name, setName] = useState('')
-  const [ownerPersonId, setOwnerPersonId] = useState<EntityId | typeof NO_OWNER>(NO_OWNER)
-  const [priority, setPriority] = useState<Priority>(defaultPriority)
-  const [tagNames, setTagNames] = useState<readonly string[]>([])
-  const [startText, setStartText] = useState('')
-  const [endText, setEndText] = useState('')
-  const [description, setDescription] = useState('')
+}: ProjectFormModalProps) {
+  const [name, setName] = useState(initialDraft.name)
+  const [ownerPersonId, setOwnerPersonId] = useState<EntityId | typeof NO_OWNER>(
+    initialDraft.ownerPersonId ?? NO_OWNER,
+  )
+  const [priority, setPriority] = useState<Priority>(initialDraft.priority)
+  const [tagNames, setTagNames] = useState<readonly string[]>(initialDraft.tagNames)
+  const [startText, setStartText] = useState(toDateField(initialDraft.plannedStart))
+  const [endText, setEndText] = useState(toDateField(initialDraft.plannedEnd))
+  const [description, setDescription] = useState(initialDraft.description ?? '')
 
   const draft: NewProjectDraft = {
     name,
@@ -65,22 +93,24 @@ export function NewProjectModal({
     <Modal
       open
       size="wide"
-      title="Novo projeto"
+      title={TITLE[mode]}
       note="fases e esforço vêm das tarefas cadastradas depois"
       hint={
-        <>
-          Status inicial: <span className="font-medium text-text2">Descoberta</span>
-        </>
+        mode === 'create' ? (
+          <>
+            Status inicial: <span className="font-medium text-text2">Descoberta</span>
+          </>
+        ) : undefined
       }
-      submitLabel="Criar projeto"
+      submitLabel={SUBMIT_LABEL[mode]}
       submitDisabled={!isValid}
       onClose={onClose}
       onSubmit={() => onSubmit(draft)}
     >
       <div className="grid min-w-0 grid-cols-[1fr_190px_88px] gap-2.5">
-        <FieldGroup variant="column" label="Nome do projeto" htmlFor="new-project-name">
+        <FieldGroup variant="column" label="Nome do projeto" htmlFor="project-form-name">
           <Input
-            id="new-project-name"
+            id="project-form-name"
             fieldSize="large"
             value={name}
             placeholder="Ex. Portal do cliente"
@@ -88,9 +118,9 @@ export function NewProjectModal({
           />
         </FieldGroup>
 
-        <FieldGroup variant="column" label="Responsável" htmlFor="new-project-owner">
+        <FieldGroup variant="column" label="Responsável" htmlFor="project-form-owner">
           <Select
-            id="new-project-owner"
+            id="project-form-owner"
             fieldSize="large"
             textSize="support"
             value={ownerPersonId}
@@ -107,9 +137,9 @@ export function NewProjectModal({
           </Select>
         </FieldGroup>
 
-        <FieldGroup variant="column" label="Prioridade" htmlFor="new-project-priority">
+        <FieldGroup variant="column" label="Prioridade" htmlFor="project-form-priority">
           <Select
-            id="new-project-priority"
+            id="project-form-priority"
             fieldSize="large"
             textSize="support"
             value={priority}
@@ -126,9 +156,9 @@ export function NewProjectModal({
       </div>
 
       <div className="grid min-w-0 grid-cols-[1fr_150px_150px] gap-2.5">
-        <FieldGroup variant="column" label="Tags" htmlFor="new-project-tags">
+        <FieldGroup variant="column" label="Tags" htmlFor="project-form-tags">
           <TagInput
-            id="new-project-tags"
+            id="project-form-tags"
             tags={tagNames}
             onChange={setTagNames}
             label="Tags do projeto"
@@ -138,41 +168,37 @@ export function NewProjectModal({
         <FieldGroup
           variant="column"
           label="Início previsto"
-          htmlFor="new-project-start"
+          htmlFor="project-form-start"
           error={hasBrokenStart ? 'Data inválida.' : undefined}
         >
-          <Input
-            id="new-project-start"
-            numeric
+          <DateField
+            id="project-form-start"
             fieldSize="large"
             value={startText}
-            placeholder="dd/mm/aaaa"
             invalid={hasBrokenStart}
-            onChange={(event) => setStartText(event.target.value)}
+            onChange={setStartText}
           />
         </FieldGroup>
 
         <FieldGroup
           variant="column"
           label="Fim previsto"
-          htmlFor="new-project-end"
+          htmlFor="project-form-end"
           error={hasBrokenEnd ? 'Data inválida.' : errors.plannedEnd}
         >
-          <Input
-            id="new-project-end"
-            numeric
+          <DateField
+            id="project-form-end"
             fieldSize="large"
             value={endText}
-            placeholder="dd/mm/aaaa"
             invalid={hasBrokenEnd || errors.plannedEnd !== undefined}
-            onChange={(event) => setEndText(event.target.value)}
+            onChange={setEndText}
           />
         </FieldGroup>
       </div>
 
       <FieldGroup
         variant="column"
-        htmlFor="new-project-description"
+        htmlFor="project-form-description"
         label={
           <>
             Descrição{' '}
@@ -181,7 +207,7 @@ export function NewProjectModal({
         }
       >
         <Textarea
-          id="new-project-description"
+          id="project-form-description"
           rows={3}
           value={description}
           placeholder="Objetivo do projeto em uma ou duas linhas."
@@ -203,14 +229,21 @@ export function NewProjectModal({
           )}
         </PreviewRow>
 
-        <PreviewRow label="fases">
-          derivadas{' '}
-          <span className="text-text3">· surgem conforme as tarefas forem cadastradas</span>
-        </PreviewRow>
+        {mode === 'create' && (
+          <>
+            <PreviewRow label="fases">
+              derivadas{' '}
+              <span className="text-text3">· surgem conforme as tarefas forem cadastradas</span>
+            </PreviewRow>
 
-        <PreviewRow label="esforço ∑">
-          0h <span className="text-text3">· sem tarefas ainda · baseline v1 criada ao salvar</span>
-        </PreviewRow>
+            <PreviewRow label="esforço ∑">
+              0h{' '}
+              <span className="text-text3">
+                · sem tarefas ainda · baseline v1 criada ao salvar
+              </span>
+            </PreviewRow>
+          </>
+        )}
       </div>
     </Modal>
   )

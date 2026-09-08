@@ -209,6 +209,18 @@ describe('previewTaskImpact', () => {
 
     expect(impact.effortAfter).toBe(impact.effortBefore)
   })
+
+  it('Should replace the edited task instead of counting it twice', () => {
+    const edited = gatewayTasks[0]
+    const impact = previewTaskImpact(
+      gatewayTasks,
+      buildDraft({ estimatedHours: (edited?.estimatedHours ?? 0) + 8 }),
+      edited?.id ?? null,
+    )
+
+    expect(impact.effortBefore).toBe(320)
+    expect(impact.effortAfter).toBe(328)
+  })
 })
 
 describe('previewAllocationConflicts', () => {

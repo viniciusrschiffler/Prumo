@@ -92,6 +92,18 @@ export function validateNewTask(draft: NewTaskDraft): NewTaskErrors {
   return errors
 }
 
+export function emptyTaskDraft(projectId: EntityId, phaseId: EntityId | null): NewTaskDraft {
+  return {
+    projectId,
+    title: '',
+    phaseId,
+    plannedStart: null,
+    plannedEnd: null,
+    estimatedHours: null,
+    assignees: [],
+  }
+}
+
 export function nextSortOrder(tasks: readonly Task[]): number {
   return tasks.reduce((highest, task) => Math.max(highest, task.sortOrder + 1), FIRST_SORT_ORDER)
 }
@@ -131,9 +143,12 @@ export function buildNewTask(draft: NewTaskDraft, ids: NewTaskIds, sortOrder: nu
   }
 }
 
+// O "antes" é o projeto como ele está hoje, com a tarefa editada dentro. O "depois" troca
+// aquela tarefa pela versão do formulário, em vez de somar uma segunda cópia dela.
 export function previewTaskImpact(
   currentTasks: readonly Task[],
   draft: NewTaskDraft,
+  replacedTaskId: EntityId | null = null,
 ): TaskImpact {
   const preview: Task = {
     id: 'preview',
@@ -148,7 +163,11 @@ export function previewTaskImpact(
     estimatedHours: draft.estimatedHours,
     sortOrder: 0,
   }
-  const withPreview = [...currentTasks, preview]
+  const remaining =
+    replacedTaskId === null
+      ? currentTasks
+      : currentTasks.filter((task) => task.id !== replacedTaskId)
+  const withPreview = [...remaining, preview]
 
   return {
     effortBefore: calculateTotalEffort(currentTasks),

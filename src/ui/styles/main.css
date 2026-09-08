@@ -152,3 +152,15 @@
     background: oklch(from var(--heat-base) l c h / 0.8);
   }
 }
+
+/* O preflight do Tailwind v4 deixou de marcar o botão como clicável, e sem isso a janela
+   inteira responde com a seta de texto — o clicável fica indistinguível do inerte. Só o
+   elemento habilitado ganha a mão: o desabilitado tem a própria utilidade de cursor. */
+@layer base {
+  button:not(:disabled),
+  select:not(:disabled),
+  input[type='checkbox']:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+}

@@ -8,7 +8,10 @@ import { useToastStore } from '@/app/stores/useToastStore'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
 import { listOpenAllocationIds, type BlockProjectsDraft } from '@/domain/projects/blockProjects'
 import type { NewProjectEventDraft } from '@/domain/projects/newProjectEvent'
-import type { NewTaskDraft } from '@/domain/projects/newTask'
+import { toProjectDraft } from '@/domain/projects/editProject'
+import { toTaskDraft } from '@/domain/projects/editTask'
+import type { NewProjectDraft } from '@/domain/projects/newProject'
+import { emptyTaskDraft, type NewTaskDraft } from '@/domain/projects/newTask'
 import { findProjectDetail } from '@/domain/projects/projectDetail'
 import type { TaskFilter } from '@/domain/projects/taskFilters'
 import type { EntityId } from '@/domain/schemas/primitives'
@@ -23,7 +26,8 @@ import { useShortcuts } from '@/ui/shortcuts/useShortcuts'
 import { BlockProjectsModal } from '../projects/BlockProjectsModal'
 import { ScreenShell } from '../ScreenShell'
 import { AllocationsTab } from './AllocationsTab'
-import { NewTaskModal } from './NewTaskModal'
+import { ProjectFormModal } from '../projects/ProjectFormModal'
+import { TaskFormModal } from './TaskFormModal'
 import { NotesTab } from './NotesTab'
 import { ProjectHeaderBadges } from './ProjectHeaderBadges'
 import { ProjectHistory } from './ProjectHistory'
@@ -33,7 +37,7 @@ import type { ProjectTab } from './projectTabItems'
 import { RegisterEventModal } from './RegisterEventModal'
 import { TasksTab } from './TasksTab'
 
-type OpenModal = 'task' | 'event' | 'block' | null
+type OpenModal = 'task' | 'event' | 'block' | 'project' | null
 
 export function ProjectScreen() {
   const { projectId = '' } = useParams()
@@ -44,6 +48,8 @@ export function ProjectScreen() {
   const snapshot = useProjectsStore((state) => state.snapshot)
   const load = useProjectsStore((state) => state.load)
   const createTask = useProjectsStore((state) => state.createTask)
+  const updateTask = useProjectsStore((state) => state.updateTask)
+  const updateProject = useProjectsStore((state) => state.updateProject)
   const registerEvent = useProjectsStore((state) => state.registerEvent)
   const blockProjects = useProjectsStore((state) => state.blockProjects)
   const notify = useToastStore((state) => state.notify)
@@ -53,6 +59,7 @@ export function ProjectScreen() {
   const [taskSearch, setTaskSearch] = useState('')
   const [selectedBaselineId, setSelectedBaselineId] = useState<EntityId | null>(null)
   const [openModal, setOpenModal] = useState<OpenModal>(null)
+  const [editingTaskId, setEditingTaskId] = useState<EntityId | null>(null)
 
   useEffect(() => {
     if (databaseStatus !== 'ready') {
@@ -91,6 +98,13 @@ export function ProjectScreen() {
         run: () => setOpenModal('task'),
       },
       {
+        id: 'project-edit',
+        keys: 'e',
+        scope: 'screen',
+        description: 'Editar projeto',
+        run: () => setOpenModal('project'),
+      },
+      {
         id: 'project-register-event',
         keys: 'mod+e',
         scope: 'screen',
@@ -110,8 +124,13 @@ export function ProjectScreen() {
 
   useShortcuts(shortcuts)
 
-  async function run(action: () => Promise<void>, success: string, failure: string) {
+  function closeModal() {
     setOpenModal(null)
+    setEditingTaskId(null)
+  }
+
+  async function run(action: () => Promise<void>, success: string, failure: string) {
+    closeModal()
 
     try {
       await action()
@@ -122,11 +141,36 @@ export function ProjectScreen() {
     }
   }
 
-  function handleCreateTask(draft: NewTaskDraft) {
+  function handleSubmitTask(draft: NewTaskDraft) {
+    if (editingTaskId === null) {
+      void run(
+        () => createTask(draft),
+        `${draft.title.trim()} entrou no projeto.`,
+        'Não foi possível criar a tarefa.',
+      )
+
+      return
+    }
+
+    const taskId = editingTaskId
+
     void run(
-      () => createTask(draft),
-      `${draft.title.trim()} entrou no projeto.`,
-      'Não foi possível criar a tarefa.',
+      () => updateTask(taskId, draft),
+      `${draft.title.trim()} foi atualizada.`,
+      'Não foi possível salvar a tarefa.',
+    )
+  }
+
+  function handleEditTask(taskId: EntityId) {
+    setEditingTaskId(taskId)
+    setOpenModal('task')
+  }
+
+  function handleUpdateProject(draft: NewProjectDraft) {
+    void run(
+      () => updateProject(projectId, draft),
+      `${draft.name.trim()} foi atualizado.`,
+      'Não foi possível salvar o projeto.',
     )
   }
 
@@ -189,6 +233,8 @@ export function ProjectScreen() {
   }
 
   const { row, comparison } = detail
+  const activePhases = snapshot.phases.filter((phase) => phase.active)
+  const editedTask = snapshot.tasks.find((task) => task.id === editingTaskId) ?? null
   const openAllocationCount = listOpenAllocationIds(
     row.tasks.map((taskRow) => taskRow.task.id),
     snapshot.allocations,
@@ -208,6 +254,9 @@ export function ProjectScreen() {
       titleAfter={<ProjectHeaderBadges row={row} />}
       actions={
         <>
+          <Button keys="e" onClick={() => setOpenModal('project')}>
+            Editar
+          </Button>
           <Button keys="mod+e" onClick={() => setOpenModal('event')}>
             Registrar decisão
           </Button>
@@ -256,6 +305,7 @@ export function ProjectScreen() {
             onFilterChange={setTaskFilter}
             onSearchChange={setTaskSearch}
             onNewTask={() => setOpenModal('task')}
+            onEditTask={handleEditTask}
           />
         )}
         {activeTab === 'allocations' && (
@@ -272,16 +322,33 @@ export function ProjectScreen() {
       />
 
       {openModal === 'task' && (
-        <NewTaskModal
+        <TaskFormModal
+          mode={editingTaskId === null ? 'create' : 'edit'}
+          taskId={editingTaskId}
           projectId={projectId}
           projectName={row.project.name}
           baselineLabel={
             comparison.baseline === null ? 'sem baseline' : `v${comparison.baseline.version}`
           }
-          phases={snapshot.phases.filter((phase) => phase.active)}
+          phases={activePhases}
           snapshot={snapshot}
-          onClose={() => setOpenModal(null)}
-          onSubmit={handleCreateTask}
+          initialDraft={
+            editedTask === null
+              ? emptyTaskDraft(projectId, activePhases[0]?.id ?? null)
+              : toTaskDraft({ task: editedTask, allocations: snapshot.allocations })
+          }
+          onClose={closeModal}
+          onSubmit={handleSubmitTask}
+        />
+      )}
+
+      {openModal === 'project' && (
+        <ProjectFormModal
+          mode="edit"
+          people={snapshot.people}
+          initialDraft={toProjectDraft({ project: row.project, tagNames: row.tagNames })}
+          onClose={closeModal}
+          onSubmit={handleUpdateProject}
         />
       )}
 
@@ -290,7 +357,7 @@ export function ProjectScreen() {
           projectId={projectId}
           projectName={row.project.name}
           today={todayIsoDate()}
-          onClose={() => setOpenModal(null)}
+          onClose={closeModal}
           onSubmit={handleRegisterEvent}
         />
       )}
@@ -299,7 +366,7 @@ export function ProjectScreen() {
         <BlockProjectsModal
           projectNames={[row.project.name]}
           openAllocationCount={openAllocationCount}
-          onClose={() => setOpenModal(null)}
+          onClose={closeModal}
           onSubmit={handleBlock}
         />
       )}

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { TaskUpdate } from '@/domain/projects/editTask'
 import type { NewTask } from '@/domain/projects/newTask'
 import type { TaskRepository } from '@/domain/repositories/TaskRepository'
 import {
@@ -36,6 +37,14 @@ const INSERT_ALLOCATION = `
 `
 
 const UPDATE_TASK_SCHEDULE = 'UPDATE task SET planned_start = ?, planned_end = ? WHERE id = ?'
+
+const UPDATE_TASK = `
+  UPDATE task
+  SET phase_id = ?, title = ?, planned_start = ?, planned_end = ?, estimated_hours = ?
+  WHERE id = ?
+`
+
+const END_ALLOCATION = 'UPDATE allocation SET ended_at = ?, ended_reason = ? WHERE id = ?'
 
 const INSERT_REPLAN_EVENT = `
   INSERT INTO project_event (id, project_id, type, event_date, title, body_md,
@@ -118,6 +127,58 @@ function toCreateStatements(newTask: NewTask): BatchStatement[] {
   ]
 }
 
+// A edição registra o replanejamento pelo mesmo caminho do arrasto da Timeline, e no mesmo
+// lote da alocação: a tarefa não pode andar sem que o histórico saiba por quê.
+function toUpdateStatements(update: TaskUpdate): BatchStatement[] {
+  const { task, event } = update
+
+  return [
+    {
+      query: UPDATE_TASK,
+      values: [
+        task.phaseId,
+        task.title,
+        task.plannedStart,
+        task.plannedEnd,
+        task.estimatedHours,
+        task.id,
+      ],
+    },
+    ...update.endedAllocationIds.map((allocationId) => ({
+      query: END_ALLOCATION,
+      values: [update.endedAt, update.endedReason, allocationId],
+    })),
+    ...update.openedAllocations.map((allocation) => ({
+      query: INSERT_ALLOCATION,
+      values: [
+        allocation.id,
+        allocation.taskId,
+        allocation.personId,
+        allocation.startDate,
+        allocation.endDate,
+        allocation.percentage,
+      ],
+    })),
+    ...(event === null
+      ? []
+      : [
+          {
+            query: INSERT_REPLAN_EVENT,
+            values: [
+              event.id,
+              event.projectId,
+              event.type,
+              event.eventDate,
+              event.title,
+              event.bodyMarkdown,
+              event.createdAt,
+            ],
+          },
+          { query: LINK_EVENT_TASK, values: [event.id, task.id] },
+        ]),
+  ]
+}
+
 export class SqliteTaskRepository implements TaskRepository {
   readonly #gateway: SqlGateway
 
@@ -145,6 +206,10 @@ export class SqliteTaskRepository implements TaskRepository {
 
   // O replanejamento e o evento que o registra vão no mesmo lote: mover a barra sem deixar
   // rastro apagaria do histórico a decisão que o desvio da baseline vai cobrar depois.
+  async update(update: TaskUpdate): Promise<void> {
+    await this.#gateway.executeBatch(toUpdateStatements(update))
+  }
+
   async reschedule(change: TaskReschedule): Promise<void> {
     const { event } = change
 

@@ -9,6 +9,7 @@ import type { QuickCapture } from '@/domain/todos/quickCapture'
 export type TodoActions = {
   capture: (capture: QuickCapture) => void
   create: (draft: NewTodoDraft) => void
+  update: (todoId: EntityId, draft: NewTodoDraft) => void
   toggle: (todoId: EntityId) => void
   snooze: (todoId: EntityId) => void
   link: (todoId: EntityId, projectId: EntityId | null) => void
@@ -16,6 +17,7 @@ export type TodoActions = {
 
 export function useTodoActions(): TodoActions {
   const createTodo = useTodosStore((state) => state.createTodo)
+  const updateTodo = useTodosStore((state) => state.updateTodo)
   const toggleTodo = useTodosStore((state) => state.toggleTodo)
   const snoozeTodo = useTodosStore((state) => state.snoozeTodo)
   const linkProject = useTodosStore((state) => state.linkProject)
@@ -47,11 +49,13 @@ export function useTodoActions(): TodoActions {
           'Não foi possível capturar o todo.',
         ),
       create: (draft) => run(() => createTodo(draft), 'Não foi possível criar o todo.'),
+      update: (todoId, draft) =>
+        run(() => updateTodo(todoId, draft), 'Não foi possível salvar o todo.'),
       toggle: (todoId) => run(() => toggleTodo(todoId), 'Não foi possível marcar o todo.'),
       snooze: (todoId) => run(() => snoozeTodo(todoId), 'Não foi possível adiar o todo.'),
       link: (todoId, projectId) =>
         run(() => linkProject(todoId, projectId), 'Não foi possível vincular o projeto.'),
     }),
-    [run, createTodo, toggleTodo, snoozeTodo, linkProject],
+    [run, createTodo, updateTodo, toggleTodo, snoozeTodo, linkProject],
   )
 }

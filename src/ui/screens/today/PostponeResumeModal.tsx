@@ -6,8 +6,8 @@ import {
 } from '@/domain/projects/postponeResume'
 import type { IsoDate } from '@/domain/schemas/primitives'
 import type { PendingDecision } from '@/domain/today/pendingDecisions'
+import { DateField } from '@/ui/primitives/DateField'
 import { FieldGroup } from '@/ui/primitives/FieldGroup'
-import { Input } from '@/ui/primitives/Input'
 import { Modal } from '@/ui/primitives/Modal'
 
 type PostponeResumeModalProps = {
@@ -49,15 +49,14 @@ export function PostponeResumeModal({
         htmlFor="postpone-resume-date"
         error={error ?? undefined}
       >
-        <Input
-          id="postpone-resume-date"
-          numeric
-          value={dateText}
-          placeholder="dd/mm/aaaa"
-          invalid={error !== null}
-          className="w-[130px]"
-          onChange={(event) => setDateText(event.target.value)}
-        />
+        <div className="w-[130px]">
+          <DateField
+            id="postpone-resume-date"
+            value={dateText}
+            invalid={error !== null}
+            onChange={setDateText}
+          />
+        </div>
       </FieldGroup>
     </Modal>
   )

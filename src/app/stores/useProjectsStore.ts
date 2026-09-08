@@ -11,6 +11,8 @@ import {
   listOpenAllocationIds,
   type BlockProjectsDraft,
 } from '@/domain/projects/blockProjects'
+import { buildProjectUpdate } from '@/domain/projects/editProject'
+import { buildTaskUpdate } from '@/domain/projects/editTask'
 import { buildNewProject, type NewProjectDraft } from '@/domain/projects/newProject'
 import {
   buildNewProjectEvent,
@@ -75,7 +77,9 @@ type ProjectsState = {
   load: () => Promise<void>
   refresh: () => Promise<void>
   createProject: (draft: NewProjectDraft) => Promise<void>
+  updateProject: (projectId: EntityId, draft: NewProjectDraft) => Promise<void>
   createTask: (draft: NewTaskDraft) => Promise<void>
+  updateTask: (taskId: EntityId, draft: NewTaskDraft) => Promise<void>
   registerEvent: (draft: NewProjectEventDraft) => Promise<void>
   setPriority: (projectIds: readonly EntityId[], priority: Priority) => Promise<void>
   blockProjects: (projectIds: readonly EntityId[], draft: BlockProjectsDraft) => Promise<void>
@@ -186,6 +190,23 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
     await get().refresh()
   },
 
+  updateProject: async (projectId, draft) => {
+    const project = get().snapshot.projects.find((candidate) => candidate.id === projectId)
+
+    if (project === undefined) {
+      return
+    }
+
+    const update = buildProjectUpdate(project, draft)
+
+    await new SqliteProjectRepository(getSqlGateway()).update(
+      update,
+      update.tagNames.map((name) => ({ id: crypto.randomUUID(), name })),
+    )
+
+    await get().refresh()
+  },
+
   createTask: async (draft) => {
     const projectTasks = get().snapshot.tasks.filter((task) => task.projectId === draft.projectId)
     const newTask = buildNewTask(
@@ -198,6 +219,29 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
     )
 
     await new SqliteTaskRepository(getSqlGateway()).create(newTask)
+    await get().refresh()
+  },
+
+  updateTask: async (taskId, draft) => {
+    const { tasks, allocations } = get().snapshot
+    const task = tasks.find((candidate) => candidate.id === taskId)
+
+    if (task === undefined) {
+      return
+    }
+
+    await new SqliteTaskRepository(getSqlGateway()).update(
+      buildTaskUpdate({
+        context: { task, allocations },
+        draft,
+        ids: {
+          eventId: crypto.randomUUID(),
+          allocationIds: draft.assignees.map(() => crypto.randomUUID()),
+        },
+        now: new Date().toISOString(),
+      }),
+    )
+
     await get().refresh()
   },
 

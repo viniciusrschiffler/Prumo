@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Checkbox } from '@/ui/primitives/Checkbox'
+import { DateField } from '@/ui/primitives/DateField'
 import { FieldGroup } from '@/ui/primitives/FieldGroup'
 import { Input } from '@/ui/primitives/Input'
 import { Select } from '@/ui/primitives/Select'
@@ -8,6 +9,7 @@ import { Textarea } from '@/ui/primitives/Textarea'
 import { GallerySection } from './GallerySection'
 
 export function FormSection() {
+  const [startDate, setStartDate] = useState('12/03/2026')
   const [closeAllocations, setCloseAllocations] = useState(true)
   const [notifyToday, setNotifyToday] = useState(false)
 
@@ -27,7 +29,7 @@ export function FormSection() {
 
         <div className="grid grid-cols-2 gap-2.5">
           <FieldGroup label="Início" htmlFor="gallery-start">
-            <Input id="gallery-start" numeric defaultValue="12/03/2026" />
+            <DateField id="gallery-start" value={startDate} onChange={setStartDate} />
           </FieldGroup>
           <FieldGroup label="Estimativa" htmlFor="gallery-effort">
             <Input id="gallery-effort" numeric defaultValue="120h" />
@@ -35,7 +37,7 @@ export function FormSection() {
         </div>
 
         <FieldGroup label="Data de retomada" htmlFor="gallery-resume" error="Data inválida.">
-          <Input id="gallery-resume" numeric invalid defaultValue="30/02/2026" />
+          <DateField id="gallery-resume" invalid value="30/02/2026" onChange={() => undefined} />
         </FieldGroup>
 
         <FieldGroup label="Motivo do bloqueio" htmlFor="gallery-reason">

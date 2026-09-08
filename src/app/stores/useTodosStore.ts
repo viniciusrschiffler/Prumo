@@ -3,6 +3,7 @@ import { todayIsoDate } from '@/app/clock'
 import { useNavigationCountsStore } from '@/app/stores/useNavigationCountsStore'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
 import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
+import { buildTodoUpdate } from '@/domain/todos/editTodo'
 import { buildNewTodo, type NewTodoDraft } from '@/domain/todos/newTodo'
 import { buildTodoCompletion, snoozeDueDate } from '@/domain/todos/todoEdits'
 import type { TodosSnapshot } from '@/domain/todos/todoRow'
@@ -32,6 +33,7 @@ type TodosState = {
   load: () => Promise<void>
   refresh: () => Promise<void>
   createTodo: (draft: NewTodoDraft) => Promise<void>
+  updateTodo: (todoId: EntityId, draft: NewTodoDraft) => Promise<void>
   toggleTodo: (todoId: EntityId) => Promise<void>
   snoozeTodo: (todoId: EntityId) => Promise<void>
   linkProject: (todoId: EntityId, projectId: EntityId | null) => Promise<void>
@@ -94,6 +96,24 @@ export const useTodosStore = create<TodosState>((set, get) => ({
     })
 
     await createTodoRepository().create(todo)
+    await get().refresh()
+  },
+
+  updateTodo: async (todoId, draft) => {
+    const todo = get().snapshot.todos.find((current) => current.id === todoId)
+
+    if (todo === undefined) {
+      return
+    }
+
+    await createTodoRepository().update(
+      buildTodoUpdate(
+        todo,
+        draft,
+        draft.tagNames.map(() => crypto.randomUUID()),
+      ),
+    )
+
     await get().refresh()
   },
 

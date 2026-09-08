@@ -9,6 +9,7 @@ import { formatIsoDate, parseDisplayDate } from '@/domain/format/displayDate'
 import type { EntityId } from '@/domain/schemas/primitives'
 import type { ProjectEventType } from '@/domain/schemas/projectEventSchema'
 import { PROJECT_EVENT_LABELS } from '@/ui/labels/entityLabels'
+import { DateField } from '@/ui/primitives/DateField'
 import { Checkbox } from '@/ui/primitives/Checkbox'
 import { FieldGroup } from '@/ui/primitives/FieldGroup'
 import { Input } from '@/ui/primitives/Input'
@@ -89,13 +90,11 @@ export function RegisterEventModal({
           htmlFor="event-date"
           error={errors.eventDate === undefined ? undefined : 'Data inválida.'}
         >
-          <Input
+          <DateField
             id="event-date"
-            numeric
             value={dateText}
-            placeholder="dd/mm/aaaa"
             invalid={errors.eventDate !== undefined}
-            onChange={(event) => setDateText(event.target.value)}
+            onChange={setDateText}
           />
         </FieldGroup>
       </div>

@@ -4,19 +4,20 @@ import type { EntityId, IsoDate, Priority } from '@/domain/schemas/primitives'
 import { PRIORITIES } from '@/domain/schemas/primitives'
 import type { Project } from '@/domain/schemas/projectSchema'
 import {
-  DEFAULT_TODO_PRIORITY,
   previewTodoGroup,
   validateNewTodo,
   type NewTodoDraft,
 } from '@/domain/todos/newTodo'
 import type { TodoGroupingContext, TodoGroupMode } from '@/domain/todos/todoGrouping'
 import { DUE_GROUP_LABELS, PRIORITY_LABELS } from '@/ui/labels/entityLabels'
+import { DateField } from '@/ui/primitives/DateField'
 import { classNames } from '@/ui/primitives/classNames'
 import { FieldGroup } from '@/ui/primitives/FieldGroup'
 import { FOCUS_RING } from '@/ui/primitives/focusRing'
 import { Input } from '@/ui/primitives/Input'
 import { Modal } from '@/ui/primitives/Modal'
 import { Select } from '@/ui/primitives/Select'
+import { TagInput } from '@/ui/primitives/TagInput'
 import { Textarea } from '@/ui/primitives/Textarea'
 
 const WITHOUT_PROJECT_VALUE = ''
@@ -32,11 +33,24 @@ const PRIORITY_BUTTON_CLASSES: Record<Priority, string> = {
   P3: 'border-text2 bg-neutral-soft text-text2',
 }
 
-type NewTodoModalProps = {
+export type TodoFormMode = 'create' | 'edit'
+
+const TITLE: Record<TodoFormMode, string> = {
+  create: 'Novo item',
+  edit: 'Editar item',
+}
+
+const SUBMIT_LABEL: Record<TodoFormMode, string> = {
+  create: 'Criar item',
+  edit: 'Salvar alterações',
+}
+
+type TodoFormModalProps = {
+  mode: TodoFormMode
   projects: readonly Project[]
   groupMode: TodoGroupMode
   context: TodoGroupingContext
-  initialDraft?: Partial<NewTodoDraft>
+  initialDraft: NewTodoDraft
   onClose: () => void
   onSubmit: (draft: NewTodoDraft) => void
 }
@@ -58,21 +72,21 @@ function describePreview(
     : `${preview.priority} · ${PRIORITY_LABELS[preview.priority]}`
 }
 
-export function NewTodoModal({
+export function TodoFormModal({
+  mode,
   projects,
   groupMode,
   context,
   initialDraft,
   onClose,
   onSubmit,
-}: NewTodoModalProps) {
-  const [title, setTitle] = useState(initialDraft?.title ?? '')
-  const [description, setDescription] = useState(initialDraft?.description ?? '')
-  const [projectId, setProjectId] = useState<EntityId | null>(initialDraft?.projectId ?? null)
-  const [dueText, setDueText] = useState(formatDueField(initialDraft?.dueDate ?? null))
-  const [priority, setPriority] = useState<Priority>(
-    initialDraft?.priority ?? DEFAULT_TODO_PRIORITY,
-  )
+}: TodoFormModalProps) {
+  const [title, setTitle] = useState(initialDraft.title)
+  const [description, setDescription] = useState(initialDraft.description)
+  const [projectId, setProjectId] = useState<EntityId | null>(initialDraft.projectId)
+  const [dueText, setDueText] = useState(formatDueField(initialDraft.dueDate))
+  const [priority, setPriority] = useState<Priority>(initialDraft.priority)
+  const [tagNames, setTagNames] = useState<readonly string[]>(initialDraft.tagNames)
 
   const draft: NewTodoDraft = {
     title,
@@ -80,7 +94,7 @@ export function NewTodoModal({
     projectId,
     dueDate: parseDisplayDate(dueText),
     priority,
-    tagNames: initialDraft?.tagNames ?? [],
+    tagNames,
   }
 
   const hasBrokenDue = dueText.trim() !== '' && draft.dueDate === null
@@ -94,16 +108,16 @@ export function NewTodoModal({
       open
       size="medium"
       tone="accent"
-      title="Novo item"
+      title={TITLE[mode]}
       hint="A seção é definida pela data limite — sem data cai em “Sem data”."
-      submitLabel="Criar item"
+      submitLabel={SUBMIT_LABEL[mode]}
       submitDisabled={!isValid}
       onClose={onClose}
       onSubmit={() => onSubmit(draft)}
     >
-      <FieldGroup label="Nome" htmlFor="new-todo-title">
+      <FieldGroup label="Nome" htmlFor="todo-form-title">
         <Input
-          id="new-todo-title"
+          id="todo-form-title"
           autoFocus
           fieldSize="medium"
           value={title}
@@ -112,9 +126,9 @@ export function NewTodoModal({
         />
       </FieldGroup>
 
-      <FieldGroup label="Descrição" htmlFor="new-todo-description">
+      <FieldGroup label="Descrição" htmlFor="todo-form-description">
         <Textarea
-          id="new-todo-description"
+          id="todo-form-description"
           rows={3}
           textSize="support"
           value={description}
@@ -124,9 +138,9 @@ export function NewTodoModal({
       </FieldGroup>
 
       <div className="grid grid-cols-[1.4fr_1fr] gap-2.5">
-        <FieldGroup label="Projeto vinculado" htmlFor="new-todo-project">
+        <FieldGroup label="Projeto vinculado" htmlFor="todo-form-project">
           <Select
-            id="new-todo-project"
+            id="todo-form-project"
             fieldSize="medium"
             textSize="support"
             value={projectId ?? WITHOUT_PROJECT_VALUE}
@@ -145,20 +159,27 @@ export function NewTodoModal({
 
         <FieldGroup
           label="Data limite"
-          htmlFor="new-todo-due"
+          htmlFor="todo-form-due"
           error={hasBrokenDue ? 'Data inválida.' : undefined}
         >
-          <Input
-            id="new-todo-due"
-            numeric
+          <DateField
+            id="todo-form-due"
             fieldSize="medium"
             value={dueText}
-            placeholder="dd/mm/aaaa"
             invalid={hasBrokenDue}
-            onChange={(event) => setDueText(event.target.value)}
+            onChange={setDueText}
           />
         </FieldGroup>
       </div>
+
+      <FieldGroup label="Tags" htmlFor="todo-form-tags">
+        <TagInput
+          id="todo-form-tags"
+          tags={tagNames}
+          onChange={setTagNames}
+          label="Tags do item"
+        />
+      </FieldGroup>
 
       <FieldGroup label="Prioridade">
         <div role="radiogroup" aria-label="Prioridade" className="flex gap-1.5">

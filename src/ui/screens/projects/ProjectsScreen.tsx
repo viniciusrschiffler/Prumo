@@ -16,7 +16,7 @@ import { buildProjectRows } from '@/domain/projects/projectRow'
 import { sortProjectRows, type ProjectSortKey } from '@/domain/projects/projectSort'
 import { sumProjectsTotals } from '@/domain/projects/projectTotals'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
-import { SUGGESTED_PRIORITY, type NewProjectDraft } from '@/domain/projects/newProject'
+import { emptyProjectDraft, type NewProjectDraft } from '@/domain/projects/newProject'
 import { listOpenAllocationIds, type BlockProjectsDraft } from '@/domain/projects/blockProjects'
 import type { Priority } from '@/domain/schemas/primitives'
 import type { EntityId } from '@/domain/schemas/primitives'
@@ -34,7 +34,7 @@ import { useShortcuts } from '@/ui/shortcuts/useShortcuts'
 import { SCREEN_META } from '@/ui/layout/screenMeta'
 import { ScreenShell } from '../ScreenShell'
 import { BlockProjectsModal } from './BlockProjectsModal'
-import { NewProjectModal } from './NewProjectModal'
+import { ProjectFormModal } from './ProjectFormModal'
 import { ProjectsFooter } from './ProjectsFooter'
 import { ProjectsTable } from './ProjectsTable'
 import { ProjectsToolbar } from './ProjectsToolbar'
@@ -357,9 +357,10 @@ export function ProjectsScreen() {
       )}
 
       {isNewProjectOpen && (
-        <NewProjectModal
+        <ProjectFormModal
+          mode="create"
           people={snapshot.people}
-          defaultPriority={SUGGESTED_PRIORITY}
+          initialDraft={emptyProjectDraft()}
           onClose={() => setNewProjectOpen(false)}
           onSubmit={(draft) => void handleCreate(draft)}
         />

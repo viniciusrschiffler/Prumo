@@ -1,6 +1,6 @@
 import type { Screen } from '@/domain/schemas/savedViewSchema'
 import { AppLogo } from '@/ui/primitives/AppLogo'
-import { ThemeCycleButton } from '@/ui/theme/ThemeCycleButton'
+import { ThemeToggleButton } from '@/ui/theme/ThemeToggleButton'
 import { SCREEN_META } from './screenMeta'
 import { SidebarContextSection } from './SidebarContextSection'
 import { SidebarFooter } from './SidebarFooter'
@@ -27,7 +27,7 @@ export function Sidebar({
           <span className="text-body font-semibold tracking-[-0.01em]">Prumo</span>
           <span className="font-mono text-micro text-text3">local · offline</span>
         </div>
-        <ThemeCycleButton />
+        <ThemeToggleButton />
       </div>
 
       <SidebarNav counts={counts} showShortcutHints={showShortcutHints} />

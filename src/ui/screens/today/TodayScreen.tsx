@@ -5,7 +5,7 @@ import type { SidebarContextItem } from '@/app/stores/useSidebarContextStore'
 import { formatIsoDate } from '@/domain/format/displayDate'
 import { formatWeekdayAbbreviation } from '@/domain/format/dueLabel'
 import { formatDeviation } from '@/domain/format/formatDeviation'
-import { SUGGESTED_PRIORITY } from '@/domain/projects/newProject'
+import { emptyProjectDraft } from '@/domain/projects/newProject'
 import { buildProjectRows } from '@/domain/projects/projectRow'
 import {
   listAllocationsEndedByBlock,
@@ -20,7 +20,7 @@ import { QuickCaptureField } from '@/ui/primitives/QuickCaptureField'
 import type { Shortcut } from '@/ui/shortcuts/shortcutRegistry'
 import { useShortcuts } from '@/ui/shortcuts/useShortcuts'
 import { RegisterEventModal } from '../project/RegisterEventModal'
-import { NewProjectModal } from '../projects/NewProjectModal'
+import { ProjectFormModal } from '../projects/ProjectFormModal'
 import { ScreenShell } from '../ScreenShell'
 import { useTodoActions } from '../todos/useTodoActions'
 import { isRowShortcut, useTodoRowFocus } from '../todos/useTodoRowFocus'
@@ -185,9 +185,10 @@ export function TodayScreen() {
       </div>
 
       {openModal?.kind === 'project' && (
-        <NewProjectModal
+        <ProjectFormModal
+          mode="create"
           people={projects.people}
-          defaultPriority={SUGGESTED_PRIORITY}
+          initialDraft={emptyProjectDraft()}
           onClose={() => setOpenModal(null)}
           onSubmit={(draft) => {
             setOpenModal(null)

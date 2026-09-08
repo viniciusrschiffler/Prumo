@@ -79,7 +79,7 @@ export function ProjectTableRow({
       onClick={(event) => (event.shiftKey ? onSelect(true) : undefined)}
       onDoubleClick={onOpen}
       className={classNames(
-        'outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--accent)]',
+        'cursor-pointer outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--accent)]',
         selected ? 'bg-accent-soft' : 'hover:bg-sunken',
       )}
     >

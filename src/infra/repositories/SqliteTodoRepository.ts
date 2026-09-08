@@ -12,6 +12,7 @@ import {
   type TodoRecurrence,
   type TodoTag,
 } from '@/domain/schemas/todoSchema'
+import type { TodoUpdate } from '@/domain/todos/editTodo'
 import type { NewTodo } from '@/domain/todos/newTodo'
 import { parseRows } from '@/infra/database/parseRow'
 import type { BatchStatement, SqlGateway } from '@/infra/database/SqlGateway'
@@ -48,6 +49,14 @@ const LINK_TAG = `
   INSERT INTO todo_tag (todo_id, tag_id)
   SELECT ?, id FROM tag WHERE name = ?
 `
+
+const UPDATE_TODO = `
+  UPDATE todo
+  SET title = ?, description = ?, due_date = ?, priority = ?, project_id = ?, task_id = ?
+  WHERE id = ?
+`
+
+const UNLINK_TAGS = 'DELETE FROM todo_tag WHERE todo_id = ?'
 
 const UPDATE_COMPLETION = 'UPDATE todo SET status = ?, completed_at = ? WHERE id = ?'
 
@@ -128,6 +137,29 @@ function toCreateStatements(todo: NewTodo): BatchStatement[] {
   ]
 }
 
+// O vínculo com tag é reescrito inteiro, como no projeto: o formulário devolve a lista final.
+function toUpdateStatements(update: TodoUpdate): BatchStatement[] {
+  return [
+    {
+      query: UPDATE_TODO,
+      values: [
+        update.title,
+        update.description,
+        update.dueDate,
+        update.priority,
+        update.projectId,
+        update.taskId,
+        update.id,
+      ],
+    },
+    { query: UNLINK_TAGS, values: [update.id] },
+    ...update.tags.flatMap((tag) => [
+      { query: INSERT_TAG, values: [tag.id, tag.name] },
+      { query: LINK_TAG, values: [update.id, tag.name] },
+    ]),
+  ]
+}
+
 export class SqliteTodoRepository implements TodoRepository {
   readonly #gateway: SqlGateway
 
@@ -157,6 +189,10 @@ export class SqliteTodoRepository implements TodoRepository {
 
   async create(todo: NewTodo): Promise<void> {
     await this.#gateway.executeBatch(toCreateStatements(todo))
+  }
+
+  async update(update: TodoUpdate): Promise<void> {
+    await this.#gateway.executeBatch(toUpdateStatements(update))
   }
 
   async setCompletion(change: TodoCompletionChange): Promise<void> {

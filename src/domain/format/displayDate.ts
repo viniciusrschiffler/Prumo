@@ -2,6 +2,7 @@ import type { IsoDate } from '@/domain/schemas/primitives'
 
 const DISPLAY_DATE_PATTERN = /^(\d{2})\/(\d{2})\/(\d{4})$/
 const EMPTY_MARK = '—'
+const MAX_DATE_DIGITS = 8
 
 export function formatIsoDate(date: IsoDate | null): string {
   if (date === null) {
@@ -41,4 +42,15 @@ export function parseDisplayDate(text: string): IsoDate | null {
   }
 
   return candidate
+}
+
+// O campo de data é texto, e obrigar a digitar a barra é trabalho que o teclado devolve de
+// graça. O separador só entra quando o grupo seguinte já tem dígito: acrescentá-lo assim que
+// o grupo fecha faria apagar o primeiro dígito do mês devolver a barra e prender o cursor.
+export function maskDisplayDate(text: string): string {
+  const digits = text.replace(/\D/g, '').slice(0, MAX_DATE_DIGITS)
+
+  return [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4)]
+    .filter((group) => group !== '')
+    .join('/')
 }

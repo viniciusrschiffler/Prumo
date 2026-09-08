@@ -1,4 +1,5 @@
 import type { ProjectBlock } from '@/domain/projects/blockProjects'
+import type { ProjectUpdate } from '@/domain/projects/editProject'
 import type { NewProject } from '@/domain/projects/newProject'
 import type { ResumePostponement } from '@/domain/projects/postponeResume'
 import type { ProjectResume } from '@/domain/projects/resumeProjects'
@@ -16,6 +17,7 @@ export type NewProjectTag = {
 export type ProjectRepository = {
   listAll(): Promise<Project[]>
   create(newProject: NewProject, tags: readonly NewProjectTag[]): Promise<void>
+  update(update: ProjectUpdate, tags: readonly NewProjectTag[]): Promise<void>
   setPriority(projectIds: readonly EntityId[], priority: Priority): Promise<void>
   blockMany(blocks: readonly ProjectBlock[]): Promise<void>
   unblock(unblock: ProjectUnblock): Promise<void>

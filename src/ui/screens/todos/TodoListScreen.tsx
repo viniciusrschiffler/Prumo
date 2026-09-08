@@ -5,7 +5,8 @@ import { useSettingsStore } from '@/app/stores/useSettingsStore'
 import type { SidebarContextItem } from '@/app/stores/useSidebarContextStore'
 import { useTodosStore } from '@/app/stores/useTodosStore'
 import type { EntityId } from '@/domain/schemas/primitives'
-import type { NewTodoDraft } from '@/domain/todos/newTodo'
+import { toTodoDraft } from '@/domain/todos/editTodo'
+import { emptyTodoDraft, type NewTodoDraft } from '@/domain/todos/newTodo'
 import {
   groupTodos,
   TODO_GROUP_MODES,
@@ -27,7 +28,7 @@ import { useShortcuts } from '@/ui/shortcuts/useShortcuts'
 import { ScreenShell } from '../ScreenShell'
 import { LinkProjectModal } from './LinkProjectModal'
 import { TodoGroupList } from './TodoGroupList'
-import { NewTodoModal } from './NewTodoModal'
+import { TodoFormModal } from './TodoFormModal'
 import { TodoQuickCapture } from './TodoQuickCapture'
 import { TodoSidePanel } from './TodoSidePanel'
 import { useTodoActions } from './useTodoActions'
@@ -39,6 +40,7 @@ const GROUP_OPTIONS = TODO_GROUP_MODES.map((mode) => ({
 }))
 
 const SNOOZE_KEY = 's'
+const EDIT_KEY = 'e'
 const LINK_PROJECT_KEY = '@'
 
 function pluralize(count: number, singular: string, plural: string): string {
@@ -57,7 +59,8 @@ export function TodoListScreen() {
   const [groupMode, setGroupMode] = useState<TodoGroupMode>('due')
   const [showDone, setShowDone] = useState(false)
   const [activeTagId, setActiveTagId] = useState<EntityId | null>(null)
-  const [newTodoDraft, setNewTodoDraft] = useState<Partial<NewTodoDraft> | null>(null)
+  const [openDraft, setOpenDraft] = useState<NewTodoDraft | null>(null)
+  const [editingTodoId, setEditingTodoId] = useState<EntityId | null>(null)
   const [linkingTodoId, setLinkingTodoId] = useState<EntityId | null>(null)
 
   useEffect(() => {
@@ -104,6 +107,25 @@ export function TodoListScreen() {
   )
   const rowFocus = useTodoRowFocus(orderedIds)
 
+  const openNewTodo = useCallback(() => {
+    setEditingTodoId(null)
+    setOpenDraft(emptyTodoDraft())
+  }, [])
+
+  const openEditTodo = useCallback(
+    (todoId: EntityId) => {
+      const row = allRows.find((candidate) => candidate.todo.id === todoId)
+
+      if (row === undefined) {
+        return
+      }
+
+      setEditingTodoId(todoId)
+      setOpenDraft(toTodoDraft({ todo: row.todo, tagNames: row.tags.map((tag) => tag.name) }))
+    },
+    [allRows],
+  )
+
   const sidebarItems = useMemo<SidebarContextItem[]>(
     () => listTagsInUse(allRows, snapshot.tags).map((tag) => ({ id: tag.id, label: tag.name })),
     [allRows, snapshot.tags],
@@ -120,10 +142,10 @@ export function TodoListScreen() {
         keys: 'n',
         scope: 'screen',
         description: 'Novo item',
-        run: () => setNewTodoDraft({}),
+        run: openNewTodo,
       },
     ],
-    [],
+    [openNewTodo],
   )
 
   useShortcuts(shortcuts)
@@ -148,17 +170,37 @@ export function TodoListScreen() {
         return
       }
 
+      if (event.key.toLowerCase() === EDIT_KEY) {
+        event.preventDefault()
+        openEditTodo(todoId)
+        return
+      }
+
       if (event.key === LINK_PROJECT_KEY) {
         event.preventDefault()
         setLinkingTodoId(todoId)
       }
     },
-    [rowFocus, actions],
+    [rowFocus, actions, openEditTodo],
   )
 
-  function handleCreate(draft: NewTodoDraft) {
-    setNewTodoDraft(null)
-    actions.create(draft)
+  function closeForm() {
+    setOpenDraft(null)
+    setEditingTodoId(null)
+  }
+
+  function handleSubmit(draft: NewTodoDraft) {
+    const todoId = editingTodoId
+
+    closeForm()
+
+    if (todoId === null) {
+      actions.create(draft)
+
+      return
+    }
+
+    actions.update(todoId, draft)
   }
 
   function handleLink(todoId: EntityId, projectId: EntityId | null) {
@@ -197,7 +239,7 @@ export function TodoListScreen() {
           <Button pressed={showDone} onClick={() => setShowDone(!showDone)}>
             {showDone ? 'Ocultar concluídos' : 'Mostrar concluídos'}
           </Button>
-          <Button variant="primary" keys="n" onClick={() => setNewTodoDraft({})}>
+          <Button variant="primary" keys="n" onClick={openNewTodo}>
             Novo item
           </Button>
         </>
@@ -224,6 +266,7 @@ export function TodoListScreen() {
             setShowDone(false)
           }}
           onToggle={actions.toggle}
+          onEdit={openEditTodo}
           onRowKeyDown={handleRowKeyDown}
         />
       </div>
@@ -234,14 +277,15 @@ export function TodoListScreen() {
         recurrences={recurrences}
       />
 
-      {newTodoDraft !== null && (
-        <NewTodoModal
+      {openDraft !== null && (
+        <TodoFormModal
+          mode={editingTodoId === null ? 'create' : 'edit'}
           projects={projects.map((entry) => entry.project)}
           groupMode={groupMode}
           context={context}
-          initialDraft={newTodoDraft}
-          onClose={() => setNewTodoDraft(null)}
-          onSubmit={handleCreate}
+          initialDraft={openDraft}
+          onClose={closeForm}
+          onSubmit={handleSubmit}
         />
       )}
 
