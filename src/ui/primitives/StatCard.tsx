@@ -3,6 +3,10 @@ import { classNames } from './classNames'
 
 export type StatCardTone = 'default' | 'muted' | 'ok' | 'danger' | 'warn'
 
+// Hoje, Capacidade e TodoList imprimem o número em 18px; Painéis é a única das nove telas que
+// o imprime no mesmo passo do título de tela, em mono.
+export type StatCardSize = 'default' | 'large'
+
 const TONE_CLASSES: Record<StatCardTone, string> = {
   default: 'text-text',
   muted: 'text-text2',
@@ -11,15 +15,28 @@ const TONE_CLASSES: Record<StatCardTone, string> = {
   warn: 'text-warn',
 }
 
+const SIZE_CLASSES: Record<StatCardSize, string> = {
+  default: 'text-metric',
+  large: 'text-entity-title',
+}
+
 type StatCardProps = {
   label: string
   tone?: StatCardTone
+  size?: StatCardSize
   hint?: ReactNode
   children: ReactNode
   className?: string
 }
 
-export function StatCard({ label, tone = 'default', hint, children, className }: StatCardProps) {
+export function StatCard({
+  label,
+  tone = 'default',
+  size = 'default',
+  hint,
+  children,
+  className,
+}: StatCardProps) {
   return (
     <div
       className={classNames(
@@ -28,7 +45,9 @@ export function StatCard({ label, tone = 'default', hint, children, className }:
       )}
     >
       <span className="text-label font-normal tracking-normal text-text2">{label}</span>
-      <span className={classNames('font-mono text-metric tabular-nums', TONE_CLASSES[tone])}>
+      <span
+        className={classNames('font-mono tabular-nums', SIZE_CLASSES[size], TONE_CLASSES[tone])}
+      >
         {children}
       </span>
       {hint !== undefined && (

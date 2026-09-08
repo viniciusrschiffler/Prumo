@@ -73,7 +73,7 @@ export const SCREEN_META: Record<Screen, ScreenMeta> = {
     path: '/paineis',
     title: 'Painéis',
     contextLabel: 'Fases',
-    contextVariant: 'list',
+    contextVariant: 'legend',
     navigationKeys: 'g g',
   },
   settings: {
