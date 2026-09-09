@@ -1,0 +1,51 @@
+name: Release
+
+# Dispara ao empurrar uma tag "v*" (ex: v0.1.0) ou manualmente pela aba Actions.
+# Em ambos os casos, o nome/tag do Release publicado vem da versão dentro de
+# src-tauri/tauri.conf.json (placeholder __VERSION__ abaixo) — então antes de
+# lançar uma nova versão, atualize esse arquivo (e o package.json, para manter
+# os dois em sincronia).
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Configurar Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache das dependências Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Instalar dependências do frontend
+        run: npm ci
+
+      - name: Build e publicação no GitHub Releases
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: "Prumo v__VERSION__"
+          releaseBody: "Instalador gerado automaticamente pelo GitHub Actions."
+          releaseDraft: true
+          prerelease: false
