@@ -3,6 +3,7 @@ import type { DatabaseSync } from 'node:sqlite'
 import { DESIGN_TODAY } from '../../../scripts/seed/seedDates.ts'
 import { openSeedDatabase } from '@/domain/testing/seedDatabase'
 import { readTodosSnapshot } from '@/domain/testing/todoSeedReaders'
+import { buildTodoBoard } from './todoBoard'
 import { groupTodos, type TodoGroupingContext } from './todoGrouping'
 import {
   buildTodoRows,
@@ -11,7 +12,12 @@ import {
   type TodosSnapshot,
 } from './todoRow'
 import { parseRecurrenceRule } from './todoRecurrence'
-import { countOpenTodosByProject, listTagsInUse, summarizeTodos } from './todoSummary'
+import {
+  countOpenTodosByProject,
+  countTodosByStatus,
+  listTagsInUse,
+  summarizeTodos,
+} from './todoSummary'
 
 const CONTEXT: TodoGroupingContext = { today: DESIGN_TODAY, weekStart: 'monday' }
 
@@ -27,6 +33,8 @@ describe('the TodoList screen over the seed', () => {
   it('Should summarize the header and the side panel', () => {
     expect(summarizeTodos(buildTodoRows(snapshot), CONTEXT)).toEqual({
       open: 7,
+      inProgress: 2,
+      blocked: 2,
       late: 1,
       linkedToProject: 5,
       withoutProject: 2,
@@ -35,7 +43,7 @@ describe('the TodoList screen over the seed', () => {
   })
 
   it('Should group by due date without revealing the completed ones', () => {
-    const rows = buildTodoRows(snapshot).filter((row) => row.todo.status === 'open')
+    const rows = buildTodoRows(snapshot).filter((row) => row.todo.status !== 'done')
     const groups = groupTodos(rows, 'due', CONTEXT, listProjectsWithPhase(snapshot))
 
     expect(groups.map((group) => [group.id, group.items.length])).toEqual([
@@ -94,5 +102,52 @@ describe('the TodoList screen over the seed', () => {
     expect(row?.project?.name).toBe('Migração do gateway')
     expect(row?.phase?.id).toBe('development')
     expect(row?.tags.map((tag) => tag.name)).toEqual(['pagamentos'])
+  })
+})
+
+describe('the Kanban over the seed', () => {
+  it('Should spread the eight todos over the four columns', () => {
+    expect(countTodosByStatus(buildTodoRows(snapshot))).toEqual([
+      { status: 'open', count: 3 },
+      { status: 'in_progress', count: 2 },
+      { status: 'blocked', count: 2 },
+      { status: 'done', count: 1 },
+    ])
+  })
+
+  it('Should stand the four columns up even before anything is dragged', () => {
+    const board = buildTodoBoard(
+      buildTodoRows(snapshot),
+      'status',
+      CONTEXT,
+      listProjectsWithPhase(snapshot),
+    )
+
+    expect(board.map((column) => [column.group.id, column.group.items.length])).toEqual([
+      ['status-open', 3],
+      ['status-in_progress', 2],
+      ['status-blocked', 2],
+      ['status-done', 1],
+    ])
+    expect(board.every((column) => column.drop !== null)).toBe(true)
+  })
+
+  // Cada projeto não arquivado é coluna, mesmo sem todo nenhum, senão não haveria para onde
+  // arrastar um card que ainda não pertence a ele.
+  it('Should give every unarchived project a column when the grouping is by project', () => {
+    const board = buildTodoBoard(
+      buildTodoRows(snapshot),
+      'project',
+      CONTEXT,
+      listProjectsWithPhase(snapshot),
+    )
+
+    expect(board.map((column) => column.group.id)).toEqual([
+      'project-campo',
+      'project-gateway',
+      'project-observabilidade',
+      'project-parceiro',
+      'project-sem-projeto',
+    ])
   })
 })

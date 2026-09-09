@@ -1,5 +1,6 @@
 import {
   useSidebarContextStore,
+  type SidebarContextItem,
   type SidebarContextMetaTone,
 } from '@/app/stores/useSidebarContextStore'
 import { classNames } from '@/ui/primitives/classNames'
@@ -11,6 +12,14 @@ import type { SidebarContextVariant } from './screenMeta'
 type SidebarContextSectionProps = {
   label: string
   variant?: SidebarContextVariant
+}
+
+type SidebarSectionShellProps = {
+  label: string
+  variant: SidebarContextVariant
+  items: readonly SidebarContextItem[]
+  activeId: string | null
+  onSelect: ((id: string) => void) | null
 }
 
 type SidebarContextItemProps = {
@@ -122,11 +131,13 @@ function LegendRow({ label, meta, color }: Omit<SidebarContextItemProps, 'isActi
   )
 }
 
-export function SidebarContextSection({ label, variant = 'list' }: SidebarContextSectionProps) {
-  const items = useSidebarContextStore((state) => state.items)
-  const activeId = useSidebarContextStore((state) => state.activeId)
-  const onSelect = useSidebarContextStore((state) => state.onSelect)
-
+function SidebarSectionShell({
+  label,
+  variant,
+  items,
+  activeId,
+  onSelect,
+}: SidebarSectionShellProps) {
   const isPills = variant === 'pills'
 
   return (
@@ -167,5 +178,39 @@ export function SidebarContextSection({ label, variant = 'list' }: SidebarContex
         </div>
       )}
     </div>
+  )
+}
+
+export function SidebarContextSection({ label, variant = 'list' }: SidebarContextSectionProps) {
+  const items = useSidebarContextStore((state) => state.items)
+  const activeId = useSidebarContextStore((state) => state.activeId)
+  const onSelect = useSidebarContextStore((state) => state.onSelect)
+
+  return (
+    <SidebarSectionShell
+      label={label}
+      variant={variant}
+      items={items}
+      activeId={activeId}
+      onSelect={onSelect}
+    />
+  )
+}
+
+export function SidebarLeadContextSection() {
+  const lead = useSidebarContextStore((state) => state.lead)
+
+  if (lead === null) {
+    return null
+  }
+
+  return (
+    <SidebarSectionShell
+      label={lead.label}
+      variant="list"
+      items={lead.items}
+      activeId={lead.activeId}
+      onSelect={lead.onSelect}
+    />
   )
 }

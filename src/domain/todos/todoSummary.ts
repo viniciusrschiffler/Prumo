@@ -2,25 +2,29 @@ import { toIsoDateOf, weekPeriod } from '@/domain/dates/isoDateMath'
 import type { Phase } from '@/domain/schemas/phaseSchema'
 import type { Project } from '@/domain/schemas/projectSchema'
 import type { Tag } from '@/domain/schemas/tagSchema'
-import { classifyDue, isDone, type TodoGroupingContext } from './todoGrouping'
+import { TODO_BOARD_STATUSES, type TodoBoardStatus } from '@/domain/schemas/todoSchema'
+import { boardStatusOf, classifyDue, isDone, isOpen, type TodoGroupingContext } from './todoGrouping'
 import type { ProjectWithPhase, TodoRow } from './todoRow'
 
 export type TodoSummary = {
   open: number
+  inProgress: number
+  blocked: number
   late: number
   linkedToProject: number
   withoutProject: number
   doneThisWeek: number
 }
 
+export type TodoStatusCount = {
+  status: TodoBoardStatus
+  count: number
+}
+
 export type TodoProjectCount = {
   project: Project | null
   phase: Phase | null
   openCount: number
-}
-
-function isOpen(row: TodoRow): boolean {
-  return row.todo.status === 'open'
 }
 
 // O mockup soma todo concluído de qualquer data num cartão que se chama "Esta semana".
@@ -44,11 +48,22 @@ export function summarizeTodos(
 
   return {
     open: open.length,
+    inProgress: rows.filter((row) => row.todo.status === 'in_progress').length,
+    blocked: rows.filter((row) => row.todo.status === 'blocked').length,
     late: open.filter((row) => classifyDue(row.todo.dueDate, context) === 'late').length,
     linkedToProject,
     withoutProject: open.length - linkedToProject,
     doneThisWeek: rows.filter((row) => isDoneThisWeek(row, context)).length,
   }
+}
+
+// O contador da barra lateral conta o quadro inteiro, não só o que o filtro em vigor deixou
+// passar: ele é o que diz de onde o filtro tira gente.
+export function countTodosByStatus(rows: readonly TodoRow[]): TodoStatusCount[] {
+  return TODO_BOARD_STATUSES.map((status) => ({
+    status,
+    count: rows.filter((row) => boardStatusOf(row) === status).length,
+  }))
 }
 
 // A ordem é por carga, não alfabética: o painel existe para dizer onde o trabalho se acumula.

@@ -15,6 +15,8 @@ function buildNewTodo(overrides: Partial<NewTodo> = {}): NewTodo {
     projectId: null,
     dueDate: '2026-09-03',
     priority: 'P1',
+    status: 'open',
+    completedAt: null,
     tags: [],
     ...overrides,
   }
@@ -83,7 +85,7 @@ describe('SqliteTodoRepository', () => {
   it('Should record the completion and clear it when the todo is reopened', async () => {
     await repository.create(buildNewTodo())
 
-    await repository.setCompletion({
+    await repository.setStatus({
       todoId: 'td-1',
       status: 'done',
       completedAt: '2026-09-03T12:00:00Z',
@@ -91,7 +93,7 @@ describe('SqliteTodoRepository', () => {
 
     expect((await repository.listAll())[0]?.completedAt).toBe('2026-09-03T12:00:00Z')
 
-    await repository.setCompletion({ todoId: 'td-1', status: 'open', completedAt: null })
+    await repository.setStatus({ todoId: 'td-1', status: 'open', completedAt: null })
 
     expect((await repository.listAll())[0]?.status).toBe('open')
   })
@@ -157,6 +159,8 @@ describe('SqliteTodoRepository.update', () => {
     taskId: null,
     dueDate: '2026-09-10',
     priority: 'P0' as const,
+    status: 'done' as const,
+    completedAt: '2026-09-05T18:00:00Z',
     tags: [],
   }
 
@@ -164,8 +168,8 @@ describe('SqliteTodoRepository.update', () => {
     await repository.create(buildNewTodo())
   })
 
-  it('Should store the fields the form asked about, leaving the completion alone', async () => {
-    await repository.setCompletion({
+  it('Should store the fields the form asked about, the status among them', async () => {
+    await repository.setStatus({
       todoId: 'td-1',
       status: 'done',
       completedAt: '2026-09-05T18:00:00Z',

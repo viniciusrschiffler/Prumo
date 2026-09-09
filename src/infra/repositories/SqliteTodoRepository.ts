@@ -1,9 +1,9 @@
 import { z } from 'zod'
 import type {
-  TodoCompletionChange,
   TodoRepository,
+  TodoStatusChange,
 } from '@/domain/repositories/TodoRepository'
-import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
+import type { EntityId, IsoDate, Priority } from '@/domain/schemas/primitives'
 import {
   todoRecurrenceSchema,
   todoSchema,
@@ -40,7 +40,7 @@ const SELECT_RECURRENCES = `
 const INSERT_TODO = `
   INSERT INTO todo (id, title, description, due_date, priority, status, project_id,
                     task_id, completed_at, recurrence_id)
-  VALUES (?, ?, ?, ?, ?, 'open', ?, NULL, NULL, NULL)
+  VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL)
 `
 
 const INSERT_TAG = 'INSERT INTO tag (id, name) VALUES (?, ?) ON CONFLICT (name) DO NOTHING'
@@ -52,15 +52,18 @@ const LINK_TAG = `
 
 const UPDATE_TODO = `
   UPDATE todo
-  SET title = ?, description = ?, due_date = ?, priority = ?, project_id = ?, task_id = ?
+  SET title = ?, description = ?, due_date = ?, priority = ?, status = ?, completed_at = ?,
+      project_id = ?, task_id = ?
   WHERE id = ?
 `
 
 const UNLINK_TAGS = 'DELETE FROM todo_tag WHERE todo_id = ?'
 
-const UPDATE_COMPLETION = 'UPDATE todo SET status = ?, completed_at = ? WHERE id = ?'
+const UPDATE_STATUS = 'UPDATE todo SET status = ?, completed_at = ? WHERE id = ?'
 
 const UPDATE_DUE_DATE = 'UPDATE todo SET due_date = ? WHERE id = ?'
+
+const UPDATE_PRIORITY = 'UPDATE todo SET priority = ? WHERE id = ?'
 
 const UPDATE_PROJECT = 'UPDATE todo SET project_id = ?, task_id = NULL WHERE id = ?'
 
@@ -127,7 +130,9 @@ function toCreateStatements(todo: NewTodo): BatchStatement[] {
         todo.description,
         todo.dueDate,
         todo.priority,
+        todo.status,
         todo.projectId,
+        todo.completedAt,
       ],
     },
     ...todo.tags.flatMap((tag) => [
@@ -147,6 +152,8 @@ function toUpdateStatements(update: TodoUpdate): BatchStatement[] {
         update.description,
         update.dueDate,
         update.priority,
+        update.status,
+        update.completedAt,
         update.projectId,
         update.taskId,
         update.id,
@@ -195,14 +202,18 @@ export class SqliteTodoRepository implements TodoRepository {
     await this.#gateway.executeBatch(toUpdateStatements(update))
   }
 
-  async setCompletion(change: TodoCompletionChange): Promise<void> {
+  async setStatus(change: TodoStatusChange): Promise<void> {
     await this.#gateway.executeBatch([
-      { query: UPDATE_COMPLETION, values: [change.status, change.completedAt, change.todoId] },
+      { query: UPDATE_STATUS, values: [change.status, change.completedAt, change.todoId] },
     ])
   }
 
   async setDueDate(todoId: EntityId, dueDate: IsoDate | null): Promise<void> {
     await this.#gateway.executeBatch([{ query: UPDATE_DUE_DATE, values: [dueDate, todoId] }])
+  }
+
+  async setPriority(todoId: EntityId, priority: Priority): Promise<void> {
+    await this.#gateway.executeBatch([{ query: UPDATE_PRIORITY, values: [priority, todoId] }])
   }
 
   async setProject(todoId: EntityId, projectId: EntityId | null): Promise<void> {

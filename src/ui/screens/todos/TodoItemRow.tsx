@@ -8,12 +8,15 @@ import { Checkbox } from '@/ui/primitives/Checkbox'
 import { classNames } from '@/ui/primitives/classNames'
 import { phaseColorStyle } from '@/ui/primitives/phaseColorStyle'
 import { PriorityBadge } from '@/ui/primitives/PriorityBadge'
+import { TodoStatusBadge } from './TodoStatusBadge'
 
 const WITHOUT_PROJECT = 'sem projeto'
 
 type TodoItemRowProps = {
   row: TodoRow
   context: TodoGroupingContext
+  // Agrupado por status, o selo repetiria o que o próprio cabeçalho do grupo já diz.
+  showStatus: boolean
   registerRef: (id: EntityId, element: HTMLDivElement | null) => void
   onToggle: (id: EntityId) => void
   onEdit: (id: EntityId) => void
@@ -37,6 +40,7 @@ function toDueClassName(row: TodoRow, context: TodoGroupingContext): string {
 export function TodoItemRow({
   row,
   context,
+  showStatus,
   registerRef,
   onToggle,
   onEdit,
@@ -50,7 +54,7 @@ export function TodoItemRow({
       role="listitem"
       ref={(element) => registerRef(todo.id, element)}
       onKeyDown={(event) => onKeyDown(event, todo.id)}
-      className="grid grid-cols-[24px_1fr_auto_auto_auto] items-center gap-2.5 border-b border-border px-3 py-2 last:border-b-0 hover:bg-sunken"
+      className="grid grid-cols-[24px_1fr_auto_auto_auto_auto] items-center gap-2.5 border-b border-border px-3 py-2 last:border-b-0 hover:bg-sunken"
     >
       <Checkbox
         boxSize="large"
@@ -99,6 +103,8 @@ export function TodoItemRow({
         )}
         {row.project?.name ?? WITHOUT_PROJECT}
       </span>
+
+      <span>{showStatus && <TodoStatusBadge status={todo.status} />}</span>
 
       <span className="inline-flex items-center gap-2">
         <PriorityBadge

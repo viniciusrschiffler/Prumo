@@ -145,3 +145,67 @@ describe('Migração 003, que reconstrói project_event', () => {
     })
   })
 })
+
+const TODO_MIGRATION_VERSION = 4
+
+function insertTodoHistory(): void {
+  database.exec(`
+    INSERT INTO tag (id, name) VALUES ('tag-1', 'pagamentos');
+
+    INSERT INTO todo (id, title, due_date, priority, status)
+    VALUES ('td-escopo', 'Fechar escopo', '2026-09-03', 'P1', 'open');
+
+    INSERT INTO todo_tag (todo_id, tag_id) VALUES ('td-escopo', 'tag-1');
+  `)
+}
+
+describe('Migração 004, que reconstrói todo', () => {
+  beforeEach(async () => {
+    applyUpTo(TODO_MIGRATION_VERSION - 1)
+    insertTodoHistory()
+
+    await runMigrations(gateway, MIGRATION_LIST)
+  })
+
+  it('Should accept the two statuses the Kanban added', () => {
+    database.exec("UPDATE todo SET status = 'in_progress' WHERE id = 'td-escopo'")
+    expect(database.prepare("SELECT status FROM todo WHERE id = 'td-escopo'").get()).toEqual({
+      status: 'in_progress',
+    })
+
+    database.exec("UPDATE todo SET status = 'blocked' WHERE id = 'td-escopo'")
+    expect(database.prepare("SELECT status FROM todo WHERE id = 'td-escopo'").get()).toEqual({
+      status: 'blocked',
+    })
+  })
+
+  it('Should still refuse a status outside the catalogue', () => {
+    expect(() =>
+      database.exec("UPDATE todo SET status = 'inventado' WHERE id = 'td-escopo'"),
+    ).toThrow()
+  })
+
+  // Dropar `todo` com a chave estrangeira ligada dispararia o CASCADE de todo_tag, e o vínculo
+  // com a tag sumiria sem aviso.
+  it('Should keep the tag links the rebuilt table cascades from', () => {
+    expect(database.prepare('SELECT * FROM todo_tag').all()).toEqual([
+      { todo_id: 'td-escopo', tag_id: 'tag-1' },
+    ])
+
+    database.exec("DELETE FROM todo WHERE id = 'td-escopo'")
+
+    expect(database.prepare('SELECT * FROM todo_tag').all()).toEqual([])
+  })
+
+  it('Should still refuse a completion time outside the done status', () => {
+    expect(() =>
+      database.exec(
+        "UPDATE todo SET completed_at = '2026-09-03T12:00:00Z' WHERE id = 'td-escopo'",
+      ),
+    ).toThrow()
+  })
+
+  it('Should leave no dangling foreign key behind', () => {
+    expect(database.prepare('PRAGMA foreign_key_check').all()).toEqual([])
+  })
+})

@@ -14,10 +14,22 @@ export type SidebarContextItem = {
   color?: string
 }
 
+// A TodoList é a única tela com duas listas na barra lateral: o design põe Status acima de
+// Tags. A seção de cima é opcional e tem rótulo próprio, porque o rótulo do `screenMeta` já
+// nomeia a de baixo.
+export type SidebarLeadSection = {
+  label: string
+  items: readonly SidebarContextItem[]
+  activeId: string | null
+  onSelect: ((id: string) => void) | null
+}
+
 type SidebarContextState = {
   items: readonly SidebarContextItem[]
   activeId: string | null
   onSelect: ((id: string) => void) | null
+  lead: SidebarLeadSection | null
+  publishLead: (lead: SidebarLeadSection | null) => void
   publish: (
     items: readonly SidebarContextItem[],
     activeId: string | null,
@@ -30,6 +42,8 @@ export const useSidebarContextStore = create<SidebarContextState>((set) => ({
   items: [],
   activeId: null,
   onSelect: null,
+  lead: null,
+  publishLead: (lead) => set(() => ({ lead })),
   publish: (items, activeId, onSelect) => set(() => ({ items, activeId, onSelect })),
   clear: () => set(() => ({ items: [], activeId: null, onSelect: null })),
 }))

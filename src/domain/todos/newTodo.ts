@@ -1,5 +1,7 @@
-import type { EntityId, IsoDate, Priority } from '@/domain/schemas/primitives'
+import type { EntityId, IsoDate, IsoDateTime, Priority } from '@/domain/schemas/primitives'
 import type { Project } from '@/domain/schemas/projectSchema'
+import type { TodoBoardStatus } from '@/domain/schemas/todoSchema'
+import { buildTodoStatusChange } from './todoEdits'
 import {
   classifyDue,
   type DueGroupBucket,
@@ -9,12 +11,15 @@ import {
 
 export const DEFAULT_TODO_PRIORITY: Priority = 'P2'
 
+export const DEFAULT_TODO_STATUS: TodoBoardStatus = 'open'
+
 export type NewTodoDraft = {
   title: string
   description: string
   projectId: EntityId | null
   dueDate: IsoDate | null
   priority: Priority
+  status: TodoBoardStatus
   tagNames: readonly string[]
 }
 
@@ -30,6 +35,8 @@ export type NewTodo = {
   projectId: EntityId | null
   dueDate: IsoDate | null
   priority: Priority
+  status: TodoBoardStatus
+  completedAt: IsoDateTime | null
   tags: readonly TodoTagDraft[]
 }
 
@@ -38,6 +45,7 @@ export type NewTodoErrors = {
 }
 
 export type TodoGroupPreview =
+  | { kind: 'status'; status: TodoBoardStatus }
   | { kind: 'due'; bucket: DueGroupBucket }
   | { kind: 'project'; project: Project | null }
   | { kind: 'priority'; priority: Priority }
@@ -80,15 +88,17 @@ export function emptyTodoDraft(): NewTodoDraft {
     projectId: null,
     dueDate: null,
     priority: DEFAULT_TODO_PRIORITY,
+    status: DEFAULT_TODO_STATUS,
     tagNames: [],
   }
 }
 
 export function buildNewTodo(
   draft: NewTodoDraft,
-  ids: { todoId: EntityId; tagIds: readonly EntityId[] },
+  ids: { todoId: EntityId; tagIds: readonly EntityId[]; now: IsoDateTime },
 ): NewTodo {
   const normalized = normalizeTodoDraft(draft, ids.tagIds)
+  const change = buildTodoStatusChange(draft.status, ids.now)
 
   return {
     id: ids.todoId,
@@ -97,6 +107,8 @@ export function buildNewTodo(
     projectId: draft.projectId,
     dueDate: draft.dueDate,
     priority: draft.priority,
+    status: draft.status,
+    completedAt: change.completedAt,
     tags: normalized.tags,
   }
 }
@@ -107,6 +119,10 @@ export function previewTodoGroup(
   context: TodoGroupingContext,
   projects: readonly Project[],
 ): TodoGroupPreview {
+  if (mode === 'status') {
+    return { kind: 'status', status: draft.status }
+  }
+
   if (mode === 'priority') {
     return { kind: 'priority', priority: draft.priority }
   }

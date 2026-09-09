@@ -27,11 +27,11 @@ describe('buildTodoCompletion', () => {
     })
   })
 
-  it('Should reopen clearing the time, because the table refuses a completed todo without one', () => {
+  it('Should reopen into progress, clearing the time the table refuses outside done', () => {
     const done = buildTodo({ status: 'done', completedAt: '2026-09-01T17:30:00Z' })
 
     expect(buildTodoCompletion(done, '2026-09-03T12:00:00Z')).toEqual({
-      status: 'open',
+      status: 'in_progress',
       completedAt: null,
     })
   })

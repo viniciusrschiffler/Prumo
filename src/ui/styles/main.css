@@ -107,6 +107,9 @@
   --radius-modal: 12px;
 
   --shadow-popover: var(--shadow);
+  /* O cartão do Kanban levanta do fundo da coluna com a mesma sombra rasa do popover; o nome
+     separado existe porque um cartão que se arrasta não é uma camada flutuante. */
+  --shadow-card: var(--shadow);
   --shadow-modal: var(--shadow-lg);
 
   --height-control: 28px;

@@ -6,6 +6,8 @@ import type { TodoGroupingContext } from './todoGrouping'
 
 const CONTEXT: TodoGroupingContext = { today: '2026-09-03', weekStart: 'monday' }
 
+const NOW = '2026-09-03T12:00:00Z'
+
 const PROJECTS = [
   buildProject({ id: 'gateway', name: 'Migração do gateway' }),
   buildProject({ id: 'parceiro', name: 'Portal do parceiro' }),
@@ -18,6 +20,7 @@ function buildDraft(overrides: Partial<NewTodoDraft> = {}): NewTodoDraft {
     projectId: null,
     dueDate: null,
     priority: 'P2',
+    status: 'open',
     tagNames: [],
     ...overrides,
   }
@@ -34,7 +37,7 @@ describe('buildNewTodo', () => {
   it('Should trim the texts and turn an empty description into null', () => {
     const todo = buildNewTodo(
       buildDraft({ title: '  Fechar escopo  ', description: '   ' }),
-      { todoId: 'td-1', tagIds: [] },
+      { todoId: 'td-1', tagIds: [], now: NOW },
     )
 
     expect(todo.title).toBe('Fechar escopo')
@@ -44,7 +47,7 @@ describe('buildNewTodo', () => {
   it('Should drop a repeated or empty tag before handing out identifiers', () => {
     const todo = buildNewTodo(
       buildDraft({ tagNames: ['infra', ' infra ', '', 'pagamentos'] }),
-      { todoId: 'td-1', tagIds: ['tag-1', 'tag-2'] },
+      { todoId: 'td-1', tagIds: ['tag-1', 'tag-2'], now: NOW },
     )
 
     expect(todo.tags).toEqual([

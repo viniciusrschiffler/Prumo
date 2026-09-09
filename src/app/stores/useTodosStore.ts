@@ -2,10 +2,12 @@ import { create } from 'zustand'
 import { todayIsoDate } from '@/app/clock'
 import { useNavigationCountsStore } from '@/app/stores/useNavigationCountsStore'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
-import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
+import type { EntityId, IsoDate, Priority } from '@/domain/schemas/primitives'
+import type { TodoBoardStatus } from '@/domain/schemas/todoSchema'
 import { buildTodoUpdate } from '@/domain/todos/editTodo'
 import { buildNewTodo, type NewTodoDraft } from '@/domain/todos/newTodo'
-import { buildTodoCompletion, snoozeDueDate } from '@/domain/todos/todoEdits'
+import type { TodoBoardDrop } from '@/domain/todos/todoBoard'
+import { buildTodoCompletion, buildTodoStatusChange, snoozeDueDate } from '@/domain/todos/todoEdits'
 import type { TodosSnapshot } from '@/domain/todos/todoRow'
 import { getSqlGateway } from '@/infra/database/DatabaseConnection'
 import { SqlitePhaseRepository } from '@/infra/repositories/SqlitePhaseRepository'
@@ -35,6 +37,9 @@ type TodosState = {
   createTodo: (draft: NewTodoDraft) => Promise<void>
   updateTodo: (todoId: EntityId, draft: NewTodoDraft) => Promise<void>
   toggleTodo: (todoId: EntityId) => Promise<void>
+  setStatus: (todoId: EntityId, status: TodoBoardStatus) => Promise<void>
+  setPriority: (todoId: EntityId, priority: Priority) => Promise<void>
+  applyBoardDrop: (todoId: EntityId, drop: TodoBoardDrop) => Promise<void>
   snoozeTodo: (todoId: EntityId) => Promise<void>
   linkProject: (todoId: EntityId, projectId: EntityId | null) => Promise<void>
   setDueDate: (todoId: EntityId, dueDate: IsoDate | null) => Promise<void>
@@ -93,6 +98,7 @@ export const useTodosStore = create<TodosState>((set, get) => ({
     const todo = buildNewTodo(draft, {
       todoId: crypto.randomUUID(),
       tagIds: draft.tagNames.map(() => crypto.randomUUID()),
+      now: new Date().toISOString(),
     })
 
     await createTodoRepository().create(todo)
@@ -111,6 +117,7 @@ export const useTodosStore = create<TodosState>((set, get) => ({
         todo,
         draft,
         draft.tagNames.map(() => crypto.randomUUID()),
+        new Date().toISOString(),
       ),
     )
 
@@ -126,8 +133,47 @@ export const useTodosStore = create<TodosState>((set, get) => ({
 
     const completion = buildTodoCompletion(todo, new Date().toISOString())
 
-    await createTodoRepository().setCompletion({ todoId, ...completion })
+    await createTodoRepository().setStatus({ todoId, ...completion })
     await get().refresh()
+  },
+
+  setStatus: async (todoId, status) => {
+    const todo = get().snapshot.todos.find((current) => current.id === todoId)
+
+    if (todo === undefined || todo.status === status) {
+      return
+    }
+
+    const change = buildTodoStatusChange(status, new Date().toISOString(), todo.completedAt)
+
+    await createTodoRepository().setStatus({ todoId, ...change })
+    await get().refresh()
+  },
+
+  setPriority: async (todoId, priority) => {
+    await createTodoRepository().setPriority(todoId, priority)
+    await get().refresh()
+  },
+
+  // O arrasto grava o campo do agrupamento em vigor, e cada campo já tem a sua ação: o quadro
+  // não abre um caminho de escrita próprio.
+  applyBoardDrop: async (todoId, drop) => {
+    if (drop.kind === 'status') {
+      await get().setStatus(todoId, drop.status)
+      return
+    }
+
+    if (drop.kind === 'priority') {
+      await get().setPriority(todoId, drop.priority)
+      return
+    }
+
+    if (drop.kind === 'project') {
+      await get().linkProject(todoId, drop.projectId)
+      return
+    }
+
+    await get().setDueDate(todoId, drop.dueDate)
   },
 
   snoozeTodo: async (todoId) => {

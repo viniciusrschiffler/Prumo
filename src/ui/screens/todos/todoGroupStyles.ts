@@ -2,7 +2,8 @@ import { formatShortDate, formatWeekdayShortDate } from '@/domain/format/dueLabe
 import type { DueGroupBucket, TodoGroup, TodoGroupingContext } from '@/domain/todos/todoGrouping'
 import { endOfCurrentWeek } from '@/domain/todos/todoGrouping'
 import type { Priority } from '@/domain/schemas/primitives'
-import { DUE_GROUP_LABELS, PRIORITY_LABELS } from '@/ui/labels/entityLabels'
+import type { TodoBoardStatus } from '@/domain/schemas/todoSchema'
+import { DUE_GROUP_LABELS, PRIORITY_LABELS, TODO_STATUS_LABELS } from '@/ui/labels/entityLabels'
 import type { TodoGroupTone, TodoGroupTitleTone } from './TodoGroupSection'
 
 export type TodoGroupHeader = {
@@ -33,6 +34,20 @@ const DUE_TITLE_TONES: Record<DueGroupBucket, TodoGroupTitleTone> = {
   doneBefore: 'ok',
 }
 
+const STATUS_TONES: Record<TodoBoardStatus, TodoGroupTone> = {
+  open: 'neutral',
+  in_progress: 'info',
+  blocked: 'danger',
+  done: 'ok',
+}
+
+const STATUS_TITLE_TONES: Record<TodoBoardStatus, TodoGroupTitleTone> = {
+  open: 'muted',
+  in_progress: 'info',
+  blocked: 'danger',
+  done: 'ok',
+}
+
 const PRIORITY_TONES: Record<Priority, TodoGroupTone> = {
   P0: 'danger',
   P1: 'warn',
@@ -60,6 +75,16 @@ export function buildGroupHeader(
   group: TodoGroup,
   context: TodoGroupingContext,
 ): TodoGroupHeader {
+  if (group.kind === 'status') {
+    return {
+      title: TODO_STATUS_LABELS[group.status],
+      meta: null,
+      tone: STATUS_TONES[group.status],
+      titleTone: STATUS_TITLE_TONES[group.status],
+      phaseColor: null,
+    }
+  }
+
   if (group.kind === 'due') {
     return {
       title: DUE_GROUP_LABELS[group.bucket],

@@ -346,9 +346,10 @@ número está em `domain/todos/todoScreen.seed.test.ts`.
 
 | Onde | Mockup | Derivado |
 | --- | --- | --- |
-| Subtítulo | 11 em aberto · 2 atrasados · 6 vinculados | **7 em aberto · 1 atrasado · 5 vinculados a projeto** |
+| Subtítulo | 11 em aberto · 2 atrasados · 6 vinculados | **7 em aberto · 2 em progresso · 2 bloqueados · 1 atrasado** |
 | Concluídos na semana | 1 | **1** — o `td-alertas`, concluído em 01/09 |
-| Atrasados · Em aberto · Sem projeto | 2 · 11 · 5 | **1 · 7 · 2** |
+| Cartões do painel | Concluídos · Atrasados · Em aberto · Sem projeto | **Concluídos 1 · Bloqueados 2 · Em progresso 2 · Atrasados 1** |
+| Colunas do Kanban | 4 fixas de status | **4** — Backlog 3, Em progresso 2, Bloqueado 2, Feito 1 |
 | Por projeto | 4 projetos | **4 não arquivados + Sem projeto** — o ERP cancelado tem `archived_at` |
 | Recorrentes | 2 cartões fictícios | **1** — "Revisão semanal de capacidade", `semanal-seg` |
 | Tags da sidebar | 1:1, contratação, arquitetura, pessoal, reunião | **3** — só as que algum todo carrega |
@@ -373,7 +374,65 @@ distingue.
 **O foco da linha mora na caixa de marcar.** Ela é um `input` de verdade, então o espaço já
 alterna sem `preventDefault` e o Tab alcança toda linha sem tabindex móvel. As setas, o `S`
 de adiar e o `@` de vincular projeto saem do `onKeyDown` da linha, que recebe o evento por
-propagação.
+propagação. O cartão do Kanban repete o mesmo arranjo, então `S`, `E`, `@` e as setas
+funcionam nas duas visões.
+
+## O Kanban da TodoList
+
+O design ganhou uma segunda visão para esta tela, e com ela o **status de todo virou quatro
+valores**: `open` (Backlog), `in_progress`, `blocked` e `done`. A migração 004 reconstrói
+`todo` e `todo_tag` para abrir o `CHECK` — mesma técnica da 003, porque dropar `todo` com a
+chave estrangeira ligada dispararia o `CASCADE` de `todo_tag`.
+
+**`cancelled` continua no enum e fora do quadro.** Nenhum caminho do app o escreve; ele fica
+porque o banco o aceita desde a 001. Todo cancelado não entra em coluna nenhuma, não conta em
+"em aberto" e não aparece no formulário.
+
+**"Em aberto" passou a ser "não concluído", não a coluna Backlog.** Quem está em progresso ou
+bloqueado continua pedindo trabalho. Vale para o subtítulo, para o painel lateral, para
+"Vencem hoje" e para o contador de Notas na navegação — o `COUNT_OPEN_TODOS` conta
+`status NOT IN ('done', 'cancelled')`.
+
+**A lista e o quadro partem das mesmas divisões.** `buildTodoGroups` devolve todas elas e
+`groupTodos` joga fora a vazia, que é o que a lista quer; `buildTodoBoard` mantém em pé a
+coluna vazia **para a qual dá para arrastar** e descarta a outra. Assim toda coluna vazia do
+quadro é um destino, e não um buraco.
+
+**O arrasto grava o campo do agrupamento em vigor**, como o rodapé do modal promete: status,
+prioridade, projeto ou data. Cada um cai na ação que já existia — o quadro não abriu caminho
+de escrita próprio.
+
+**Duas colunas de vencimento não recebem card.** "Atrasados", porque nada torna um item
+atrasado por escolha, e "Concluídos antes", porque é uma data que já passou. As duas só
+aparecem quando têm o que mostrar. "Concluídos hoje", essa, recebe: soltar ali marca o item
+como feito.
+
+**Desmarcar a caixa devolve o item a "Em progresso"**, e não ao Backlog. É o que o mockup do
+quadro faz, e o schema não guarda de qual coluna o item saiu.
+
+**Agrupado por status, o concluído sempre aparece.** É a coluna "Feito" que o revela, senão
+ela mentiria sobre estar vazia. Nos outros três agrupamentos o botão "Mostrar concluídos"
+continua mandando — o mockup também libera o concluído no agrupamento por vencimento, e ali
+isso deixaria o botão sem função nenhuma.
+
+**O selo de status some da linha e do cartão quando o agrupamento é por status**, porque o
+cabeçalho do grupo já diz o mesmo.
+
+**Status virou filtro na barra lateral, no molde das tags.** O design desenha a lista com
+contador e o mesmo hover das tags, que nesta tela já são filtro. É a única das nove telas com
+duas listas contextuais, então o `useSidebarLeadContext` publica a de cima e o `screenMeta`
+segue nomeando só a de baixo.
+
+**O "+ Novo item" da coluna abre o formulário já preenchido com o campo daquela coluna.** Um
+botão por coluna que criasse tudo no mesmo lugar seria pior que um botão só.
+
+**`compareTodos` da tela de Hoje comparava o status cru** para descer o concluído. Com quatro
+status o comparador ficou inconsistente e trocou a ordem da lista — passou a comparar só o
+"é concluído". Verificado no seed.
+
+**O `v` alterna as duas visões.** O design desenha o controle segmentado e nenhuma tecla; o
+atalho entrou porque toda outra troca de modo desta tela já é alcançável pelo teclado, e ele
+aparece na paleta de comandos como qualquer outro.
 
 ## A tela de Timeline contra o mockup
 

@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { buildTodo } from '@/domain/testing/todoBuilders'
 import { buildTodoUpdate, toTodoDraft } from './editTodo'
 
+const NOW = '2026-09-03T12:00:00Z'
+
 describe('toTodoDraft', () => {
   it('Should fill the form with what the todo already has', () => {
     const todo = buildTodo({ description: 'Com o jurídico.', projectId: 'gateway' })
@@ -12,6 +14,7 @@ describe('toTodoDraft', () => {
       projectId: 'gateway',
       dueDate: '2026-09-03',
       priority: 'P2',
+      status: 'open',
       tagNames: ['1:1'],
     })
   })
@@ -22,14 +25,14 @@ describe('buildTodoUpdate', () => {
     const todo = buildTodo({ projectId: 'gateway', taskId: 'task-1' })
     const draft = toTodoDraft({ todo, tagNames: [] })
 
-    expect(buildTodoUpdate(todo, draft, []).taskId).toBe('task-1')
+    expect(buildTodoUpdate(todo, draft, [], NOW).taskId).toBe('task-1')
   })
 
   it('Should release the task when the project changes, as the link modal does', () => {
     const todo = buildTodo({ projectId: 'gateway', taskId: 'task-1' })
     const draft = { ...toTodoDraft({ todo, tagNames: [] }), projectId: 'portal' }
 
-    expect(buildTodoUpdate(todo, draft, []).taskId).toBeNull()
+    expect(buildTodoUpdate(todo, draft, [], NOW).taskId).toBeNull()
   })
 
   it('Should trim the title and turn a blank description into no description', () => {
@@ -39,7 +42,7 @@ describe('buildTodoUpdate', () => {
       title: '  Fechar  ',
       description: '  ',
     }
-    const update = buildTodoUpdate(todo, draft, [])
+    const update = buildTodoUpdate(todo, draft, [], NOW)
 
     expect(update.title).toBe('Fechar')
     expect(update.description).toBeNull()
@@ -49,7 +52,7 @@ describe('buildTodoUpdate', () => {
     const todo = buildTodo()
     const draft = { ...toTodoDraft({ todo, tagNames: [] }), tagNames: ['infra', ' infra ', ''] }
 
-    expect(buildTodoUpdate(todo, draft, ['tag-1']).tags).toEqual([
+    expect(buildTodoUpdate(todo, draft, ['tag-1'], NOW).tags).toEqual([
       { id: 'tag-1', name: 'infra' },
     ])
   })

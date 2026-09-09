@@ -1,6 +1,7 @@
-import type { EntityId, IsoDate, Priority } from '@/domain/schemas/primitives'
-import type { Todo } from '@/domain/schemas/todoSchema'
+import type { EntityId, IsoDate, IsoDateTime, Priority } from '@/domain/schemas/primitives'
+import { isBoardStatus, type Todo, type TodoBoardStatus } from '@/domain/schemas/todoSchema'
 import { normalizeTodoDraft, type NewTodoDraft, type TodoTagDraft } from './newTodo'
+import { buildTodoStatusChange } from './todoEdits'
 
 export type TodoUpdate = {
   id: EntityId
@@ -10,6 +11,8 @@ export type TodoUpdate = {
   taskId: EntityId | null
   dueDate: IsoDate | null
   priority: Priority
+  status: TodoBoardStatus
+  completedAt: IsoDateTime | null
   tags: readonly TodoTagDraft[]
 }
 
@@ -18,6 +21,8 @@ export type TodoEditContext = {
   tagNames: readonly string[]
 }
 
+// Nenhum caminho do app grava `cancelled`, e o formulário não oferece essa opção: se um todo
+// cancelado chegasse aqui, ele abriria como Backlog em vez de sem coluna nenhuma.
 export function toTodoDraft(context: TodoEditContext): NewTodoDraft {
   const { todo } = context
 
@@ -27,6 +32,7 @@ export function toTodoDraft(context: TodoEditContext): NewTodoDraft {
     projectId: todo.projectId,
     dueDate: todo.dueDate,
     priority: todo.priority,
+    status: isBoardStatus(todo.status) ? todo.status : 'open',
     tagNames: context.tagNames,
   }
 }
@@ -37,8 +43,11 @@ export function buildTodoUpdate(
   todo: Todo,
   draft: NewTodoDraft,
   tagIds: readonly EntityId[],
+  now: IsoDateTime,
 ): TodoUpdate {
   const normalized = normalizeTodoDraft(draft, tagIds)
+  // Quem já estava concluído mantém o carimbo original: reeditar o título não é reconcluir.
+  const change = buildTodoStatusChange(draft.status, now, todo.completedAt)
 
   return {
     id: todo.id,
@@ -48,6 +57,8 @@ export function buildTodoUpdate(
     taskId: draft.projectId === todo.projectId ? todo.taskId : null,
     dueDate: draft.dueDate,
     priority: draft.priority,
+    status: change.status,
+    completedAt: change.completedAt,
     tags: normalized.tags,
   }
 }

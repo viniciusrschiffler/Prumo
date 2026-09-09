@@ -4,9 +4,10 @@ import type { Phase } from '@/domain/schemas/phaseSchema'
 import type { EntityId, IsoDate, Priority } from '@/domain/schemas/primitives'
 import { PRIORITIES } from '@/domain/schemas/primitives'
 import type { Project } from '@/domain/schemas/projectSchema'
+import { TODO_BOARD_STATUSES, type TodoBoardStatus } from '@/domain/schemas/todoSchema'
 import type { ProjectWithPhase, TodoRow } from './todoRow'
 
-export const TODO_GROUP_MODES = ['due', 'project', 'priority'] as const
+export const TODO_GROUP_MODES = ['status', 'due', 'project', 'priority'] as const
 
 export type TodoGroupMode = (typeof TODO_GROUP_MODES)[number]
 
@@ -19,6 +20,7 @@ export const DUE_GROUP_BUCKETS = [...DUE_BUCKETS, 'doneToday', 'doneBefore'] as 
 export type DueGroupBucket = (typeof DUE_GROUP_BUCKETS)[number]
 
 export type TodoGroup =
+  | { id: string; kind: 'status'; status: TodoBoardStatus; items: readonly TodoRow[] }
   | { id: string; kind: 'due'; bucket: DueGroupBucket; items: readonly TodoRow[] }
   | {
       id: string
@@ -63,6 +65,16 @@ export function classifyDue(
 
 export function isDone(row: TodoRow): boolean {
   return row.todo.status === 'done'
+}
+
+// "Em aberto" é tudo que ainda pede trabalho, não só a coluna Backlog: quem está em progresso
+// ou bloqueado continua aberto.
+export function isOpen(row: TodoRow): boolean {
+  return row.todo.status !== 'done' && row.todo.status !== 'cancelled'
+}
+
+export function boardStatusOf(row: TodoRow): TodoBoardStatus | null {
+  return row.todo.status === 'cancelled' ? null : row.todo.status
 }
 
 // O botão revela todo concluído, de qualquer data, e o mockup só desenha "Concluídos hoje" —
@@ -122,10 +134,21 @@ function sorted(rows: readonly TodoRow[] | undefined): TodoRow[] {
   return (rows ?? []).toSorted(compareRows)
 }
 
+function groupByStatus(rows: readonly TodoRow[]): TodoGroup[] {
+  const byStatus = collect(rows, boardStatusOf)
+
+  return TODO_BOARD_STATUSES.map((status) => ({
+    id: `status-${status}`,
+    kind: 'status',
+    status,
+    items: sorted(byStatus.get(status)),
+  }))
+}
+
 function groupByDue(rows: readonly TodoRow[], context: TodoGroupingContext): TodoGroup[] {
   const byBucket = collect(rows, (row) => classifyDueGroup(row, context))
 
-  return DUE_GROUP_BUCKETS.filter((bucket) => byBucket.has(bucket)).map((bucket) => ({
+  return DUE_GROUP_BUCKETS.map((bucket) => ({
     id: `due-${bucket}`,
     kind: 'due',
     bucket,
@@ -139,15 +162,13 @@ function groupByProject(
 ): TodoGroup[] {
   const byProject = collect(rows, (row) => row.todo.projectId ?? WITHOUT_PROJECT_ID)
 
-  const named = projects
-    .filter((entry) => byProject.has(entry.project.id))
-    .map<TodoGroup>((entry) => ({
-      id: `project-${entry.project.id}`,
-      kind: 'project',
-      project: entry.project,
-      phase: entry.phase,
-      items: sorted(byProject.get(entry.project.id)),
-    }))
+  const named = projects.map<TodoGroup>((entry) => ({
+    id: `project-${entry.project.id}`,
+    kind: 'project',
+    project: entry.project,
+    phase: entry.phase,
+    items: sorted(byProject.get(entry.project.id)),
+  }))
 
   // Todo preso a projeto arquivado não tem grupo próprio, e sumir com ele esconderia
   // trabalho em aberto.
@@ -155,10 +176,6 @@ function groupByProject(
   const orphans = rows.filter(
     (row) => row.todo.projectId === null || !knownIds.has(row.todo.projectId),
   )
-
-  if (orphans.length === 0) {
-    return named
-  }
 
   return [
     ...named,
@@ -175,12 +192,31 @@ function groupByProject(
 function groupByPriority(rows: readonly TodoRow[]): TodoGroup[] {
   const byPriority = collect(rows, (row) => row.todo.priority)
 
-  return PRIORITIES.filter((priority) => byPriority.has(priority)).map((priority) => ({
+  return PRIORITIES.map((priority) => ({
     id: `priority-${priority}`,
     kind: 'priority',
     priority,
     items: sorted(byPriority.get(priority)),
   }))
+}
+
+// A lista e o quadro partem das mesmas divisões; quem decide o que fazer com a divisão vazia
+// é cada um deles.
+export function buildTodoGroups(
+  rows: readonly TodoRow[],
+  mode: TodoGroupMode,
+  context: TodoGroupingContext,
+  projects: readonly ProjectWithPhase[],
+): TodoGroup[] {
+  if (mode === 'status') {
+    return groupByStatus(rows)
+  }
+
+  if (mode === 'project') {
+    return groupByProject(rows, projects)
+  }
+
+  return mode === 'priority' ? groupByPriority(rows) : groupByDue(rows, context)
 }
 
 export function groupTodos(
@@ -189,9 +225,7 @@ export function groupTodos(
   context: TodoGroupingContext,
   projects: readonly ProjectWithPhase[],
 ): TodoGroup[] {
-  if (mode === 'project') {
-    return groupByProject(rows, projects)
-  }
-
-  return mode === 'priority' ? groupByPriority(rows) : groupByDue(rows, context)
+  return buildTodoGroups(rows, mode, context, projects).filter(
+    (group) => group.items.length > 0,
+  )
 }

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { classNames } from './classNames'
 
-export type StatCardTone = 'default' | 'muted' | 'ok' | 'danger' | 'warn'
+export type StatCardTone = 'default' | 'muted' | 'ok' | 'danger' | 'warn' | 'info'
 
 // Hoje, Capacidade e TodoList imprimem o número em 18px; Painéis é a única das nove telas que
 // o imprime no mesmo passo do título de tela, em mono.
@@ -13,6 +13,7 @@ const TONE_CLASSES: Record<StatCardTone, string> = {
   ok: 'text-ok',
   danger: 'text-danger',
   warn: 'text-warn',
+  info: 'text-info',
 }
 
 const SIZE_CLASSES: Record<StatCardSize, string> = {

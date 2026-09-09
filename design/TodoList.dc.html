@@ -78,6 +78,17 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
       <div style="display:flex;align-items:center;gap:8px;height:28px;padding:0 8px;border-radius:6px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);"><span style="font-size:13px;">Painéis</span></div>
     </nav>
 
+    <div style="margin-top:14px;padding:0 14px 6px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Status</div>
+    <div style="display:grid;gap:2px;padding:0 10px;">
+      <sc-for list="{{ statusCounts }}" as="s" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;gap:8px;height:24px;padding:0 4px;border-radius:5px;cursor:pointer;" style-hover="background:var(--neutral-soft);">
+          <span style="width:7px;height:7px;border-radius:2px;background:{{ s.color }};"></span>
+          <span style="font-size:12px;color:var(--text2);">{{ s.label }}</span>
+          <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text3);">{{ s.count }}</span>
+        </div>
+      </sc-for>
+    </div>
+
     <div style="margin-top:14px;padding:0 14px 6px;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);">Tags</div>
     <div style="display:flex;flex-wrap:wrap;gap:4px;padding:0 14px;">
       <span style="padding:1px 7px;border:1px solid var(--border);border-radius:5px;font-size:11px;color:var(--text2);cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);">1:1</span>
@@ -101,9 +112,14 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
           <h1 style="margin:0;font-size:20px;font-weight:600;letter-spacing:-0.01em;">TodoList</h1>
           <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text3);">{{ subhead }}</span>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;margin-left:10px;">
+        <div style="display:flex;padding:2px;gap:2px;margin-left:6px;background:var(--sunken);border:1px solid var(--border);border-radius:6px;">
+          <button onClick="{{ setLista }}" style="border:0;border-radius:4px;padding:5px 11px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgLista }};color:{{ fgLista }};">Lista</button>
+          <button onClick="{{ setKanban }}" style="border:0;border-radius:4px;padding:5px 11px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgKanban }};color:{{ fgKanban }};">Kanban</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-size:11px;color:var(--text3);">Agrupar por</span>
           <div style="display:flex;padding:2px;gap:2px;background:var(--sunken);border:1px solid var(--border);border-radius:6px;">
+            <button onClick="{{ setGStatus }}" style="border:0;border-radius:4px;padding:4px 10px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgStatus }};color:{{ fgStatus }};">Status</button>
             <button onClick="{{ setVenc }}" style="border:0;border-radius:4px;padding:4px 10px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgVenc }};color:{{ fgVenc }};">Vencimento</button>
             <button onClick="{{ setProj }}" style="border:0;border-radius:4px;padding:4px 10px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgProj }};color:{{ fgProj }};">Projeto</button>
             <button onClick="{{ setPrio }}" style="border:0;border-radius:4px;padding:4px 10px;font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;background:{{ bgPrio }};color:{{ fgPrio }};">Prioridade</button>
@@ -124,13 +140,13 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
             <span style="padding:1px 5px;border:1px solid var(--border);border-radius:3px;background:var(--sunken);font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);">↵</span>
           </span>
         </div>
-        <span style="font-size:11px;color:var(--text3);white-space:nowrap;">marcar <span style="padding:0 5px;border:1px solid var(--border);border-radius:3px;font-family:'IBM Plex Mono',monospace;">espaço</span> · adiar <span style="padding:0 5px;border:1px solid var(--border);border-radius:3px;font-family:'IBM Plex Mono',monospace;">S</span> · vincular projeto <span style="padding:0 5px;border:1px solid var(--border);border-radius:3px;font-family:'IBM Plex Mono',monospace;">@</span></span>
+        <span style="font-size:11px;color:var(--text3);white-space:nowrap;">{{ hintLine }}</span>
       </div>
     </header>
 
-    <div style="flex:1;display:grid;grid-template-columns:1fr 320px;overflow:hidden;">
+    <div style="flex:1;display:grid;grid-template-columns:{{ mainCols }};overflow:hidden;">
 
-      <div style="overflow:auto;padding:14px 20px 24px;display:grid;gap:14px;align-content:start;grid-auto-rows:max-content;">
+      <div style="display:{{ listaDisplay }};overflow:auto;padding:14px 20px 24px;gap:14px;align-content:start;grid-auto-rows:max-content;">
         <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
           <section style="display:grid;gap:7px;">
             <div style="display:flex;align-items:center;gap:9px;">
@@ -142,7 +158,7 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
             </div>
             <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);overflow:hidden;">
               <sc-for list="{{ g.itens }}" as="t" hint-placeholder-count="3">
-                <div style="display:grid;grid-template-columns:24px 1fr auto auto auto 24px;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
+                <div style="display:grid;grid-template-columns:24px 1fr auto auto auto auto 24px;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--border);" style-hover="background:var(--sunken);">
                   <span onClick="{{ t.toggle }}" style="width:15px;height:15px;border-radius:4px;border:1px solid {{ t.boxBorder }};background:{{ t.boxBg }};display:inline-flex;align-items:center;justify-content:center;color:var(--accent-fg);font-size:9px;cursor:pointer;">{{ t.check }}</span>
                   <span style="font-size:13px;color:{{ t.textColor }};text-decoration:{{ t.strike }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.titulo }}</span>
                   <span style="display:flex;gap:4px;">
@@ -151,6 +167,7 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
                     </sc-for>
                   </span>
                   <span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:{{ t.projColor }};white-space:nowrap;"><span style="width:3px;height:11px;border-radius:2px;background:{{ t.faseColor }};display:{{ t.projDotDisplay }};"></span>{{ t.projeto }}</span>
+                  <span style="display:inline-flex;align-items:center;gap:5px;padding:1px 7px;border-radius:999px;background:{{ t.stBg }};color:{{ t.stFg }};font-size:10px;font-weight:600;white-space:nowrap;"><span style="width:5px;height:5px;border-radius:50%;background:{{ t.stFg }};"></span>{{ t.stLabel }}</span>
                   <span style="display:inline-flex;align-items:center;gap:8px;">
                     <span style="padding:1px 6px;border-radius:4px;background:{{ t.prioBg }};color:{{ t.prioFg }};font-size:10px;font-weight:600;">{{ t.prio }}</span>
                     <span style="min-width:52px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:{{ t.dueColor }};">{{ t.due }}</span>
@@ -158,9 +175,6 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
                   <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:4px;color:var(--text3);font:500 12px 'IBM Plex Mono',monospace;cursor:pointer;" style-hover="background:var(--neutral-soft);color:var(--text);">⋯</span>
                 </div>
               </sc-for>
-              <div style="display:{{ addRowDisplay }};align-items:center;padding:5px 12px 7px;">
-                <button onClick="{{ openNew }}" style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border:1px dashed var(--border-strong);border-radius:5px;background:transparent;color:var(--text3);font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="color:var(--text);border-color:var(--text3);">+ Novo item</button>
-              </div>
             </div>
           </section>
         </sc-for>
@@ -172,7 +186,47 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
         </div>
       </div>
 
-      <div style="border-left:1px solid var(--border);background:var(--sunken);overflow:auto;padding:14px;display:grid;gap:14px;align-content:start;grid-auto-rows:max-content;">
+      <div style="display:{{ kanbanDisplay }};overflow:auto;padding:14px 20px 20px;">
+        <div style="display:flex;gap:12px;align-items:stretch;height:100%;min-height:0;">
+          <sc-for list="{{ columns }}" as="c" hint-placeholder-count="4">
+            <section onDragOver="{{ c.over }}" onDragLeave="{{ c.leave }}" onDrop="{{ c.drop }}" style="flex:1 1 240px;min-width:240px;max-width:340px;display:flex;flex-direction:column;min-height:0;border:1px solid {{ c.border }};border-radius:10px;background:{{ c.bg }};box-shadow:{{ c.shadow }};overflow:hidden;">
+              <div style="display:flex;align-items:center;gap:8px;padding:10px 11px 9px;border-bottom:1px solid var(--border);background:var(--panel);">
+                <span style="width:8px;height:8px;border-radius:2px;background:{{ c.color }};"></span>
+                <h2 style="margin:0;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:{{ c.titleColor }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ c.titulo }}</h2>
+                <span style="margin-left:auto;padding:0 6px;border-radius:999px;background:var(--sunken);font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:var(--text2);">{{ c.count }}</span>
+              </div>
+              <div style="flex:1;min-height:0;overflow:auto;display:grid;gap:8px;padding:9px;align-content:start;">
+                <sc-for list="{{ c.itens }}" as="t" hint-placeholder-count="3">
+                  <article draggable="true" onDragStart="{{ t.dragStart }}" onDragEnd="{{ t.dragEnd }}" style="display:grid;gap:7px;padding:9px 10px;border:1px solid var(--border);border-left:3px solid {{ t.prioFg }};border-radius:8px;background:var(--panel);box-shadow:var(--shadow);cursor:grab;opacity:{{ t.opacity }};" style-hover="border-color:var(--border-strong);">
+                    <div style="display:flex;align-items:flex-start;gap:8px;">
+                      <span onClick="{{ t.toggle }}" style="margin-top:1px;flex:none;width:14px;height:14px;border-radius:4px;border:1px solid {{ t.boxBorder }};background:{{ t.boxBg }};display:inline-flex;align-items:center;justify-content:center;color:var(--accent-fg);font-size:9px;cursor:pointer;">{{ t.check }}</span>
+                      <span style="font-size:12.5px;line-height:1.35;color:{{ t.textColor }};text-decoration:{{ t.strike }};text-wrap:pretty;">{{ t.titulo }}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                      <span style="padding:1px 6px;border-radius:4px;background:{{ t.prioBg }};color:{{ t.prioFg }};font-size:10px;font-weight:600;">{{ t.prio }}</span>
+                      <span style="display:{{ t.stChipDisplay }};align-items:center;gap:5px;padding:1px 7px;border-radius:999px;background:{{ t.stBg }};color:{{ t.stFg }};font-size:10px;font-weight:600;"><span style="width:5px;height:5px;border-radius:50%;background:{{ t.stFg }};"></span>{{ t.stLabel }}</span>
+                      <sc-for list="{{ t.tags }}" as="tg" hint-placeholder-count="1">
+                        <span style="padding:0 6px;border:1px solid var(--border);border-radius:4px;font-size:10px;color:var(--text3);">{{ tg.nome }}</span>
+                      </sc-for>
+                      <span style="margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:11px;font-variant-numeric:tabular-nums;color:{{ t.dueColor }};">{{ t.due }}</span>
+                    </div>
+                    <div style="display:{{ t.projRowDisplay }};align-items:center;gap:6px;padding-top:6px;border-top:1px solid var(--border);">
+                      <span style="width:3px;height:11px;border-radius:2px;background:{{ t.faseColor }};"></span>
+                      <span style="font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ t.projeto }}</span>
+                    </div>
+                  </article>
+                </sc-for>
+                <div style="display:{{ c.emptyDisplay }};align-items:center;justify-content:center;height:64px;border:1px dashed var(--border-strong);border-radius:8px;font-size:11px;color:var(--text3);">arraste um card para cá</div>
+              </div>
+              <div style="padding:8px 9px;border-top:1px solid var(--border);">
+                <button onClick="{{ c.add }}" style="width:100%;height:26px;border:1px dashed var(--border-strong);border-radius:6px;background:transparent;color:var(--text3);font:500 11px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="color:var(--text);border-color:var(--text3);">+ Novo item</button>
+              </div>
+            </section>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="border-left:1px solid var(--border);background:var(--sunken);overflow:auto;padding:14px;display:{{ railDisplay }};gap:14px;align-content:start;grid-auto-rows:max-content;">
         <section style="display:grid;gap:8px;">
           <h2 style="margin:0;font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);">Esta semana</h2>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -181,16 +235,16 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
               <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ok);">{{ doneN }}</span>
             </div>
             <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:10px;display:grid;gap:2px;">
+              <span style="font-size:11px;color:var(--text2);">Bloqueados</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--danger);">{{ blockedN }}</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:10px;display:grid;gap:2px;">
+              <span style="font-size:11px;color:var(--text2);">Em progresso</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--info);">{{ wipN }}</span>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:10px;display:grid;gap:2px;">
               <span style="font-size:11px;color:var(--text2);">Atrasados</span>
-              <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--danger);">{{ lateN }}</span>
-            </div>
-            <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:10px;display:grid;gap:2px;">
-              <span style="font-size:11px;color:var(--text2);">Em aberto</span>
-              <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;">{{ openCount }}</span>
-            </div>
-            <div style="border:1px solid var(--border);border-radius:8px;background:var(--panel);padding:10px;display:grid;gap:2px;">
-              <span style="font-size:11px;color:var(--text2);">Sem projeto</span>
-              <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text2);">{{ noProjN }}</span>
+              <span style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--warn);">{{ lateN }}</span>
             </div>
           </div>
         </section>
@@ -225,7 +279,6 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
     </div>
   </main>
 
-  <!-- NOVO ITEM -->
   <div style="display:{{ newDisplay }};position:fixed;inset:0;background:oklch(0.2 0.02 265 / 0.4);align-items:center;justify-content:center;z-index:40;">
     <div style="width:560px;border:1px solid var(--border-strong);border-radius:12px;background:var(--panel);box-shadow:var(--shadow-lg);overflow:hidden;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);">
@@ -262,6 +315,15 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
         </div>
 
         <div style="display:grid;gap:5px;">
+          <span style="font-size:11px;color:var(--text2);">Status</span>
+          <div style="display:flex;gap:6px;">
+            <sc-for list="{{ statusOptions }}" as="s" hint-placeholder-count="4">
+              <button onClick="{{ s.pick }}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;height:28px;border:1px solid {{ s.border }};border-radius:6px;background:{{ s.bg }};color:{{ s.fg }};font:600 11px 'IBM Plex Sans',sans-serif;cursor:pointer;"><span style="width:6px;height:6px;border-radius:50%;background:{{ s.dot }};"></span>{{ s.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:grid;gap:5px;">
           <span style="font-size:11px;color:var(--text2);">Prioridade</span>
           <div style="display:flex;gap:6px;">
             <sc-for list="{{ prioOptions }}" as="p" hint-placeholder-count="4">
@@ -277,7 +339,7 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
       </div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-top:1px solid var(--border);background:var(--sunken);">
-        <span style="font-size:11px;color:var(--text3);">A seção é definida pela data limite — sem data cai em “Sem data”.</span>
+        <span style="font-size:11px;color:var(--text3);">No Kanban, arrastar o card entre colunas atualiza o campo do agrupamento.</span>
         <div style="display:flex;gap:8px;">
           <button onClick="{{ closeNew }}" style="height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:6px;background:var(--panel);color:var(--text);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;">Cancelar</button>
           <button onClick="{{ saveNew }}" style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid transparent;border-radius:6px;background:var(--accent);color:var(--accent-fg);font:500 12px 'IBM Plex Sans',sans-serif;cursor:pointer;" style-hover="background:var(--accent-hover);">Criar item<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:0.75;">⌘↵</span></button>
@@ -286,16 +348,42 @@ a:hover{color:var(--accent-hover);text-decoration:underline;}
     </div>
   </div>
 </div>
-
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;}}">
 class Component extends DCLogic {
+  seed = [
+    { id: 1, titulo: "Fechar escopo do módulo de conciliação com o time financeiro", due: "hoje", dueKey: "hoje", prio: "P0", proj: "Migração do gateway", fase: "dev", tags: ["arquitetura"], status: "progresso" },
+    { id: 2, titulo: "Responder proposta de replanejamento do parceiro", due: "+2d", dueKey: "atraso", prio: "P1", proj: "Portal do parceiro", fase: "he", tags: [], status: "bloqueado" },
+    { id: 3, titulo: "1:1 com Rafael — carga acima de 100%", due: "hoje", dueKey: "hoje", prio: "P2", proj: null, fase: null, tags: ["1:1"], status: "backlog" },
+    { id: 4, titulo: "Revisar baseline antes do comitê", due: "14:02", dueKey: "hoje", prio: "P2", proj: "App de campo v2", fase: "hi", tags: [], status: "feito" },
+    { id: 5, titulo: "Aprovar vaga de dev pleno com o RH", due: "+5d", dueKey: "atraso", prio: "P1", proj: null, fase: null, tags: ["contratação"], status: "bloqueado" },
+    { id: 6, titulo: "Escrever ADR do roteador de pagamentos", due: "amanhã", dueKey: "semana", prio: "P1", proj: "Migração do gateway", fase: "dev", tags: ["arquitetura"], status: "progresso" },
+    { id: 7, titulo: "Alinhar janela de cutover com a operação", due: "05/09", dueKey: "semana", prio: "P0", proj: "Observabilidade", fase: "prod", tags: ["reunião"], status: "progresso" },
+    { id: 8, titulo: "Definir substituto de Rafael em Observabilidade", due: "05/09", dueKey: "semana", prio: "P1", proj: "Observabilidade", fase: "prod", tags: [], status: "backlog" },
+    { id: 9, titulo: "Consolidar notas da retro de agosto", due: "09/09", dueKey: "depois", prio: "P2", proj: null, fase: null, tags: ["pessoal"], status: "backlog" },
+    { id: 10, titulo: "Revisar plano de contratação do Q4", due: "15/09", dueKey: "depois", prio: "P2", proj: null, fase: null, tags: ["contratação"], status: "backlog" },
+    { id: 11, titulo: "Preparar demo interna do app de campo", due: "sem data", dueKey: "semdata", prio: "P3", proj: "App de campo v2", fase: "hi", tags: [], status: "backlog" },
+    { id: 12, titulo: "Ler proposta de observabilidade do fornecedor", due: "sem data", dueKey: "semdata", prio: "P3", proj: null, fase: null, tags: ["pessoal"], status: "backlog" },
+    { id: 13, titulo: "Homologar novo provedor de antifraude", due: "08/09", dueKey: "depois", prio: "P1", proj: "Migração do gateway", fase: "dev", tags: [], status: "feito" },
+  ];
+
   state = {
-    theme: null, group: "vencimento", showDone: false, done: {}, novo: false,
-    form: { nome: "", desc: "", proj: "", due: "", prio: "P2" },
-    extras: [],
+    theme: null, view: "kanban", group: "status", showDone: false, novo: false,
+    items: this.seed, dragId: null, overCol: null,
+    form: { nome: "", desc: "", proj: "", due: "", prio: "P2", status: "backlog" },
   };
   nextId = 100;
+
+  statusDef = {
+    backlog: { label: "Backlog", fg: "var(--text2)", bg: "var(--neutral-soft)", bar: "var(--border-strong)" },
+    progresso: { label: "Em progresso", fg: "var(--info)", bg: "var(--info-soft)", bar: "var(--info)" },
+    feito: { label: "Feito", fg: "var(--ok)", bg: "var(--ok-soft)", bar: "var(--ok)" },
+    bloqueado: { label: "Bloqueado", fg: "var(--danger)", bg: "var(--danger-soft)", bar: "var(--danger)" },
+  };
+  statusOrder = ["backlog", "progresso", "bloqueado", "feito"];
+  fase = { dev: "var(--ph-dev)", hi: "var(--ph-hi)", he: "var(--ph-he)", prod: "var(--ph-prod)" };
+  dueLabels = { atraso: "+1d", hoje: "hoje", semana: "amanhã", depois: "10/09", semdata: "sem data" };
+  projNames = ["Migração do gateway", "Portal do parceiro", "Observabilidade", "App de campo v2"];
 
   classify(due) {
     if (!due) return { key: "semdata", label: "sem data" };
@@ -315,33 +403,38 @@ class Component extends DCLogic {
   faseDe(proj) {
     return { "Migração do gateway": "dev", "Portal do parceiro": "he", "Observabilidade": "prod", "App de campo v2": "hi" }[proj] || null;
   }
-
-  todos = [
-    { id: 1, titulo: "Fechar escopo do módulo de conciliação com o time financeiro", due: "hoje", dueKey: "hoje", prio: "P0", proj: "Migração do gateway", fase: "dev", tags: ["arquitetura"] },
-    { id: 2, titulo: "Responder proposta de replanejamento do parceiro", due: "+2d", dueKey: "atraso", prio: "P1", proj: "Portal do parceiro", fase: "he", tags: [] },
-    { id: 3, titulo: "1:1 com Rafael — carga acima de 100%", due: "hoje", dueKey: "hoje", prio: "P2", proj: null, fase: null, tags: ["1:1"] },
-    { id: 4, titulo: "Revisar baseline antes do comitê", due: "14:02", dueKey: "feito", prio: "P2", proj: "App de campo v2", fase: "hi", tags: [], feito: true },
-    { id: 5, titulo: "Aprovar vaga de dev pleno com o RH", due: "+5d", dueKey: "atraso", prio: "P1", proj: null, fase: null, tags: ["contratação"] },
-    { id: 6, titulo: "Escrever ADR do roteador de pagamentos", due: "amanhã", dueKey: "semana", prio: "P1", proj: "Migração do gateway", fase: "dev", tags: ["arquitetura"] },
-    { id: 7, titulo: "Alinhar janela de cutover com a operação", due: "sex 05/09", dueKey: "semana", prio: "P0", proj: "Observabilidade", fase: "prod", tags: ["reunião"] },
-    { id: 8, titulo: "Definir substituto de Rafael em Observabilidade", due: "sex 05/09", dueKey: "semana", prio: "P1", proj: "Observabilidade", fase: "prod", tags: [] },
-    { id: 9, titulo: "Consolidar notas da retro de agosto", due: "09/09", dueKey: "depois", prio: "P2", proj: null, fase: null, tags: ["pessoal"] },
-    { id: 10, titulo: "Revisar plano de contratação do Q4", due: "15/09", dueKey: "depois", prio: "P2", proj: null, fase: null, tags: ["contratação"] },
-    { id: 11, titulo: "Preparar demo interna do app de campo", due: "sem data", dueKey: "semdata", prio: "P3", proj: "App de campo v2", fase: "hi", tags: [] },
-    { id: 12, titulo: "Ler proposta de observabilidade do fornecedor", due: "sem data", dueKey: "semdata", prio: "P3", proj: null, fase: null, tags: ["pessoal"] },
-  ];
-
-  fase = { dev: "var(--ph-dev)", hi: "var(--ph-hi)", he: "var(--ph-he)", prod: "var(--ph-prod)" };
-
   prioStyle(p) {
     if (p === "P0") return ["var(--danger-soft)", "var(--danger)"];
     if (p === "P1") return ["var(--warn-soft)", "var(--warn)"];
-    return ["var(--neutral-soft)", "var(--text2)"];
+    if (p === "P2") return ["var(--neutral-soft)", "var(--text2)"];
+    return ["var(--neutral-soft)", "var(--text3)"];
+  }
+
+  patch(id, fn) {
+    this.setState(s => ({ items: s.items.map(it => (it.id === id ? { ...it, ...fn(it) } : it)) }));
+  }
+
+  moveTo(colKey) {
+    const id = this.state.dragId;
+    const g = this.state.group;
+    this.setState({ overCol: null, dragId: null });
+    if (id == null) return;
+    this.patch(id, (it) => {
+      if (g === "status") return { status: colKey };
+      if (g === "prioridade") return { prio: colKey };
+      if (g === "projeto") {
+        const proj = colKey === "sem" ? null : colKey;
+        return { proj, fase: this.faseDe(proj) };
+      }
+      if (colKey === "feito") return { status: "feito" };
+      return { dueKey: colKey, due: this.dueLabels[colKey], status: it.status === "feito" ? "progresso" : it.status };
+    });
   }
 
   item(t) {
-    const done = t.feito || !!this.state.done[t.id];
+    const done = t.status === "feito";
     const ps = this.prioStyle(t.prio);
+    const sd = this.statusDef[t.status] || this.statusDef.backlog;
     return {
       titulo: t.titulo,
       check: done ? "✓" : "",
@@ -349,71 +442,126 @@ class Component extends DCLogic {
       boxBorder: done ? "var(--accent)" : "var(--border-strong)",
       textColor: done ? "var(--text3)" : "var(--text)",
       strike: done ? "line-through" : "none",
-      toggle: () => this.setState(s => ({ done: { ...s.done, [t.id]: !(t.feito || s.done[t.id]) } })),
+      toggle: () => this.patch(t.id, (it) => ({ status: it.status === "feito" ? "progresso" : "feito" })),
       tags: t.tags.map(n => ({ nome: n })),
       projeto: t.proj || "sem projeto",
       projColor: t.proj ? "var(--text2)" : "var(--text3)",
       faseColor: this.fase[t.fase] || "var(--border-strong)",
       projDotDisplay: t.proj ? "inline-block" : "none",
+      projRowDisplay: t.proj ? "flex" : "none",
       prio: t.prio, prioBg: done ? "var(--neutral-soft)" : ps[0], prioFg: done ? "var(--text3)" : ps[1],
       due: t.due,
       dueColor: done ? "var(--text3)" : t.dueKey === "atraso" ? "var(--danger)" : t.dueKey === "hoje" ? "var(--text)" : "var(--text2)",
+      stLabel: sd.label, stBg: sd.bg, stFg: sd.fg,
+      stChipDisplay: this.state.group === "status" ? "none" : "inline-flex",
+      opacity: this.state.dragId === t.id ? 0.45 : 1,
+      dragStart: (e) => {
+        if (e.dataTransfer) { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(t.id)); }
+        this.setState({ dragId: t.id });
+      },
+      dragEnd: () => this.setState({ dragId: null, overCol: null }),
     };
   }
 
-  renderVals() {
-    const theme = this.state.theme ?? this.props.theme ?? "light";
+  columnDefs(pool) {
     const g = this.state.group;
-    const showDone = this.state.showDone;
-    const on = "var(--panel)", off = "transparent";
-    const done = (t) => t.feito || !!this.state.done[t.id];
-    const all = this.todos.concat(this.state.extras);
-    const pool = all.filter(t => showDone || !done(t));
-    const f = this.state.form;
-    const cls = this.classify(f.due);
-
-    let defs;
+    if (g === "status") {
+      return this.statusOrder.map(k => {
+        const sd = this.statusDef[k];
+        return { key: k, titulo: sd.label, color: sd.bar, titleColor: sd.fg, meta: "", itens: pool.filter(t => t.status === k) };
+      });
+    }
     if (g === "vencimento") {
-      defs = [
+      const defs = [
         { key: "atraso", titulo: "Atrasados", color: "var(--danger)", titleColor: "var(--danger)", meta: "resolver ou adiar" },
         { key: "hoje", titulo: "Hoje", color: "var(--accent)", titleColor: "var(--text)", meta: "qui, 03/09" },
         { key: "semana", titulo: "Esta semana", color: "var(--border-strong)", titleColor: "var(--text2)", meta: "até 06/09" },
         { key: "depois", titulo: "Depois", color: "var(--border-strong)", titleColor: "var(--text2)", meta: "" },
         { key: "semdata", titulo: "Sem data", color: "var(--border-strong)", titleColor: "var(--text2)", meta: "backlog pessoal" },
-        { key: "feito", titulo: "Concluídos hoje", color: "var(--ok)", titleColor: "var(--ok)", meta: "" },
+        { key: "feito", titulo: "Concluídos", color: "var(--ok)", titleColor: "var(--ok)", meta: "" },
       ];
-      defs = defs.map(d => ({ ...d, itens: pool.filter(t => (done(t) ? "feito" : t.dueKey) === d.key) }));
-    } else if (g === "projeto") {
-      const names = ["Migração do gateway", "Portal do parceiro", "Observabilidade", "App de campo v2", null];
-      defs = names.map(n => ({
+      return defs.map(d => ({ ...d, itens: pool.filter(t => (t.status === "feito" ? "feito" : t.dueKey) === d.key) }));
+    }
+    if (g === "projeto") {
+      return this.projNames.concat([null]).map(n => ({
         key: n || "sem",
         titulo: n || "Sem projeto",
         color: n ? this.fase[this.faseDe(n)] || "var(--border-strong)" : "var(--border-strong)",
         titleColor: "var(--text2)", meta: "",
         itens: pool.filter(t => t.proj === n),
       }));
-    } else {
-      defs = ["P0", "P1", "P2", "P3"].map(p => ({
-        key: p, titulo: p === "P0" ? "P0 · urgente" : p === "P1" ? "P1 · alta" : p === "P2" ? "P2 · normal" : "P3 · baixa",
-        color: p === "P0" ? "var(--danger)" : p === "P1" ? "var(--warn)" : "var(--border-strong)",
-        titleColor: "var(--text2)", meta: "",
-        itens: pool.filter(t => t.prio === p),
-      }));
     }
+    return ["P0", "P1", "P2", "P3"].map(p => ({
+      key: p,
+      titulo: p === "P0" ? "P0 · urgente" : p === "P1" ? "P1 · alta" : p === "P2" ? "P2 · normal" : "P3 · baixa",
+      color: p === "P0" ? "var(--danger)" : p === "P1" ? "var(--warn)" : "var(--border-strong)",
+      titleColor: "var(--text2)", meta: "",
+      itens: pool.filter(t => t.prio === p),
+    }));
+  }
+
+  renderVals() {
+    const theme = this.state.theme ?? this.props.theme ?? "light";
+    const g = this.state.group;
+    const view = this.state.view;
+    const showDone = this.state.showDone;
+    const on = "var(--panel)", off = "transparent";
+    const all = this.state.items;
+    const done = (t) => t.status === "feito";
+    const keepDone = showDone || g === "status" || g === "vencimento";
+    const pool = keepDone ? all : all.filter(t => !done(t));
+    const f = this.state.form;
+    const cls = this.classify(f.due);
+
+    const defs = this.columnDefs(pool);
 
     const groups = defs.filter(d => d.itens.length).map(d => ({
       titulo: d.titulo, color: d.color, titleColor: d.titleColor, meta: d.meta,
       count: d.itens.length, itens: d.itens.map(t => this.item(t)),
     }));
 
+    const columns = defs.map(d => ({
+      titulo: d.titulo, color: d.color, titleColor: d.titleColor,
+      count: d.itens.length, itens: d.itens.map(t => this.item(t)),
+      emptyDisplay: d.itens.length ? "none" : "flex",
+      border: this.state.overCol === d.key ? "var(--accent)" : "var(--border)",
+      bg: this.state.overCol === d.key ? "var(--accent-soft)" : "var(--sunken)",
+      shadow: this.state.overCol === d.key ? "0 0 0 3px var(--accent-soft)" : "none",
+      over: (e) => {
+        e.preventDefault();
+        if (this.state.overCol !== d.key) this.setState({ overCol: d.key });
+      },
+      leave: (e) => {
+        if (e.currentTarget.contains(e.relatedTarget)) return;
+        if (this.state.overCol === d.key) this.setState({ overCol: null });
+      },
+      drop: (e) => { e.preventDefault(); this.moveTo(d.key); },
+      add: () => this.setState(s => ({
+        novo: true,
+        form: {
+          ...s.form,
+          status: g === "status" ? d.key : s.form.status,
+          prio: g === "prioridade" ? d.key : s.form.prio,
+          proj: g === "projeto" ? (d.key === "sem" ? "" : d.key) : s.form.proj,
+        },
+      })),
+    }));
+
     const openTodos = all.filter(t => !done(t));
     const openN = openTodos.length;
     const lateN = openTodos.filter(t => t.dueKey === "atraso").length;
+    const wipN = all.filter(t => t.status === "progresso").length;
+    const blockedN = all.filter(t => t.status === "bloqueado").length;
     const linkedN = openTodos.filter(t => t.proj).length;
     const noProjN = openN - linkedN;
-    const doneN = all.filter(t => done(t)).length;
-    const projNames = ["Migração do gateway", "Portal do parceiro", "Observabilidade", "App de campo v2"];
-    const byProject = projNames.map(n => ({
+    const doneN = all.filter(done).length;
+
+    const statusCounts = this.statusOrder.map(k => ({
+      label: this.statusDef[k].label, color: this.statusDef[k].bar,
+      count: all.filter(t => t.status === k).length,
+    }));
+
+    const byProject = this.projNames.map(n => ({
       nome: n,
       color: this.fase[this.faseDe(n)] || "var(--border-strong)",
       count: openTodos.filter(t => t.proj === n).length,
@@ -432,7 +580,20 @@ class Component extends DCLogic {
       };
     });
 
-    const previewGroup = g === "vencimento" ? this.groupName(cls.key)
+    const statusOptions = this.statusOrder.map(k => {
+      const sd = this.statusDef[k];
+      const sel = f.status === k;
+      return {
+        label: sd.label, dot: sd.bar,
+        pick: () => this.setState(s => ({ form: { ...s.form, status: k } })),
+        bg: sel ? sd.bg : "transparent",
+        fg: sel ? sd.fg : "var(--text2)",
+        border: sel ? sd.fg : "var(--border)",
+      };
+    });
+
+    const previewGroup = g === "status" ? this.statusDef[f.status].label
+      : g === "vencimento" ? this.groupName(cls.key)
       : g === "projeto" ? (f.proj || "Sem projeto")
       : (f.prio + (f.prio === "P0" ? " · urgente" : f.prio === "P1" ? " · alta" : f.prio === "P2" ? " · normal" : " · baixa"));
 
@@ -440,22 +601,32 @@ class Component extends DCLogic {
       theme,
       themeGlyph: theme === "dark" ? "☀" : "☾",
       toggleTheme: () => this.setState({ theme: theme === "dark" ? "light" : "dark" }),
+      setLista: () => this.setState({ view: "lista" }),
+      setKanban: () => this.setState({ view: "kanban" }),
+      bgLista: view === "lista" ? on : off, fgLista: view === "lista" ? "var(--text)" : "var(--text2)",
+      bgKanban: view === "kanban" ? on : off, fgKanban: view === "kanban" ? "var(--text)" : "var(--text2)",
+      mainCols: view === "kanban" ? "1fr" : "1fr 320px",
+      railDisplay: view === "kanban" ? "none" : "grid",
+      listaDisplay: view === "lista" ? "grid" : "none",
+      kanbanDisplay: view === "kanban" ? "block" : "none",
+      hintLine: view === "kanban" ? "arraste o card entre colunas para atualizar · marcar espaço · adiar S" : "marcar espaço · adiar S · vincular projeto @",
+      setGStatus: () => this.setState({ group: "status" }),
       setVenc: () => this.setState({ group: "vencimento" }),
       setProj: () => this.setState({ group: "projeto" }),
       setPrio: () => this.setState({ group: "prioridade" }),
+      bgStatus: g === "status" ? on : off, fgStatus: g === "status" ? "var(--text)" : "var(--text2)",
       bgVenc: g === "vencimento" ? on : off, fgVenc: g === "vencimento" ? "var(--text)" : "var(--text2)",
       bgProj: g === "projeto" ? on : off, fgProj: g === "projeto" ? "var(--text)" : "var(--text2)",
       bgPrio: g === "prioridade" ? on : off, fgPrio: g === "prioridade" ? "var(--text)" : "var(--text2)",
-      groups,
+      groups, columns,
       openCount: openN,
-      subhead: openN + " em aberto · " + lateN + " atrasados · " + linkedN + " vinculados a projeto",
-      lateN, linkedN, noProjN, doneN, byProject,
+      subhead: openN + " em aberto · " + wipN + " em progresso · " + blockedN + " bloqueados · " + lateN + " atrasados",
+      lateN, wipN, blockedN, linkedN, noProjN, doneN, byProject, statusCounts,
       doneLabel: showDone ? "Ocultar concluídos" : "Mostrar concluídos",
       bgDone: showDone ? "var(--accent-soft)" : "var(--panel)",
       fgDone: showDone ? "var(--accent)" : "var(--text)",
       toggleDone: () => this.setState({ showDone: !showDone }),
       emptyDisplay: groups.length ? "none" : "grid",
-      addRowDisplay: "none",
       newDisplay: this.state.novo ? "flex" : "none",
       openNew: () => this.setState({ novo: true }),
       closeNew: () => this.setState({ novo: false }),
@@ -464,18 +635,18 @@ class Component extends DCLogic {
       setDesc: (e) => this.setState(s => ({ form: { ...s.form, desc: e.target.value } })),
       setProjeto: (e) => this.setState(s => ({ form: { ...s.form, proj: e.target.value } })),
       setDue: (e) => this.setState(s => ({ form: { ...s.form, due: e.target.value } })),
-      prioOptions, previewGroup,
+      prioOptions, statusOptions, previewGroup,
       previewExtra: f.proj ? " · vinculado a " + f.proj : "",
       saveNew: () => {
         const c = this.classify(f.due);
         const item = {
           id: this.nextId++, titulo: f.nome || "Item sem título", desc: f.desc,
-          due: c.label, dueKey: c.key, prio: f.prio,
+          due: c.label, dueKey: c.key, prio: f.prio, status: f.status,
           proj: f.proj || null, fase: this.faseDe(f.proj), tags: [],
         };
         this.setState(s => ({
-          extras: s.extras.concat([item]), novo: false,
-          form: { nome: "", desc: "", proj: "", due: "", prio: "P2" },
+          items: s.items.concat([item]), novo: false,
+          form: { nome: "", desc: "", proj: "", due: "", prio: "P2", status: "backlog" },
         }));
       },
     };

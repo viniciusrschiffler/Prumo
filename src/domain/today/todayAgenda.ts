@@ -71,16 +71,21 @@ function isDueToday(todo: Todo, today: IsoDate): boolean {
     return isCompletedOn(todo, today)
   }
 
-  return todo.status === 'open' && todo.dueDate !== null && todo.dueDate <= today
+  return todo.status !== 'cancelled' && todo.dueDate !== null && todo.dueDate <= today
 }
 
 function priorityIndex(priority: Priority): number {
   return PRIORITY_ORDER.get(priority) ?? PRIORITIES.length
 }
 
+// O que desce para o fim da lista é o concluído; comparar o status cru desordenaria a lista
+// agora que existem quatro deles, e nenhum dos outros três tem precedência sobre o outro.
 function compareTodos(first: Todo, second: Todo): number {
-  if (first.status !== second.status) {
-    return first.status === 'done' ? 1 : -1
+  const firstDone = first.status === 'done'
+  const secondDone = second.status === 'done'
+
+  if (firstDone !== secondDone) {
+    return firstDone ? 1 : -1
   }
 
   if (first.dueDate !== second.dueDate) {

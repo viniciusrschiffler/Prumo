@@ -5,7 +5,8 @@ import type {
 import type { SqlGateway } from '@/infra/database/SqlGateway'
 
 const COUNT_OPEN_PROJECTS = 'SELECT count(*) AS total FROM project WHERE archived_at IS NULL'
-const COUNT_OPEN_TODOS = "SELECT count(*) AS total FROM todo WHERE status = 'open'"
+// Em aberto é tudo que ainda pede trabalho: quem está em progresso ou bloqueado conta junto.
+const COUNT_OPEN_TODOS = "SELECT count(*) AS total FROM todo WHERE status NOT IN ('done', 'cancelled')"
 
 type CountRow = {
   total: number

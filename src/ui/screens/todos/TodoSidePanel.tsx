@@ -51,12 +51,14 @@ export function TodoSidePanel({ summary, projectCounts, recurrences }: TodoSideP
           <StatCard label="Concluídos" tone="ok">
             {summary.doneThisWeek}
           </StatCard>
-          <StatCard label="Atrasados" tone="danger">
-            {summary.late}
+          <StatCard label="Bloqueados" tone="danger">
+            {summary.blocked}
           </StatCard>
-          <StatCard label="Em aberto">{summary.open}</StatCard>
-          <StatCard label="Sem projeto" tone="muted">
-            {summary.withoutProject}
+          <StatCard label="Em progresso" tone="info">
+            {summary.inProgress}
+          </StatCard>
+          <StatCard label="Atrasados" tone="warn">
+            {summary.late}
           </StatCard>
         </div>
       </PanelSection>

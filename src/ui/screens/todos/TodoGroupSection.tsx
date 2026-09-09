@@ -2,14 +2,15 @@ import type { ReactNode } from 'react'
 import { classNames } from '@/ui/primitives/classNames'
 import { phaseColorStyle } from '@/ui/primitives/phaseColorStyle'
 
-export type TodoGroupTone = 'danger' | 'accent' | 'ok' | 'warn' | 'neutral' | 'phase'
-export type TodoGroupTitleTone = 'default' | 'muted' | 'danger' | 'ok'
+export type TodoGroupTone = 'danger' | 'accent' | 'ok' | 'warn' | 'info' | 'neutral' | 'phase'
+export type TodoGroupTitleTone = 'default' | 'muted' | 'danger' | 'ok' | 'info'
 
 const BAR_CLASSES: Record<TodoGroupTone, string> = {
   danger: 'bg-danger',
   accent: 'bg-accent',
   ok: 'bg-ok',
   warn: 'bg-warn',
+  info: 'bg-info',
   neutral: 'bg-border-strong',
   phase: 'phase-tinted bg-[var(--phase-tone)]',
 }
@@ -19,6 +20,7 @@ const TITLE_CLASSES: Record<TodoGroupTitleTone, string> = {
   muted: 'text-text2',
   danger: 'text-danger',
   ok: 'text-ok',
+  info: 'text-info',
 }
 
 type TodoGroupSectionProps = {

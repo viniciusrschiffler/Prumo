@@ -2,7 +2,7 @@ import type { Screen } from '@/domain/schemas/savedViewSchema'
 import { AppLogo } from '@/ui/primitives/AppLogo'
 import { ThemeToggleButton } from '@/ui/theme/ThemeToggleButton'
 import { SCREEN_META } from './screenMeta'
-import { SidebarContextSection } from './SidebarContextSection'
+import { SidebarContextSection, SidebarLeadContextSection } from './SidebarContextSection'
 import { SidebarFooter } from './SidebarFooter'
 import { SidebarNav } from './SidebarNav'
 
@@ -31,6 +31,7 @@ export function Sidebar({
       </div>
 
       <SidebarNav counts={counts} showShortcutHints={showShortcutHints} />
+      <SidebarLeadContextSection />
       <SidebarContextSection
         label={SCREEN_META[currentScreen].contextLabel}
         variant={SCREEN_META[currentScreen].contextVariant}

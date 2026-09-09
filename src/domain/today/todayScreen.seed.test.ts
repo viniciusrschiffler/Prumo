@@ -80,7 +80,7 @@ describe('Vencem hoje sobre o seed', () => {
   })
 
   it('Should have no todo completed today, so no struck row like the mockup draws', () => {
-    expect(agenda.dueTodos.every((row) => row.todo.status === 'open')).toBe(true)
+    expect(agenda.dueTodos.every((row) => row.todo.status !== 'done')).toBe(true)
   })
 
   it('Should link each todo to its project and current phase', () => {

@@ -150,3 +150,27 @@ describe('groupTodos by priority', () => {
     expect(groups.map((group) => group.id)).toEqual(['priority-P0', 'priority-P3'])
   })
 })
+
+describe('groupTodos by status', () => {
+  it('Should order the columns as the board does and drop the empty ones from the list', () => {
+    const rows = [
+      buildTodoRow({ id: 'td-1', status: 'blocked' }),
+      buildTodoRow({ id: 'td-2', status: 'open' }),
+      buildTodoRow({ id: 'td-3', status: 'done', completedAt: '2026-09-03T12:00:00Z' }),
+    ]
+
+    expect(groupTodos(rows, 'status', CONTEXT, PROJECTS).map((group) => group.id)).toEqual([
+      'status-open',
+      'status-blocked',
+      'status-done',
+    ])
+  })
+
+  // O cancelado não é coluna do quadro, e inventar uma para ele seria dar status a algo que
+  // nenhuma ação do app escreve.
+  it('Should leave the cancelled one out of every column', () => {
+    const rows = [buildTodoRow({ id: 'td-1', status: 'cancelled' })]
+
+    expect(groupTodos(rows, 'status', CONTEXT, PROJECTS)).toEqual([])
+  })
+})

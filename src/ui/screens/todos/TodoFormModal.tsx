@@ -3,13 +3,18 @@ import { formatIsoDate, parseDisplayDate } from '@/domain/format/displayDate'
 import type { EntityId, IsoDate, Priority } from '@/domain/schemas/primitives'
 import { PRIORITIES } from '@/domain/schemas/primitives'
 import type { Project } from '@/domain/schemas/projectSchema'
+import { TODO_BOARD_STATUSES, type TodoBoardStatus } from '@/domain/schemas/todoSchema'
 import {
   previewTodoGroup,
   validateNewTodo,
   type NewTodoDraft,
 } from '@/domain/todos/newTodo'
 import type { TodoGroupingContext, TodoGroupMode } from '@/domain/todos/todoGrouping'
-import { DUE_GROUP_LABELS, PRIORITY_LABELS } from '@/ui/labels/entityLabels'
+import {
+  DUE_GROUP_LABELS,
+  PRIORITY_LABELS,
+  TODO_STATUS_LABELS,
+} from '@/ui/labels/entityLabels'
 import { DateField } from '@/ui/primitives/DateField'
 import { classNames } from '@/ui/primitives/classNames'
 import { FieldGroup } from '@/ui/primitives/FieldGroup'
@@ -26,6 +31,20 @@ function formatDueField(dueDate: IsoDate | null): string {
   return dueDate === null ? '' : formatIsoDate(dueDate)
 }
 
+const STATUS_BUTTON_CLASSES: Record<TodoBoardStatus, string> = {
+  open: 'border-text2 bg-neutral-soft text-text2',
+  in_progress: 'border-info bg-info-soft text-info',
+  blocked: 'border-danger bg-danger-soft text-danger',
+  done: 'border-ok bg-ok-soft text-ok',
+}
+
+const STATUS_DOT_CLASSES: Record<TodoBoardStatus, string> = {
+  open: 'bg-border-strong',
+  in_progress: 'bg-info',
+  blocked: 'bg-danger',
+  done: 'bg-ok',
+}
+
 const PRIORITY_BUTTON_CLASSES: Record<Priority, string> = {
   P0: 'border-danger bg-danger-soft text-danger',
   P1: 'border-warn bg-warn-soft text-warn',
@@ -38,6 +57,15 @@ export type TodoFormMode = 'create' | 'edit'
 const TITLE: Record<TodoFormMode, string> = {
   create: 'Novo item',
   edit: 'Editar item',
+}
+
+// A dica do rodapé fala do agrupamento em vigor: é ele que decide em que coluna o item nasce,
+// e no Kanban é ele também que o arrasto reescreve.
+const HINT: Record<TodoGroupMode, string> = {
+  status: 'No Kanban, arrastar o card entre colunas troca o status.',
+  due: 'A seção é definida pela data limite — sem data cai em “Sem data”.',
+  project: 'A seção é definida pelo projeto vinculado — sem vínculo cai em “Sem projeto”.',
+  priority: 'A seção é definida pela prioridade.',
 }
 
 const SUBMIT_LABEL: Record<TodoFormMode, string> = {
@@ -63,6 +91,10 @@ function describePreview(
 ): string {
   const preview = previewTodoGroup(draft, groupMode, context, projects)
 
+  if (preview.kind === 'status') {
+    return TODO_STATUS_LABELS[preview.status]
+  }
+
   if (preview.kind === 'due') {
     return DUE_GROUP_LABELS[preview.bucket]
   }
@@ -86,6 +118,7 @@ export function TodoFormModal({
   const [projectId, setProjectId] = useState<EntityId | null>(initialDraft.projectId)
   const [dueText, setDueText] = useState(formatDueField(initialDraft.dueDate))
   const [priority, setPriority] = useState<Priority>(initialDraft.priority)
+  const [status, setStatus] = useState<TodoBoardStatus>(initialDraft.status)
   const [tagNames, setTagNames] = useState<readonly string[]>(initialDraft.tagNames)
 
   const draft: NewTodoDraft = {
@@ -94,6 +127,7 @@ export function TodoFormModal({
     projectId,
     dueDate: parseDisplayDate(dueText),
     priority,
+    status,
     tagNames,
   }
 
@@ -109,7 +143,7 @@ export function TodoFormModal({
       size="medium"
       tone="accent"
       title={TITLE[mode]}
-      hint="A seção é definida pela data limite — sem data cai em “Sem data”."
+      hint={HINT[groupMode]}
       submitLabel={SUBMIT_LABEL[mode]}
       submitDisabled={!isValid}
       onClose={onClose}
@@ -179,6 +213,33 @@ export function TodoFormModal({
           onChange={setTagNames}
           label="Tags do item"
         />
+      </FieldGroup>
+
+      <FieldGroup label="Status">
+        <div role="radiogroup" aria-label="Status" className="flex gap-1.5">
+          {TODO_BOARD_STATUSES.map((option) => (
+            <button
+              key={option}
+              type="button"
+              role="radio"
+              aria-checked={option === status}
+              onClick={() => setStatus(option)}
+              className={classNames(
+                'inline-flex h-7 flex-1 items-center justify-center gap-1.5 rounded-button border text-label font-semibold tracking-normal',
+                option === status
+                  ? STATUS_BUTTON_CLASSES[option]
+                  : 'border-border bg-transparent text-text2',
+                FOCUS_RING,
+              )}
+            >
+              <span
+                aria-hidden
+                className={classNames('h-1.5 w-1.5 flex-none rounded-full', STATUS_DOT_CLASSES[option])}
+              />
+              {TODO_STATUS_LABELS[option]}
+            </button>
+          ))}
+        </div>
       </FieldGroup>
 
       <FieldGroup label="Prioridade">

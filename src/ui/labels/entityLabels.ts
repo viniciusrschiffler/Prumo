@@ -2,6 +2,8 @@ import type { EventFilter } from '@/domain/projects/eventFilters'
 import type { BadgeTone } from '@/ui/primitives/Badge'
 import type { Priority } from '@/domain/schemas/primitives'
 import type { DueGroupBucket, TodoGroupMode } from '@/domain/todos/todoGrouping'
+import type { TodoBoardStatus } from '@/domain/schemas/todoSchema'
+import type { TodoView } from '@/domain/todos/todoView'
 import type { RecurrenceWeekday } from '@/domain/todos/todoRecurrence'
 import type { ProjectSortKey } from '@/domain/projects/projectSort'
 import type { ProjectEventType } from '@/domain/schemas/projectEventSchema'
@@ -73,9 +75,31 @@ export const PRIORITY_LABELS: Record<Priority, string> = {
 }
 
 export const TODO_GROUP_MODE_LABELS: Record<TodoGroupMode, string> = {
+  status: 'Status',
   due: 'Vencimento',
   project: 'Projeto',
   priority: 'Prioridade',
+}
+
+export const TODO_VIEW_LABELS: Record<TodoView, string> = {
+  list: 'Lista',
+  board: 'Kanban',
+}
+
+// O status `open` é a coluna Backlog do quadro: o rótulo é do que ainda não começou, não
+// de tudo que está em aberto.
+export const TODO_STATUS_LABELS: Record<TodoBoardStatus, string> = {
+  open: 'Backlog',
+  in_progress: 'Em progresso',
+  blocked: 'Bloqueado',
+  done: 'Feito',
+}
+
+export const TODO_STATUS_TONES: Record<TodoBoardStatus, BadgeTone> = {
+  open: 'neutral',
+  in_progress: 'info',
+  blocked: 'danger',
+  done: 'ok',
 }
 
 export const DUE_GROUP_LABELS: Record<DueGroupBucket, string> = {

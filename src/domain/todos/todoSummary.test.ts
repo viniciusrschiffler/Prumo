@@ -3,7 +3,12 @@ import { buildProject } from '@/domain/testing/projectRowBuilders'
 import { buildTodoRow } from '@/domain/testing/todoBuilders'
 import type { TodoGroupingContext } from './todoGrouping'
 import type { ProjectWithPhase } from './todoRow'
-import { countOpenTodosByProject, listTagsInUse, summarizeTodos } from './todoSummary'
+import {
+  countOpenTodosByProject,
+  countTodosByStatus,
+  listTagsInUse,
+  summarizeTodos,
+} from './todoSummary'
 
 const CONTEXT: TodoGroupingContext = { today: '2026-09-03', weekStart: 'monday' }
 
@@ -36,6 +41,8 @@ describe('summarizeTodos', () => {
   it('Should count only what is open, apart from the completed ones', () => {
     expect(summarizeTodos(ROWS, CONTEXT)).toEqual({
       open: 4,
+      inProgress: 0,
+      blocked: 0,
       late: 1,
       linkedToProject: 3,
       withoutProject: 1,
@@ -82,5 +89,23 @@ describe('listTagsInUse', () => {
 
   it('Should return nothing when no todo has a tag', () => {
     expect(listTagsInUse([buildTodoRow()], tags)).toEqual([])
+  })
+})
+
+describe('countTodosByStatus', () => {
+  it('Should count the whole board, in the order the columns stand', () => {
+    const rows = [
+      buildTodoRow({ id: 'td-1', status: 'blocked' }),
+      buildTodoRow({ id: 'td-2', status: 'in_progress' }),
+      buildTodoRow({ id: 'td-3', status: 'in_progress' }),
+      buildTodoRow({ id: 'td-4', status: 'cancelled' }),
+    ]
+
+    expect(countTodosByStatus(rows)).toEqual([
+      { status: 'open', count: 0 },
+      { status: 'in_progress', count: 2 },
+      { status: 'blocked', count: 1 },
+      { status: 'done', count: 0 },
+    ])
   })
 })

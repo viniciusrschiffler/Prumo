@@ -15,6 +15,7 @@ type TodoGroupListProps = {
   errorMessage: string | null
   groups: readonly TodoGroup[]
   context: TodoGroupingContext
+  showStatus: boolean
   hasAnyTodo: boolean
   rowFocus: TodoRowFocus
   onRetry: () => void
@@ -29,6 +30,7 @@ export function TodoGroupList({
   errorMessage,
   groups,
   context,
+  showStatus,
   hasAnyTodo,
   rowFocus,
   onRetry,
@@ -104,6 +106,7 @@ export function TodoGroupList({
                   key={row.todo.id}
                   row={row}
                   context={context}
+                  showStatus={showStatus}
                   registerRef={rowFocus.registerRef}
                   onToggle={onToggle}
                   onEdit={onEdit}
