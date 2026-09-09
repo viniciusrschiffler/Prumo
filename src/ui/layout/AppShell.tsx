@@ -14,6 +14,7 @@ import { ThemeProvider } from '@/ui/theme/ThemeProvider'
 import { CommandPalette, COMMAND_PALETTE_SHORTCUT_ID } from './CommandPalette'
 import { resolveScreenFromPath, SCREEN_META } from './screenMeta'
 import { Sidebar } from './Sidebar'
+import { TitleBar } from './TitleBar'
 import { ToastRegion } from './ToastRegion'
 
 export function AppShell() {
@@ -80,21 +81,24 @@ export function AppShell() {
 
   return (
     <ThemeProvider>
-      <div className="grid h-screen grid-cols-[216px_1fr] overflow-hidden bg-bg text-text">
-        <Sidebar
-          currentScreen={currentScreen}
-          counts={sidebarCounts}
-          dataFolderPath={dataFolderPath}
-          showShortcutHints={showShortcutHints}
-        />
-        <main className="overflow-hidden">
-          {errorMessage !== null && (
-            <div className="border-b border-danger bg-danger-soft px-7 py-2 text-support text-danger">
-              {errorMessage}
-            </div>
-          )}
-          <Outlet />
-        </main>
+      <div className="flex h-screen flex-col overflow-hidden bg-bg text-text">
+        <TitleBar />
+        <div className="grid flex-1 grid-cols-[216px_1fr] overflow-hidden">
+          <Sidebar
+            currentScreen={currentScreen}
+            counts={sidebarCounts}
+            dataFolderPath={dataFolderPath}
+            showShortcutHints={showShortcutHints}
+          />
+          <main className="overflow-hidden">
+            {errorMessage !== null && (
+              <div className="border-b border-danger bg-danger-soft px-7 py-2 text-support text-danger">
+                {errorMessage}
+              </div>
+            )}
+            <Outlet />
+          </main>
+        </div>
         {isCommandPaletteOpen && <CommandPalette />}
         <ShortcutListener />
         <ToastRegion />
