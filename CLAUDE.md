@@ -287,9 +287,22 @@ mesmos campos, então são o mesmo componente — `ProjectFormModal`, `TaskFormM
 Os testes estão em `domain/projects/editProject.test.ts`, `domain/projects/editTask.test.ts` e
 `domain/todos/editTodo.test.ts`.
 
-**O formulário só mexe no que ele pergunta.** Status, arquivamento e pausa do projeto, e
-status e datas reais da tarefa, ficam de fora: cada um tem ação própria com evento no
-histórico, e deixá-los cair num formulário apagaria esse rastro.
+**O formulário só mexe no que ele pergunta.** Arquivamento e pausa do projeto, e as datas
+reais da tarefa, ficam de fora: cada um tem ação própria com evento no histórico, e
+deixá-los cair num formulário apagaria esse rastro. O status do projeto segue a mesma regra.
+
+**O status da tarefa é a exceção, e virou campo do formulário.** A regra acima o mantinha de
+fora pela ação própria que ele teria — e essa ação não existe em tela nenhuma, então toda
+tarefa nascia e morria em "A fazer". O `Select` de Situação lista os cinco valores do enum,
+`cancelled` incluído, porque tarefa cancelada é leitura que o domínio já faz: ela não conta em
+esforço, progresso nem período. A troca de status não registra evento: o histórico do projeto
+é sobre o plano, e o design não desenha evento para tarefa que anda.
+
+**A descrição da tarefa é coluna nova, `task.description`, aberta pela migração 005.** É um
+`ALTER TABLE` simples — o `CHECK` do status não muda e nenhuma tabela referencia `task` por
+gatilho, então nada de reconstrução como na 003 e na 004. O `toDescription` trata texto em
+branco como ausência, para a coluna anulável não guardar string vazia. A tabela de tarefas não
+ganhou coluna: o texto aparece no `title` da linha, junto do nome da tarefa.
 
 **Editar tarefa nunca deleta alocação.** Tirar a pessoa preenche `ended_at` com
 `TASK_EDIT_ALLOCATION_REASON`; trocar o percentual encerra a de antes e abre outra sobre a

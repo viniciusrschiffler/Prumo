@@ -40,6 +40,19 @@ describe('toTaskDraft', () => {
 
     expect(draft.assignees).toEqual([{ personId: 'ana', percentage: 50 }])
   })
+
+  it('Should bring the description as text, because the field is one and the column is nullable', () => {
+    expect(toTaskDraft({ task, allocations: [] }).description).toBe('')
+    expect(
+      toTaskDraft({ task: buildTask({ description: 'Sem planilha' }), allocations: [] }).description,
+    ).toBe('Sem planilha')
+  })
+
+  it('Should bring the status the task carries, so the form opens on it', () => {
+    expect(toTaskDraft({ task: buildTask({ status: 'blocked' }), allocations: [] }).status).toBe(
+      'blocked',
+    )
+  })
 })
 
 describe('buildTaskUpdate', () => {
@@ -50,6 +63,20 @@ describe('buildTaskUpdate', () => {
     expect(result.openedAllocations).toEqual([])
     expect(result.event).toBeNull()
     expect(result.task.title).toBe('Outro título')
+  })
+
+  it('Should store the status and the description the form asked about', () => {
+    const result = update({ status: 'done', description: '  Virada no domingo  ' })
+
+    expect(result.task.status).toBe('done')
+    expect(result.task.description).toBe('Virada no domingo')
+    expect(result.event).toBeNull()
+  })
+
+  it('Should clear the description when the field was emptied', () => {
+    const result = update({ description: '   ' })
+
+    expect(result.task.description).toBeNull()
   })
 
   it('Should end the allocation of whoever left, never delete it', () => {

@@ -4,7 +4,7 @@ import type { Allocation } from '@/domain/schemas/allocationSchema'
 import type { Person } from '@/domain/schemas/personSchema'
 import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
 import type { Project } from '@/domain/schemas/projectSchema'
-import type { Task } from '@/domain/schemas/taskSchema'
+import type { Task, TaskStatus } from '@/domain/schemas/taskSchema'
 import type { DatePeriod } from '@/domain/types/DatePeriod'
 import { findAllocationConflicts, type AllocationConflict } from './allocationConflicts'
 
@@ -21,6 +21,8 @@ export type TaskAssignee = {
 export type NewTaskDraft = {
   projectId: EntityId
   title: string
+  description: string
+  status: TaskStatus
   phaseId: EntityId | null
   plannedStart: IsoDate | null
   plannedEnd: IsoDate | null
@@ -51,6 +53,14 @@ export type TaskImpact = {
   effortAfter: number
   periodBefore: DatePeriod | null
   periodAfter: DatePeriod | null
+}
+
+// A descrição em branco é ausência, não texto vazio: a coluna é anulável e a tela não tem o
+// que mostrar quando ninguém escreveu nada.
+export function toDescription(text: string): string | null {
+  const trimmed = text.trim()
+
+  return trimmed === '' ? null : trimmed
 }
 
 export function validateNewTask(draft: NewTaskDraft): NewTaskErrors {
@@ -96,6 +106,8 @@ export function emptyTaskDraft(projectId: EntityId, phaseId: EntityId | null): N
   return {
     projectId,
     title: '',
+    description: '',
+    status: INITIAL_STATUS,
     phaseId,
     plannedStart: null,
     plannedEnd: null,
@@ -119,7 +131,8 @@ export function buildNewTask(draft: NewTaskDraft, ids: NewTaskIds, sortOrder: nu
       projectId: draft.projectId,
       phaseId: draft.phaseId ?? '',
       title: draft.title.trim(),
-      status: INITIAL_STATUS,
+      description: toDescription(draft.description),
+      status: draft.status,
       plannedStart,
       plannedEnd,
       actualStart: null,
@@ -155,7 +168,8 @@ export function previewTaskImpact(
     projectId: draft.projectId,
     phaseId: draft.phaseId ?? '',
     title: draft.title,
-    status: INITIAL_STATUS,
+    description: toDescription(draft.description),
+    status: draft.status,
     plannedStart: draft.plannedStart,
     plannedEnd: draft.plannedEnd,
     actualStart: null,

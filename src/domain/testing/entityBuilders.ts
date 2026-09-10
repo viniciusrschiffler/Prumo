@@ -10,6 +10,7 @@ export function buildTask(overrides: Partial<Task> = {}): Task {
     projectId: 'project-1',
     phaseId: 'development',
     title: 'Tarefa',
+    description: null,
     status: 'todo',
     plannedStart: '2026-03-01',
     plannedEnd: '2026-03-10',

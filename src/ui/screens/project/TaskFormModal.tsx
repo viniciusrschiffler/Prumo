@@ -11,10 +11,14 @@ import type { ProjectsSnapshot } from '@/domain/projects/projectRow'
 import { formatIsoDate, parseDisplayDate } from '@/domain/format/displayDate'
 import type { Phase } from '@/domain/schemas/phaseSchema'
 import type { EntityId, IsoDate } from '@/domain/schemas/primitives'
+import { TASK_STATUSES, type TaskStatus } from '@/domain/schemas/taskSchema'
+import { TASK_STATUS_LABELS } from '@/ui/labels/entityLabels'
 import { DateField } from '@/ui/primitives/DateField'
 import { FieldGroup } from '@/ui/primitives/FieldGroup'
 import { Input } from '@/ui/primitives/Input'
 import { Modal } from '@/ui/primitives/Modal'
+import { Select } from '@/ui/primitives/Select'
+import { Textarea } from '@/ui/primitives/Textarea'
 import { phaseColorStyle } from '@/ui/primitives/phaseColorStyle'
 import { classNames } from '@/ui/primitives/classNames'
 import { FOCUS_RING } from '@/ui/primitives/focusRing'
@@ -81,6 +85,8 @@ export function TaskFormModal({
   onSubmit,
 }: TaskFormModalProps) {
   const [title, setTitle] = useState(initialDraft.title)
+  const [description, setDescription] = useState(initialDraft.description)
+  const [status, setStatus] = useState<TaskStatus>(initialDraft.status)
   const [phaseId, setPhaseId] = useState<EntityId | null>(initialDraft.phaseId)
   const [startText, setStartText] = useState(toDateField(initialDraft.plannedStart))
   const [endText, setEndText] = useState(toDateField(initialDraft.plannedEnd))
@@ -90,6 +96,8 @@ export function TaskFormModal({
   const draft: NewTaskDraft = {
     projectId,
     title,
+    description,
+    status,
     phaseId,
     plannedStart: parseDisplayDate(startText),
     plannedEnd: parseDisplayDate(endText),
@@ -146,6 +154,18 @@ export function TaskFormModal({
         />
       </FieldGroup>
 
+      <FieldGroup variant="column" label="Descrição" htmlFor="task-form-description">
+        <Textarea
+          id="task-form-description"
+          rows={3}
+          value={description}
+          placeholder="O que precisa ser feito, e o que fica de fora."
+          textSize="support"
+          onChange={(event) => setDescription(event.target.value)}
+          className="resize-y"
+        />
+      </FieldGroup>
+
       <FieldGroup variant="column" label="Fase" error={errors.phaseId}>
         <div role="radiogroup" aria-label="Fase da tarefa" className="flex flex-wrap gap-1.5">
           {phases.map((phase) => (
@@ -171,7 +191,22 @@ export function TaskFormModal({
         </div>
       </FieldGroup>
 
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-4 gap-2.5">
+        <FieldGroup variant="column" label="Situação" htmlFor="task-form-status">
+          <Select
+            id="task-form-status"
+            fieldSize="large"
+            value={status}
+            onChange={(event) => setStatus(event.target.value as TaskStatus)}
+          >
+            {TASK_STATUSES.map((value) => (
+              <option key={value} value={value}>
+                {TASK_STATUS_LABELS[value]}
+              </option>
+            ))}
+          </Select>
+        </FieldGroup>
+
         <FieldGroup
           variant="column"
           label="Início"
