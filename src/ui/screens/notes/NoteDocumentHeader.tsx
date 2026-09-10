@@ -1,7 +1,6 @@
 import type { NoteRow } from '@/domain/notes/noteRow'
 import type { NoteTreeNode } from '@/domain/notes/noteTree'
 import { Button } from '@/ui/primitives/Button'
-import { IconButton } from '@/ui/primitives/IconButton'
 import { PhaseStripe } from '@/ui/primitives/PhaseStripe'
 import { SegmentedControl } from '@/ui/primitives/SegmentedControl'
 import { formatDocumentMeta } from './noteLabels'
@@ -15,7 +14,6 @@ type NoteDocumentHeaderProps = {
   onModeChange: (mode: NoteViewMode) => void
   onLink: () => void
   onNewNote: () => void
-  onDelete: () => void
 }
 
 export function NoteDocumentHeader({
@@ -26,7 +24,6 @@ export function NoteDocumentHeader({
   onModeChange,
   onLink,
   onNewNote,
-  onDelete,
 }: NoteDocumentHeaderProps) {
   const isFolder = node.kind === 'folder'
 
@@ -64,13 +61,6 @@ export function NoteDocumentHeader({
           <Button variant="primary" keys="mod+n" onClick={onNewNote}>
             Nova nota
           </Button>
-          <IconButton
-            label={isFolder ? `Excluir a pasta ${node.name}` : `Excluir a nota ${node.name}`}
-            className="hover:border-danger hover:text-danger"
-            onClick={onDelete}
-          >
-            ✕
-          </IconButton>
         </div>
       </div>
     </header>

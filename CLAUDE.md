@@ -770,8 +770,10 @@ linha. O `stopPropagation` da linha é obrigatório: sem ele o menu da área vaz
 trocaria o nó pelo `null` da raiz. Na área vazia da árvore o mesmo menu sai sem o excluir, criando
 na raiz.
 
-**Excluir existe para nota e para pasta, com confirmação.** Chega-se por três caminhos: o menu de
-contexto, o `Delete` sobre a linha com foco e o ✕ do cabeçalho do documento. O `planNoteDeletion`
+**Excluir existe para nota e para pasta, com confirmação, e mora na árvore.** Chega-se pelo menu
+de contexto da linha e pelo `Delete` sobre ela — o cabeçalho do documento chegou a ter um ✕ e
+ele saiu: ação destrutiva ao lado de "Nova nota" e do controle de exibição pede o clique errado,
+e a linha é onde se escolhe o arquivo de qualquer jeito. O `planNoteDeletion`
 varre a pasta antes para dizer quantas notas vão junto e para saber quais linhas tirar da tabela
 `note` e da `note_search` — o `removeAll` faz as duas coisas num lote só. **A ordem é a mesma da
 gravação, com uma etapa a mais na frente:** o editor fecha primeiro, senão a gravação automática

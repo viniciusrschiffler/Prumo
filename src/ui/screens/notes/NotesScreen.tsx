@@ -173,15 +173,6 @@ export function NotesScreen() {
           onModeChange={setMode}
           onLink={() => setOpenModal({ kind: 'link' })}
           onNewNote={() => setOpenModal({ kind: 'note', folderPath: targetFolderPath })}
-          onDelete={() =>
-            setOpenModal({
-              kind: 'delete',
-              plan: planDeletion(
-                { path: selectedNode.path, kind: selectedNode.kind },
-                selectedNode.name,
-              ),
-            })
-          }
         />
       )}
 
