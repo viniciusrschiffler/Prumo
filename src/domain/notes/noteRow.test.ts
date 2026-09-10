@@ -45,6 +45,7 @@ function task(id: string, projectId: string): Task {
     projectId,
     phaseId: PHASE.id,
     title: id,
+    description: null,
     status: 'in_progress',
     plannedStart: null,
     plannedEnd: null,

@@ -16,6 +16,11 @@ export type NoteTreeNode = NoteEntry & {
   fileCount: number
 }
 
+export type NoteTarget = {
+  path: string
+  kind: NoteEntryKind
+}
+
 function compareSiblings(first: NoteEntry, second: NoteEntry): number {
   if (first.kind !== second.kind) {
     return first.kind === 'folder' ? -1 : 1
@@ -91,4 +96,38 @@ export function filterNoteTree(
 
 export function findFirstFile(tree: readonly NoteTreeNode[]): NoteTreeNode | null {
   return tree.find((node) => node.kind === 'file') ?? null
+}
+
+function hasCollapsedAncestor(path: string, collapsedPaths: ReadonlySet<string>): boolean {
+  const segments = noteSegments(path)
+
+  for (let length = 1; length < segments.length; length += 1) {
+    if (collapsedPaths.has(segments.slice(0, length).join('/'))) {
+      return true
+    }
+  }
+
+  return false
+}
+
+export function collapseNoteTree(
+  tree: readonly NoteTreeNode[],
+  collapsedPaths: ReadonlySet<string>,
+): NoteTreeNode[] {
+  return tree.filter((node) => !hasCollapsedAncestor(node.path, collapsedPaths))
+}
+
+export function listFolderPaths(tree: readonly NoteTreeNode[]): string[] {
+  return tree.filter((node) => node.kind === 'folder').map((node) => node.path)
+}
+
+// Criar dentro do que está selecionado é o que o explorador do VS Code faz: pasta selecionada
+// recebe o arquivo novo, arquivo selecionado manda para a pasta dele, e nada selecionado
+// escreve na raiz.
+export function resolveTargetFolder(node: NoteTarget | null): string {
+  if (node === null) {
+    return NOTES_ROOT
+  }
+
+  return node.kind === 'folder' ? node.path : noteFolderOf(node.path)
 }

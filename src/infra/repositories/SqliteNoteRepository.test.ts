@@ -134,7 +134,7 @@ describe('SqliteNoteRepository.setLinks', () => {
   })
 })
 
-describe('SqliteNoteRepository.remove', () => {
+describe('SqliteNoteRepository.removeAll', () => {
   it('Should take the note out of the table and out of the index', async () => {
     await repository.saveContent({
       path: 'notas/nova.md',
@@ -142,9 +142,36 @@ describe('SqliteNoteRepository.remove', () => {
       updatedAt: '2026-09-03T10:00:00Z',
     })
 
-    await repository.remove('notas/nova.md')
+    await repository.removeAll(['notas/nova.md'])
 
     expect(await repository.listAll()).toEqual([])
     expect(await repository.searchPaths('"conciliação"')).toEqual([])
+  })
+
+  it('Should take every note of a deleted folder in one write', async () => {
+    await repository.saveContent({
+      path: 'notas/decisoes/provedor.md',
+      content: 'conciliação',
+      updatedAt: '2026-09-03T10:00:00Z',
+    })
+    await repository.saveContent({
+      path: 'notas/decisoes/cutover.md',
+      content: 'cutover',
+      updatedAt: '2026-09-03T10:05:00Z',
+    })
+    await repository.saveContent({
+      path: 'notas/solta.md',
+      content: 'solta',
+      updatedAt: '2026-09-03T10:10:00Z',
+    })
+
+    await repository.removeAll(['notas/decisoes/provedor.md', 'notas/decisoes/cutover.md'])
+
+    expect((await repository.listAll()).map((note) => note.path)).toEqual(['notas/solta.md'])
+    expect(await repository.searchPaths('"cutover"')).toEqual([])
+  })
+
+  it('Should write nothing when the deleted folder had no note', async () => {
+    await expect(repository.removeAll([])).resolves.toBeUndefined()
   })
 })

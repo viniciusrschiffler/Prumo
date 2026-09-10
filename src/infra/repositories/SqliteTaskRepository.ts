@@ -13,7 +13,7 @@ import { parseRows } from '@/infra/database/parseRow'
 import type { BatchStatement, SqlGateway } from '@/infra/database/SqlGateway'
 
 const SELECT_ALL = `
-  SELECT id, project_id, phase_id, title, status, planned_start, planned_end,
+  SELECT id, project_id, phase_id, title, description, status, planned_start, planned_end,
          actual_start, actual_end, estimated_hours, sort_order
   FROM task
   ORDER BY project_id, sort_order
@@ -25,9 +25,9 @@ const SELECT_DEPENDENCIES = `
 `
 
 const INSERT_TASK = `
-  INSERT INTO task (id, project_id, phase_id, title, status, planned_start, planned_end,
-                    actual_start, actual_end, estimated_hours, sort_order)
-  VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
+  INSERT INTO task (id, project_id, phase_id, title, description, status, planned_start,
+                    planned_end, actual_start, actual_end, estimated_hours, sort_order)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?)
 `
 
 const INSERT_ALLOCATION = `
@@ -40,7 +40,8 @@ const UPDATE_TASK_SCHEDULE = 'UPDATE task SET planned_start = ?, planned_end = ?
 
 const UPDATE_TASK = `
   UPDATE task
-  SET phase_id = ?, title = ?, planned_start = ?, planned_end = ?, estimated_hours = ?
+  SET phase_id = ?, title = ?, description = ?, status = ?, planned_start = ?, planned_end = ?,
+      estimated_hours = ?
   WHERE id = ?
 `
 
@@ -61,6 +62,7 @@ const taskRowSchema = z
     project_id: z.string(),
     phase_id: z.string(),
     title: z.string(),
+    description: z.string().nullable(),
     status: z.string(),
     planned_start: z.string().nullable(),
     planned_end: z.string().nullable(),
@@ -74,6 +76,7 @@ const taskRowSchema = z
     projectId: row.project_id,
     phaseId: row.phase_id,
     title: row.title,
+    description: row.description,
     status: row.status,
     plannedStart: row.planned_start,
     plannedEnd: row.planned_end,
@@ -106,6 +109,7 @@ function toCreateStatements(newTask: NewTask): BatchStatement[] {
         task.projectId,
         task.phaseId,
         task.title,
+        task.description,
         task.status,
         task.plannedStart,
         task.plannedEnd,
@@ -138,6 +142,8 @@ function toUpdateStatements(update: TaskUpdate): BatchStatement[] {
       values: [
         task.phaseId,
         task.title,
+        task.description,
+        task.status,
         task.plannedStart,
         task.plannedEnd,
         task.estimatedHours,

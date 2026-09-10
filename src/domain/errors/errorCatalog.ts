@@ -14,6 +14,7 @@ export const ERROR_CATALOG = {
   NOTES_FOLDER_UNREADABLE: 'Não foi possível ler a pasta de notas.',
   NOTE_READ_FAILED: 'Não foi possível abrir o arquivo da nota.',
   NOTE_WRITE_FAILED: 'Não foi possível gravar a nota na pasta de dados.',
+  NOTE_DELETE_FAILED: 'Não foi possível excluir o arquivo na pasta de dados.',
   EXPORT_FAILED: 'Não foi possível gravar a exportação na pasta de dados.',
   SHORTCUT_CONFLICT: 'Dois comandos disputam o mesmo atalho.',
   RECORD_NOT_FOUND: 'O registro não foi encontrado.',

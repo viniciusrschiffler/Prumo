@@ -11,6 +11,7 @@ export const taskSchema = z
     projectId: entityIdSchema,
     phaseId: entityIdSchema,
     title: z.string().min(1),
+    description: z.string().nullable(),
     status: taskStatusSchema,
     plannedStart: isoDateSchema.nullable(),
     plannedEnd: isoDateSchema.nullable(),

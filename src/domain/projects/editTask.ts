@@ -4,7 +4,7 @@ import type { EntityId, IsoDateTime } from '@/domain/schemas/primitives'
 import type { ProjectEvent } from '@/domain/schemas/projectEventSchema'
 import type { Task } from '@/domain/schemas/taskSchema'
 import { buildTaskReschedule, hasScheduleChanged } from '@/domain/timeline/timelineSchedule'
-import type { NewTaskDraft, TaskAssignee } from './newTask'
+import { toDescription, type NewTaskDraft, type TaskAssignee } from './newTask'
 
 export const TASK_EDIT_ALLOCATION_REASON = 'alocação alterada na edição da tarefa'
 
@@ -34,6 +34,8 @@ export function toTaskDraft(context: TaskEditContext): NewTaskDraft {
   return {
     projectId: task.projectId,
     title: task.title,
+    description: task.description ?? '',
+    status: task.status,
     phaseId: task.phaseId,
     plannedStart: task.plannedStart,
     plannedEnd: task.plannedEnd,
@@ -84,6 +86,8 @@ export function buildTaskUpdate(input: TaskUpdateInput): TaskUpdate {
     ...task,
     phaseId: draft.phaseId ?? task.phaseId,
     title: draft.title.trim(),
+    description: toDescription(draft.description),
+    status: draft.status,
     plannedStart: draft.plannedStart,
     plannedEnd: draft.plannedEnd,
     estimatedHours: draft.estimatedHours,

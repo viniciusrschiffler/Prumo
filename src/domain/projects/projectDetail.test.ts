@@ -58,8 +58,11 @@ describe('findProjectDetail', () => {
     expect(gateway.feed).toHaveLength(8)
   })
 
-  it('Should count the notes linked to this project only', () => {
-    expect(gateway.noteCount).toBe(2)
+  it('Should list the notes linked to this project only, newest first', () => {
+    expect(gateway.noteCards.map((card) => card.title)).toEqual([
+      'migracao-do-gateway',
+      'decisao-provedor',
+    ])
   })
 
   it('Should report the open risk the design badges', () => {
@@ -87,6 +90,6 @@ describe('findProjectDetail', () => {
     expect(empty.baselineOptions).toEqual([])
     expect(empty.comparison.deviationInDays).toBeNull()
     expect(empty.feed).toEqual([])
-    expect(empty.noteCount).toBe(0)
+    expect(empty.noteCards).toEqual([])
   })
 })

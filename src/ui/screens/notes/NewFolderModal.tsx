@@ -1,17 +1,25 @@
 import { useState } from 'react'
-import { toNoteSlug } from '@/domain/notes/notePath'
+import { NOTES_ROOT, toNoteSlug } from '@/domain/notes/notePath'
 import { FieldGroup } from '@/ui/primitives/FieldGroup'
 import { Input } from '@/ui/primitives/Input'
 import { Modal } from '@/ui/primitives/Modal'
+import { Select } from '@/ui/primitives/Select'
 
 type NewFolderModalProps = {
-  parentPath: string
+  folderPaths: readonly string[]
+  defaultParentPath: string
   onClose: () => void
-  onSubmit: (name: string) => void
+  onSubmit: (parentPath: string, name: string) => void
 }
 
-export function NewFolderModal({ parentPath, onClose, onSubmit }: NewFolderModalProps) {
+export function NewFolderModal({
+  folderPaths,
+  defaultParentPath,
+  onClose,
+  onSubmit,
+}: NewFolderModalProps) {
   const [name, setName] = useState('')
+  const [parentPath, setParentPath] = useState(defaultParentPath)
 
   const trimmedName = name.trim()
   const isValid = trimmedName !== ''
@@ -21,19 +29,34 @@ export function NewFolderModal({ parentPath, onClose, onSubmit }: NewFolderModal
       open
       title="Nova pasta"
       tone="accent"
-      note={`${parentPath}/`}
       submitLabel="Criar pasta"
       submitDisabled={!isValid}
-      onSubmit={() => onSubmit(trimmedName)}
+      onSubmit={() => onSubmit(parentPath, trimmedName)}
       onClose={onClose}
     >
-      <FieldGroup label="Nome">
+      <FieldGroup label="Nome" htmlFor="new-folder-name">
         <Input
+          id="new-folder-name"
           autoFocus
           value={name}
-          placeholder="Projetos"
+          placeholder="Decisões de arquitetura"
           onChange={(event) => setName(event.target.value)}
         />
+      </FieldGroup>
+
+      <FieldGroup label="Dentro de" htmlFor="new-folder-parent">
+        <Select
+          id="new-folder-parent"
+          value={parentPath}
+          onChange={(event) => setParentPath(event.target.value)}
+        >
+          <option value={NOTES_ROOT}>{NOTES_ROOT}/</option>
+          {folderPaths.map((path) => (
+            <option key={path} value={path}>
+              {path}/
+            </option>
+          ))}
+        </Select>
       </FieldGroup>
 
       <p className="font-mono text-micro text-text3">

@@ -28,6 +28,14 @@ export function noteFolderOf(path: string): string {
   return noteSegments(path).slice(0, -1).join(SEPARATOR)
 }
 
+export function listAncestorFolders(path: string): string[] {
+  const segments = noteSegments(path)
+
+  return segments
+    .slice(0, -1)
+    .map((_, index) => segments.slice(0, index + 1).join(SEPARATOR))
+}
+
 export function noteBaseName(path: string): string {
   const name = noteFileName(path)
 

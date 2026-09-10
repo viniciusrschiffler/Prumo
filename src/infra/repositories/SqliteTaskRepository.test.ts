@@ -63,6 +63,7 @@ describe('SqliteTaskRepository', () => {
         projectId: 'gateway',
         phaseId: 'development',
         title: 'gw-prov',
+        description: null,
         status: 'done',
         plannedStart: '2026-03-12',
         plannedEnd: '2026-03-27',
@@ -162,6 +163,7 @@ describe('Gravação de tarefa', () => {
         projectId: 'gateway',
         phaseId: 'production',
         title: 'Conciliação automática',
+        description: 'Fecha o dia do financeiro sem planilha.',
         status: 'todo',
         plannedStart: '2026-09-07',
         plannedEnd: '2026-10-09',
@@ -190,7 +192,11 @@ describe('Gravação de tarefa', () => {
       ['gw-conc'],
     )
 
-    expect(written).toMatchObject({ title: 'Conciliação automática', estimatedHours: 80 })
+    expect(written).toMatchObject({
+      title: 'Conciliação automática',
+      description: 'Fecha o dia do financeiro sem planilha.',
+      estimatedHours: 80,
+    })
     expect(allocations).toEqual([{ id: 'al-conc-1' }])
   })
 
@@ -201,6 +207,7 @@ describe('Gravação de tarefa', () => {
         projectId: 'gateway',
         phaseId: 'production',
         title: 'Tarefa sem dono válido',
+        description: null,
         status: 'todo',
         plannedStart: '2026-09-07',
         plannedEnd: '2026-10-09',
@@ -315,7 +322,8 @@ describe('SqliteTaskRepository.update', () => {
     projectId: 'gateway',
     phaseId: 'production',
     title: 'Cutover em produção',
-    status: 'todo' as const,
+    description: 'Vira a chave do tráfego no domingo de manhã.',
+    status: 'in_progress' as const,
     plannedStart: '2026-03-12',
     plannedEnd: '2026-04-10',
     actualStart: null,

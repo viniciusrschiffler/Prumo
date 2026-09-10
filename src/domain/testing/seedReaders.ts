@@ -12,6 +12,7 @@ type TaskRow = {
   project_id: string
   phase_id: string
   title: string
+  description: string | null
   status: Task['status']
   planned_start: string | null
   planned_end: string | null
@@ -77,6 +78,7 @@ export function readTasks(database: DatabaseSync, projectId: string): Task[] {
       projectId: row.project_id,
       phaseId: row.phase_id,
       title: row.title,
+      description: row.description,
       status: row.status,
       plannedStart: row.planned_start,
       plannedEnd: row.planned_end,
@@ -238,6 +240,7 @@ export function readProjectsSnapshot(database: DatabaseSync): ProjectsSnapshot {
         projectId: row.project_id,
         phaseId: row.phase_id,
         title: row.title,
+        description: row.description,
         status: row.status,
         plannedStart: row.planned_start,
         plannedEnd: row.planned_end,

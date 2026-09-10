@@ -209,3 +209,28 @@ describe('Migração 004, que reconstrói todo', () => {
     expect(database.prepare('PRAGMA foreign_key_check').all()).toEqual([])
   })
 })
+
+const TASK_DESCRIPTION_MIGRATION_VERSION = 5
+
+describe('Migração 005, que abre a descrição da tarefa', () => {
+  beforeEach(async () => {
+    applyUpTo(TASK_DESCRIPTION_MIGRATION_VERSION - 1)
+    insertHistory()
+
+    await runMigrations(gateway, MIGRATION_LIST)
+  })
+
+  it('Should keep the task the older version had written', () => {
+    expect(database.prepare("SELECT title, description FROM task WHERE id = 'gw-cut'").get()).toEqual(
+      { title: 'Cutover em produção', description: null },
+    )
+  })
+
+  it('Should accept the description the task form now asks about', () => {
+    database.exec("UPDATE task SET description = 'Vira a chave no domingo' WHERE id = 'gw-cut'")
+
+    expect(database.prepare("SELECT description FROM task WHERE id = 'gw-cut'").get()).toEqual({
+      description: 'Vira a chave no domingo',
+    })
+  })
+})

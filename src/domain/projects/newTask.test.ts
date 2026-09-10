@@ -21,6 +21,8 @@ function buildDraft(overrides: Partial<NewTaskDraft> = {}): NewTaskDraft {
   return {
     projectId: 'gateway',
     title: 'Conciliação automática',
+    description: '',
+    status: 'todo',
     phaseId: 'production',
     plannedStart: '2026-09-07',
     plannedEnd: '2026-10-09',
@@ -103,6 +105,7 @@ describe('buildNewTask', () => {
       projectId: 'gateway',
       phaseId: 'production',
       title: 'Conciliação automática',
+      description: null,
       status: 'todo',
       plannedStart: '2026-09-07',
       plannedEnd: '2026-10-09',
@@ -111,6 +114,19 @@ describe('buildNewTask', () => {
       estimatedHours: 80,
       sortOrder: 5,
     })
+  })
+
+  it('Should keep the description the form asked about, as null when it is blank', () => {
+    expect(buildNewTask(buildDraft({ description: '  ' }), IDS, 1).task.description).toBeNull()
+    expect(buildNewTask(buildDraft({ description: '  Sem planilha  ' }), IDS, 1).task.description).toBe(
+      'Sem planilha',
+    )
+  })
+
+  it('Should be born with the status the form chose', () => {
+    expect(buildNewTask(buildDraft({ status: 'in_progress' }), IDS, 1).task.status).toBe(
+      'in_progress',
+    )
   })
 
   it('Should trim the title before writing it', () => {

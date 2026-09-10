@@ -97,7 +97,10 @@ export function TaskLine({
       )}
     >
       <span role="cell" className="flex min-w-0 items-center gap-2">
-        <span title={task.title} className="truncate text-body">
+        <span
+          title={task.description === null ? task.title : `${task.title}\n\n${task.description}`}
+          className="truncate text-body"
+        >
           {task.title}
         </span>
         {dependsOn.map((title) => (
