@@ -27,7 +27,10 @@ export function Checkbox({
   return (
     <label
       className={classNames(
-        'inline-flex text-support',
+        // O input do sr-only é absoluto: sem um pai posicionado ele escapa do contêiner de
+        // rolagem da tela e estica a página inteira, o que dava a segunda barra vertical em
+        // Configurações.
+        'relative inline-flex text-support',
         hasDescription ? 'items-start gap-[9px]' : 'items-center gap-1.5',
         disabled ? 'cursor-not-allowed text-text3' : 'cursor-pointer',
         className,

@@ -67,7 +67,7 @@ function ContextRow({
       aria-current={isActive || undefined}
       onClick={onSelect}
       className={classNames(
-        'flex h-[26px] items-center gap-[7px] rounded-button px-2 text-left hover:bg-neutral-soft',
+        'flex h-[26px] min-w-0 items-center gap-[7px] rounded-button px-2 text-left hover:bg-neutral-soft',
         toRowToneClasses(isActive, subdued),
         FOCUS_RING,
       )}
@@ -117,7 +117,7 @@ function ContextPill({ label, meta, isActive, onSelect }: SidebarContextItemProp
 // diz o que o clique faria, e botão que não faz nada é pior que botão ausente.
 function LegendRow({ label, meta, color }: Omit<SidebarContextItemProps, 'isActive' | 'onSelect'>) {
   return (
-    <div className="flex h-[22px] items-center gap-[7px] px-2 text-text2">
+    <div className="flex h-[22px] min-w-0 items-center gap-[7px] px-2 text-text2">
       {color !== undefined && (
         <span
           className="phase-tinted h-2 w-2 flex-none rounded-[2px] bg-[var(--phase-tone)]"
@@ -149,8 +149,10 @@ function SidebarSectionShell({
       ) : (
         <div
           className={classNames(
-            isPills ? 'flex flex-wrap gap-1 px-3.5' : 'grid gap-px px-2',
-            'overflow-auto',
+            // A trilha de largura mínima zero é o que segura o nome longo: sem ela a coluna
+            // do grid cresce até o texto inteiro e a barra lateral ganha rolagem horizontal.
+            isPills ? 'flex flex-wrap gap-1 px-3.5' : 'grid grid-cols-[minmax(0,1fr)] gap-px px-2',
+            'overflow-y-auto',
           )}
         >
           {items.map((item) => {

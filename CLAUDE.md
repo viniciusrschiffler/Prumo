@@ -124,6 +124,24 @@ abaixo da largura intrínseca do atributo `size` e vaza de trilha de grid estrei
 na coluna de data de 130px do modal de registrar evento. Não é utilidade de width, não disputa
 com nenhuma classe que a tela passe.
 
+**`grid` sozinho não segura texto longo: a trilha precisa de `minmax(0,1fr)`.** A coluna
+implícita é `auto`, que cresce até o max-content do item, então um nome de projeto comprido na
+lista contextual da barra lateral esticava a linha e a lista ganhava rolagem horizontal —
+verificado com 215px de largura contra 438px de conteúdo. O `truncate` no rótulo não basta; o
+que decide é a trilha, mais o `min-w-0` na linha. A lista rola só na vertical, `overflow-y-auto`.
+
+**Input `sr-only` sem pai posicionado estica a página inteira.** O `sr-only` do Tailwind é
+`position: absolute`, e sem contêiner posicionado no caminho a caixa de marcar escapa do
+`overflow-auto` da tela e vira altura de rolagem no `documentElement` — era a segunda barra
+vertical de Configurações, 1180px de `scrollHeight` num viewport de 900. O `Checkbox` leva
+`relative` no `label` por isso. Nenhuma barra de rolagem deve existir fora do conteúdo do
+`ScreenShell`: se aparecer uma segunda, procure elemento absoluto sem pai posicionado.
+
+**O conteúdo de Configurações é centralizado, e o mockup não é.** O `Configuracoes.dc.html`
+escreve `max-width: 1040px` sem `margin: 0 auto`, o que só não desalinha porque ele é desenhado
+perto de 1280. Numa janela larga a coluna ficava colada à esquerda com um vazio do tamanho dela
+à direita, então o `mx-auto` entrou. É a única das nove telas com coluna de largura máxima.
+
 **Variação de aparência em primitivo vira prop, nunca className.** Vale para toda propriedade
 CSS, não só width: `Tabs` ganhou `bordered`, `Badge` ganhou `weight`, `PriorityBadge` ganhou
 `variant` e `ProgressBar` ganhou `track` e `size` exatamente por isso. Passar `font-normal` ou

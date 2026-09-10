@@ -83,7 +83,7 @@ export function SettingsScreen() {
       actions={status === 'ready' ? <SaveStamp /> : undefined}
       contentClassName="px-5 pb-8 pt-4"
     >
-      <div className="grid max-w-260 auto-rows-max content-start gap-4">
+      <div className="mx-auto grid w-full max-w-260 auto-rows-max content-start gap-4">
         {status === 'error' && (
           <Alert
             level="danger"
