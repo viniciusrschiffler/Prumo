@@ -4,6 +4,7 @@ import {
   isInsideNotesRoot,
   isMarkdownPath,
   joinNotePath,
+  listAncestorFolders,
   noteBaseName,
   noteDepth,
   noteFileName,
@@ -94,5 +95,23 @@ describe('buildUniqueNotePath', () => {
     const taken = new Set(['notas/nota-nova.md', 'notas/nota-nova-2.md'])
 
     expect(buildUniqueNotePath('notas', 'nota-nova', taken)).toBe('notas/nota-nova-3.md')
+  })
+})
+
+describe('listAncestorFolders', () => {
+  it('Should list every folder above the file, from the root down', () => {
+    expect(listAncestorFolders('notas/projetos/gateway/cutover.md')).toEqual([
+      'notas',
+      'notas/projetos',
+      'notas/projetos/gateway',
+    ])
+  })
+
+  it('Should leave the folder itself out of its own ancestors', () => {
+    expect(listAncestorFolders('notas/projetos')).toEqual(['notas'])
+  })
+
+  it('Should give nothing above the notes root', () => {
+    expect(listAncestorFolders('notas')).toEqual([])
   })
 })

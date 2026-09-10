@@ -90,11 +90,17 @@ export class SqliteNoteRepository implements NoteRepository {
     ])
   }
 
-  async remove(path: string): Promise<void> {
-    await this.#gateway.executeBatch([
-      { query: DELETE_SEARCH, values: [path] },
-      { query: DELETE_NOTE, values: [path] },
-    ])
+  async removeAll(paths: readonly string[]): Promise<void> {
+    if (paths.length === 0) {
+      return
+    }
+
+    await this.#gateway.executeBatch(
+      paths.flatMap((path) => [
+        { query: DELETE_SEARCH, values: [path] },
+        { query: DELETE_NOTE, values: [path] },
+      ]),
+    )
   }
 
   async searchPaths(ftsQuery: string): Promise<string[]> {

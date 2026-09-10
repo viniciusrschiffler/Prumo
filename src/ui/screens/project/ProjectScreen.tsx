@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { todayIsoDate } from '@/app/clock'
 import { useDatabaseStore } from '@/app/stores/useDatabaseStore'
+import { useNotesStore } from '@/app/stores/useNotesStore'
 import { useProjectsStore } from '@/app/stores/useProjectsStore'
 import type { SidebarContextItem } from '@/app/stores/useSidebarContextStore'
 import { useToastStore } from '@/app/stores/useToastStore'
@@ -52,6 +53,7 @@ export function ProjectScreen() {
   const updateProject = useProjectsStore((state) => state.updateProject)
   const registerEvent = useProjectsStore((state) => state.registerEvent)
   const blockProjects = useProjectsStore((state) => state.blockProjects)
+  const requestNote = useNotesStore((state) => state.requestNote)
   const notify = useToastStore((state) => state.notify)
 
   const [activeTab, setActiveTab] = useState<ProjectTab>('tasks')
@@ -164,6 +166,13 @@ export function ProjectScreen() {
   function handleEditTask(taskId: EntityId) {
     setEditingTaskId(taskId)
     setOpenModal('task')
+  }
+
+  // A nota mora no editor da tela de Notas, então o cartão pede a nota e navega: a rota não
+  // carrega o caminho do arquivo, que tem barra e não caberia num parâmetro.
+  function handleOpenNote(path: string) {
+    requestNote(path)
+    void navigate(SCREEN_META.notes.path)
   }
 
   function handleUpdateProject(draft: NewProjectDraft) {
@@ -284,7 +293,7 @@ export function ProjectScreen() {
             items={[
               { id: 'tasks', label: 'Tarefas', count: row.tasks.length },
               { id: 'allocations', label: 'Alocações', count: detail.allocationRows.length },
-              { id: 'notes', label: 'Notas', count: detail.noteCount },
+              { id: 'notes', label: 'Notas', count: detail.noteCards.length },
             ]}
             onSelectTab={setActiveTab}
             onSelectBaseline={setSelectedBaselineId}
@@ -311,7 +320,7 @@ export function ProjectScreen() {
         {activeTab === 'allocations' && (
           <AllocationsTab rows={detail.allocationRows} conflicts={detail.conflicts} />
         )}
-        {activeTab === 'notes' && <NotesTab noteCount={detail.noteCount} />}
+        {activeTab === 'notes' && <NotesTab cards={detail.noteCards} onOpenNote={handleOpenNote} />}
       </div>
 
       <ProjectHistory

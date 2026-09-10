@@ -20,6 +20,8 @@ export type NoteRepository = {
   // esta gravação, no mesmo lote da linha da nota.
   saveContent(content: NoteContent): Promise<void>
   setLinks(link: NoteLink): Promise<void>
-  remove(path: string): Promise<void>
+  // Apagar pasta tira várias notas de uma vez, e as linhas somem no mesmo lote do índice:
+  // meia exclusão deixaria a busca apontando para arquivo que não existe mais.
+  removeAll(paths: readonly string[]): Promise<void>
   searchPaths(ftsQuery: string): Promise<string[]>
 }

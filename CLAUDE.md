@@ -351,10 +351,18 @@ prova cada um está em `domain/projects/`. Não "conserte" a tela para bater com
 | --- | --- | --- |
 | Progresso | 33% | **13%** — 40h concluídas de 320h, o que `calculateProgress` já media |
 | Aba Alocações | 4 | **8** — 5 abertas e 3 encerradas, que nunca são deletadas |
-| Aba Notas | 6 | **2** — o que a tabela `note` liga a `gateway` |
+| Aba Notas | 6 | **2** — o que a tabela `note` liga a `gateway`, um cartão cada |
 | Histórico | 14 | **8** — paginado de sete em sete, então "Carregar 1 evento anterior" |
 | Desvio do Cutover | — | **+11d** — o mesmo desvio do projeto, que sai justamente dele |
 | Diff do evento de escopo | fim 18/09 → 29/09 | **26/06 → 18/09** — o mockup mistura baseline v1→v2 no esforço com v2→atual no fim; congelar baseline compara v1 com v2 nos dois |
+
+**A aba Notas lista cartão, e o cartão navega.** O mockup só imprime o número, e número que não
+leva a lugar nenhum é o mesmo que botão que não faz nada. **O título do cartão é o nome do
+arquivo, não o primeiro `#` do documento:** a aba responde pela tabela `note`, e ler cada `.md`
+do disco a cada troca de aba custaria uma varredura da pasta. O clique põe o caminho em
+`requestNote` e navega para Notas — a rota não carrega o caminho do arquivo, que tem barra e não
+caberia num parâmetro —, e o `useNotesScreenData` abre a nota pedida antes de cair no primeiro
+arquivo da árvore.
 
 Duas escolhas de leitura que o mockup deixou ambíguas:
 
@@ -739,13 +747,42 @@ separados de propósito: gravar o texto não pode apagar o projeto já ligado.
 um indicador de estado. O texto vai ao disco 800ms depois da última tecla, no blur do editor e ao
 sair da tela; trocar de arquivo com edição pendente cobra a gravação antes de o próximo entrar.
 
-**O "+" da árvore é nova pasta, não nova nota.** O botão primário do cabeçalho já cria nota com
-⌘N, e sem o "+" não haveria como montar a árvore que o mockup desenha. **A lupa ficou de fora**,
-pelo critério do "Simular" da tela de Projeto: ela só focaria o campo de busca uma linha abaixo.
+**O cabeçalho da árvore tem os dois botões, e diz onde vai criar.** Um "+" só, de pasta, não
+respondia a "e para criar arquivo dentro dela?". O rótulo do cabeçalho é a pasta de destino, e o
+`resolveTargetFolder` a escolhe como o explorador do VS Code: pasta selecionada recebe o item
+novo, arquivo selecionado manda para a pasta dele, nada selecionado escreve na raiz. **A lupa
+ficou de fora**, pelo critério do "Simular" da tela de Projeto: ela só focaria o campo de busca
+uma linha abaixo.
 
-**A nova nota pede título em modal.** O design não desenha nenhum, mas o nome do arquivo é a
-navegação inteira desta tela: criar `nota-nova.md` e deixar o usuário renomear por fora seria
-pior. O `toNoteSlug` transforma o título no nome, e o modal mostra o caminho antes de gravar.
+**O botão de criar também abre o destino.** Criar dentro de pasta fechada faria o arquivo novo
+nascer invisível, então o mesmo gesto que pede a criação tira a pasta e os ancestrais dela do
+conjunto de fechadas. Isso mora no evento, não num efeito que observe a seleção: um efeito
+impediria fechar justamente a pasta da nota aberta.
+
+**A árvore fecha pasta, e o filtro abre todas.** Pasta fechada esconde o que mora dentro dela em
+qualquer profundidade e continua na lista, com o ▸ trocando pelo ▾. Com filtro de projeto ou
+busca em vigor a árvore passa inteira: esconder um resultado atrás de pasta fechada faria a busca
+mentir sobre o que encontrou. O rodapé conta a árvore filtrada, não a expandida — o total não
+pode mudar porque alguém fechou uma pasta.
+
+**O botão direito abre menu na árvore**, com "Nova nota aqui", "Nova pasta aqui" e o excluir da
+linha. O `stopPropagation` da linha é obrigatório: sem ele o menu da área vazia chegaria depois e
+trocaria o nó pelo `null` da raiz. Na área vazia da árvore o mesmo menu sai sem o excluir, criando
+na raiz.
+
+**Excluir existe para nota e para pasta, com confirmação.** Chega-se por três caminhos: o menu de
+contexto, o `Delete` sobre a linha com foco e o ✕ do cabeçalho do documento. O `planNoteDeletion`
+varre a pasta antes para dizer quantas notas vão junto e para saber quais linhas tirar da tabela
+`note` e da `note_search` — o `removeAll` faz as duas coisas num lote só. **A ordem é a mesma da
+gravação, com uma etapa a mais na frente:** o editor fecha primeiro, senão a gravação automática
+pendente recriaria no disco o arquivo recém-apagado; depois vai o disco e só então o banco.
+
+**A nova nota pede título em modal, e não nome de arquivo na linha.** É a única divergência
+consciente em relação ao VS Code aqui: lá se digita o nome do arquivo na própria árvore, e o
+título com acento se perderia no `toNoteSlug`. O modal pergunta o título, que vira o primeiro `#`
+do arquivo, mostra o caminho resultante antes de gravar e traz a pasta de destino como `Select`
+já preenchido — o mesmo campo no modal de pasta, que antes usava a seleção em silêncio e não
+deixava escolher a raiz.
 
 **Vincular evento entra no modal do "Vincular projeto".** O design desenha o callout "Nota
 vinculada" e nenhum controle que o crie. Escolhido o projeto, aparece a lista de eventos dele;

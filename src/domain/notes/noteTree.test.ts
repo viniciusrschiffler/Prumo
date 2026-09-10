@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildNoteTree,
+  collapseNoteTree,
   countFilesIn,
   filterNoteTree,
   findFirstFile,
+  listFolderPaths,
+  resolveTargetFolder,
   type NoteEntry,
 } from './noteTree'
 
@@ -117,5 +120,57 @@ describe('findFirstFile', () => {
 
   it('Should give nothing when the tree has no file', () => {
     expect(findFirstFile(buildNoteTree([folder('notas/pessoal')]))).toBeNull()
+  })
+})
+
+describe('collapseNoteTree', () => {
+  const tree = buildNoteTree(ENTRIES)
+
+  it('Should keep the closed folder and hide what lives inside it', () => {
+    expect(collapseNoteTree(tree, new Set(['notas/time'])).map((node) => node.path)).toEqual([
+      'notas/projetos',
+      'notas/projetos/migracao-gateway',
+      'notas/projetos/migracao-gateway/adr-roteador.md',
+      'notas/time',
+      'notas/leituras.md',
+    ])
+  })
+
+  it('Should hide the descendant of any depth, not only the direct child', () => {
+    const visible = collapseNoteTree(tree, new Set(['notas/projetos'])).map((node) => node.path)
+
+    expect(visible).toContain('notas/projetos')
+    expect(visible).not.toContain('notas/projetos/migracao-gateway')
+    expect(visible).not.toContain('notas/projetos/migracao-gateway/adr-roteador.md')
+  })
+
+  it('Should pass the whole tree through when nothing is closed', () => {
+    expect(collapseNoteTree(tree, new Set())).toEqual(tree)
+  })
+})
+
+describe('listFolderPaths', () => {
+  it('Should offer every folder as a destination, file left out', () => {
+    expect(listFolderPaths(buildNoteTree(ENTRIES))).toEqual([
+      'notas/projetos',
+      'notas/projetos/migracao-gateway',
+      'notas/time',
+    ])
+  })
+})
+
+describe('resolveTargetFolder', () => {
+  it('Should write inside the selected folder', () => {
+    expect(resolveTargetFolder({ path: 'notas/time', kind: 'folder' })).toBe('notas/time')
+  })
+
+  it('Should write beside the selected file', () => {
+    expect(resolveTargetFolder({ path: 'notas/time/retro-agosto.md', kind: 'file' })).toBe(
+      'notas/time',
+    )
+  })
+
+  it('Should fall back to the notes root with nothing selected', () => {
+    expect(resolveTargetFolder(null)).toBe('notas')
   })
 })

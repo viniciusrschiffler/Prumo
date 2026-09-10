@@ -4,7 +4,12 @@ import { useNavigationCountsStore } from '@/app/stores/useNavigationCountsStore'
 import { PrumoError, toPublicMessage } from '@/domain/errors/PrumoError'
 import { buildUniqueNotePath, toNoteSlug } from '@/domain/notes/notePath'
 import type { NotesSnapshot } from '@/domain/notes/noteRow'
-import type { NoteEntryKind } from '@/domain/notes/noteTree'
+import {
+  isPathRemovedBy,
+  planNoteDeletion,
+  type NoteDeletionPlan,
+} from '@/domain/notes/noteDeletion'
+import type { NoteTarget } from '@/domain/notes/noteTree'
 import { toFtsQuery } from '@/domain/notes/noteSearchQuery'
 import type { EntityId, IsoDateTime } from '@/domain/schemas/primitives'
 import { getSqlGateway } from '@/infra/database/DatabaseConnection'
@@ -18,11 +23,6 @@ import { TauriNoteFilesRepository } from '@/infra/repositories/TauriNoteFilesRep
 export type NotesStatus = 'idle' | 'loading' | 'ready' | 'error'
 
 export type NoteSaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'error'
-
-export type NoteTarget = {
-  path: string
-  kind: NoteEntryKind
-}
 
 export type NewNoteDraft = {
   title: string
@@ -47,6 +47,7 @@ type NotesState = {
   saveStatus: NoteSaveStatus
   savedAt: IsoDateTime | null
   matchedPaths: ReadonlySet<string> | null
+  requestedPath: string | null
   load: () => Promise<void>
   refresh: () => Promise<void>
   openNode: (target: NoteTarget | null) => Promise<void>
@@ -54,6 +55,10 @@ type NotesState = {
   saveNote: () => Promise<void>
   createNote: (draft: NewNoteDraft) => Promise<string | null>
   createFolder: (parentPath: string, name: string) => Promise<void>
+  deleteNode: (plan: NoteDeletionPlan) => Promise<void>
+  planDeletion: (target: NoteTarget, name: string) => NoteDeletionPlan
+  requestNote: (path: string) => void
+  clearRequest: () => void
   setLinks: (projectId: EntityId | null, eventId: EntityId | null) => Promise<void>
   search: (text: string) => Promise<void>
 }
@@ -96,6 +101,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   saveStatus: 'idle',
   savedAt: null,
   matchedPaths: null,
+  requestedPath: null,
 
   load: async () => {
     set(() => ({ status: 'loading', errorMessage: null }))
@@ -212,6 +218,34 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   createFolder: async (parentPath, name) => {
     await createFilesRepository().createFolder(`${parentPath}/${toNoteSlug(name)}`)
     await get().refresh()
+  },
+
+  planDeletion: (target, name) => planNoteDeletion(get().snapshot.entries, target, name),
+
+  // O editor fecha antes de o arquivo sair: a gravação automática que estivesse pendente
+  // recriaria no disco o arquivo recém-apagado. Depois o disco vai primeiro e a linha do banco
+  // depois, a mesma ordem da gravação — índice atrasado o "Verificar arquivos" acusa, texto
+  // apagado com a linha viva ninguém recupera.
+  deleteNode: async (plan) => {
+    const { openPath } = get()
+
+    if (openPath !== null && isPathRemovedBy(plan, openPath)) {
+      set(() => ({ openPath: null, content: '', saveStatus: 'idle', savedAt: null }))
+    }
+
+    await createFilesRepository().remove({ path: plan.path, kind: plan.kind })
+    await new SqliteNoteRepository(getSqlGateway()).removeAll(plan.filePaths)
+
+    await get().refresh()
+    await useNavigationCountsStore.getState().refresh()
+  },
+
+  requestNote: (path) => {
+    set(() => ({ requestedPath: path }))
+  },
+
+  clearRequest: () => {
+    set(() => ({ requestedPath: null }))
   },
 
   setLinks: async (projectId, eventId) => {

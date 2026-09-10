@@ -43,8 +43,10 @@ export function useNotesScreenData(projectFilterId: string) {
   const snapshot = useNotesStore((state) => state.snapshot)
   const matchedPaths = useNotesStore((state) => state.matchedPaths)
   const openPath = useNotesStore((state) => state.openPath)
+  const requestedPath = useNotesStore((state) => state.requestedPath)
   const load = useNotesStore((state) => state.load)
   const openNode = useNotesStore((state) => state.openNode)
+  const clearRequest = useNotesStore((state) => state.clearRequest)
 
   useEffect(() => {
     if (databaseStatus !== 'ready') {
@@ -78,17 +80,28 @@ export function useNotesScreenData(projectFilterId: string) {
     [visibleTree, openPath],
   )
 
+  // A nota pedida por outra tela vence o primeiro arquivo da árvore: quem clicou no cartão da
+  // aba Notas do projeto quer aquela nota, não a primeira da pasta.
+  useEffect(() => {
+    if (status !== 'ready' || requestedPath === null) {
+      return
+    }
+
+    clearRequest()
+    void openNode({ path: requestedPath, kind: 'file' })
+  }, [status, requestedPath, clearRequest, openNode])
+
   // Abrir o primeiro arquivo é o que a tela faz sozinha ao chegar, e também quando o filtro
   // esconde o que estava aberto: um editor apontando para um caminho fora da árvore mentiria.
   useEffect(() => {
-    if (status !== 'ready' || selectedNode !== null) {
+    if (status !== 'ready' || selectedNode !== null || requestedPath !== null) {
       return
     }
 
     const first = findFirstFile(visibleTree)
 
     void openNode(first)
-  }, [status, selectedNode, visibleTree, openNode])
+  }, [status, selectedNode, requestedPath, visibleTree, openNode])
 
   return {
     status: combineStatus([databaseStatus, status]),

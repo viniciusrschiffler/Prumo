@@ -24,6 +24,7 @@ type NoteDocumentPaneProps = {
   onModeChange: (mode: NoteViewMode) => void
   onLink: () => void
   onNewNote: () => void
+  onDelete: () => void
 }
 
 export function NoteDocumentPane({
@@ -34,6 +35,7 @@ export function NoteDocumentPane({
   onModeChange,
   onLink,
   onNewNote,
+  onDelete,
 }: NoteDocumentPaneProps) {
   const content = useNotesStore((state) => state.content)
   const saveStatus = useNotesStore((state) => state.saveStatus)
@@ -53,6 +55,7 @@ export function NoteDocumentPane({
         onModeChange={onModeChange}
         onLink={onLink}
         onNewNote={onNewNote}
+        onDelete={onDelete}
       />
 
       <div className={`grid flex-1 overflow-hidden ${PANE_CLASSES[mode]}`}>

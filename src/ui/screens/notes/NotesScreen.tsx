@@ -3,12 +3,14 @@ import { useNotesStore } from '@/app/stores/useNotesStore'
 import type { SidebarContextItem } from '@/app/stores/useSidebarContextStore'
 import { useToastStore } from '@/app/stores/useToastStore'
 import { toPublicMessage } from '@/domain/errors/PrumoError'
-import { noteFolderOf, NOTES_ROOT } from '@/domain/notes/notePath'
+import type { NoteDeletionPlan } from '@/domain/notes/noteDeletion'
 import { ALL_NOTES_FILTER } from '@/domain/notes/noteRow'
+import { listFolderPaths, resolveTargetFolder } from '@/domain/notes/noteTree'
 import { useSidebarContext } from '@/ui/layout/useSidebarContext'
 import { Alert } from '@/ui/primitives/Alert'
 import { Button } from '@/ui/primitives/Button'
 import { EmptyState } from '@/ui/primitives/EmptyState'
+import { DeleteNoteModal } from './DeleteNoteModal'
 import { LinkNoteModal } from './LinkNoteModal'
 import { NewFolderModal } from './NewFolderModal'
 import { NewNoteModal } from './NewNoteModal'
@@ -20,7 +22,12 @@ import { useNoteAutosave } from './useNoteAutosave'
 import { useNotesScreenData } from './useNotesScreenData'
 import { useNoteShortcuts } from './useNoteShortcuts'
 
-type OpenModal = 'note' | 'folder' | 'link' | null
+type OpenModal =
+  | { kind: 'note'; folderPath: string }
+  | { kind: 'folder'; parentPath: string }
+  | { kind: 'delete'; plan: NoteDeletionPlan }
+  | { kind: 'link' }
+  | null
 
 const EMPTY_DESCRIPTION =
   'As notas são arquivos .md na sua pasta de dados. Crie a primeira com ⌘N ou escolha uma na árvore.'
@@ -50,13 +57,17 @@ export function NotesScreen() {
   const openNode = useNotesStore((state) => state.openNode)
   const createNote = useNotesStore((state) => state.createNote)
   const createFolder = useNotesStore((state) => state.createFolder)
+  const planDeletion = useNotesStore((state) => state.planDeletion)
+  const deleteNode = useNotesStore((state) => state.deleteNode)
   const setLinks = useNotesStore((state) => state.setLinks)
   const search = useNotesStore((state) => state.search)
+
+  const targetFolderPath = resolveTargetFolder(selectedNode)
 
   useNoteAutosave()
   useNoteShortcuts({
     editorRef,
-    onNewNote: () => setOpenModal('note'),
+    onNewNote: () => setOpenModal({ kind: 'note', folderPath: targetFolderPath }),
     onModeChange: (toNext) => setMode(toNext),
   })
 
@@ -73,21 +84,15 @@ export function NotesScreen() {
 
   useSidebarContext(sidebarItems, projectFilterId, setProjectFilterId)
 
-  const folders = useMemo(
-    () => visibleTree.filter((node) => node.kind === 'folder'),
-    [visibleTree],
-  )
+  const folderPaths = useMemo(() => listFolderPaths(visibleTree), [visibleTree])
 
-  const selectedFolderPath =
-    selectedNode === null
-      ? NOTES_ROOT
-      : selectedNode.kind === 'folder'
-        ? selectedNode.path
-        : noteFolderOf(selectedNode.path)
-
-  async function run(action: () => Promise<unknown>, failure: string) {
+  async function run(action: () => Promise<unknown>, failure: string, success?: string) {
     try {
       await action()
+
+      if (success !== undefined) {
+        notify(success)
+      }
     } catch (cause) {
       console.error(failure, cause)
       notify(toPublicMessage(cause), 'danger')
@@ -127,11 +132,19 @@ export function NotesScreen() {
         nodes={visibleTree}
         phaseColorOf={phaseColorOf}
         selectedPath={selectedNode?.path ?? null}
+        targetFolderPath={targetFolderPath}
         searchText={searchText}
         isFiltered={projectFilterId !== ALL_NOTES_FILTER || searchText.trim() !== ''}
         onSelect={(node) => void openNode(node)}
         onSearch={handleSearch}
-        onNewFolder={() => setOpenModal('folder')}
+        onNewNote={(folderPath) => setOpenModal({ kind: 'note', folderPath })}
+        onNewFolder={(parentPath) => setOpenModal({ kind: 'folder', parentPath })}
+        onDelete={(node) =>
+          setOpenModal({
+            kind: 'delete',
+            plan: planDeletion({ path: node.path, kind: node.kind }, node.name),
+          })
+        }
       />
 
       {selectedNode === null ? (
@@ -141,7 +154,11 @@ export function NotesScreen() {
             title="Nenhuma nota aberta"
             description={EMPTY_DESCRIPTION}
             action={
-              <Button variant="primary" keys="mod+n" onClick={() => setOpenModal('note')}>
+              <Button
+                variant="primary"
+                keys="mod+n"
+                onClick={() => setOpenModal({ kind: 'note', folderPath: targetFolderPath })}
+              >
                 Nova nota
               </Button>
             }
@@ -154,15 +171,24 @@ export function NotesScreen() {
           mode={mode}
           editorRef={editorRef}
           onModeChange={setMode}
-          onLink={() => setOpenModal('link')}
-          onNewNote={() => setOpenModal('note')}
+          onLink={() => setOpenModal({ kind: 'link' })}
+          onNewNote={() => setOpenModal({ kind: 'note', folderPath: targetFolderPath })}
+          onDelete={() =>
+            setOpenModal({
+              kind: 'delete',
+              plan: planDeletion(
+                { path: selectedNode.path, kind: selectedNode.kind },
+                selectedNode.name,
+              ),
+            })
+          }
         />
       )}
 
-      {openModal === 'note' && (
+      {openModal?.kind === 'note' && (
         <NewNoteModal
-          folders={folders}
-          defaultFolderPath={selectedFolderPath}
+          folderPaths={folderPaths}
+          defaultFolderPath={openModal.folderPath}
           onClose={() => setOpenModal(null)}
           onSubmit={(draft) => {
             setOpenModal(null)
@@ -171,21 +197,40 @@ export function NotesScreen() {
         />
       )}
 
-      {openModal === 'folder' && (
+      {openModal?.kind === 'folder' && (
         <NewFolderModal
-          parentPath={selectedFolderPath}
+          folderPaths={folderPaths}
+          defaultParentPath={openModal.parentPath}
           onClose={() => setOpenModal(null)}
-          onSubmit={(name) => {
+          onSubmit={(parentPath, name) => {
             setOpenModal(null)
             void run(
-              () => createFolder(selectedFolderPath, name),
+              () => createFolder(parentPath, name),
               'Não foi possível criar a pasta.',
+              `Pasta ${name} criada.`,
             )
           }}
         />
       )}
 
-      {openModal === 'link' && selectedRow !== null && (
+      {openModal?.kind === 'delete' && (
+        <DeleteNoteModal
+          plan={openModal.plan}
+          onClose={() => setOpenModal(null)}
+          onConfirm={() => {
+            const { plan } = openModal
+
+            setOpenModal(null)
+            void run(
+              () => deleteNode(plan),
+              'Não foi possível excluir na pasta de notas.',
+              `${plan.name} excluída.`,
+            )
+          }}
+        />
+      )}
+
+      {openModal?.kind === 'link' && selectedRow !== null && (
         <LinkNoteModal
           row={selectedRow}
           projects={linkableProjects}

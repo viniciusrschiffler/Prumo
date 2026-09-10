@@ -1,7 +1,7 @@
-import { mkdir, readDir, readTextFile, stat, writeTextFile } from '@tauri-apps/plugin-fs'
+import { mkdir, readDir, readTextFile, remove, stat, writeTextFile } from '@tauri-apps/plugin-fs'
 import { PrumoError } from '@/domain/errors/PrumoError'
 import { isMarkdownPath, joinNotePath, NOTES_ROOT } from '@/domain/notes/notePath'
-import type { NoteEntry } from '@/domain/notes/noteTree'
+import type { NoteEntry, NoteTarget } from '@/domain/notes/noteTree'
 import type { NoteFilesRepository } from '@/domain/repositories/NoteFilesRepository'
 
 const HIDDEN_PREFIX = '.'
@@ -63,6 +63,14 @@ export class TauriNoteFilesRepository implements NoteFilesRepository {
       await mkdir(this.#toSystem(folderPath), { recursive: true })
     } catch (cause) {
       throw new PrumoError('NOTE_WRITE_FAILED', `falha ao criar ${folderPath}`, { cause })
+    }
+  }
+
+  async remove(target: NoteTarget): Promise<void> {
+    try {
+      await remove(this.#toSystem(target.path), { recursive: target.kind === 'folder' })
+    } catch (cause) {
+      throw new PrumoError('NOTE_DELETE_FAILED', `falha ao excluir ${target.path}`, { cause })
     }
   }
 

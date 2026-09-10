@@ -8,6 +8,7 @@ import {
   type BaselineOption,
 } from './baselineOptions'
 import { buildEventFeed, type EventFeedEntry } from './eventFeed'
+import { listProjectNoteCards, type ProjectNoteCard } from './projectNotes'
 import { buildProjectRows, type ProjectRow, type ProjectsSnapshot } from './projectRow'
 
 export type ProjectDetail = {
@@ -17,7 +18,7 @@ export type ProjectDetail = {
   allocationRows: readonly AllocationRow[]
   conflicts: readonly AllocationConflict[]
   feed: readonly EventFeedEntry[]
-  noteCount: number
+  noteCards: readonly ProjectNoteCard[]
 }
 
 export function findProjectDetail(
@@ -64,6 +65,6 @@ export function findProjectDetail(
       baselines,
       baselineTasks: snapshot.baselineTasks,
     }),
-    noteCount: snapshot.notes.filter((note) => note.projectId === projectId).length,
+    noteCards: listProjectNoteCards(snapshot.notes, snapshot.events, projectId),
   }
 }
